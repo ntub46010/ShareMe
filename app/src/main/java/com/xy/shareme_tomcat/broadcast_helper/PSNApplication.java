@@ -1,11 +1,11 @@
-package com.xy.shareme_broadcast.broadcast_helper;
+package com.xy.shareme_tomcat.broadcast_helper;
 
 import android.app.Application;
 import android.content.Context;
 import android.content.res.Resources;
 
 import com.xy.network.helpers.VolleyRequestHelper;
-import com.xy.shareme_broadcast.broadcast_helper.managers.UserDataManager;
+import com.xy.shareme_tomcat.broadcast_helper.managers.UserDataManager;
 
 public class PSNApplication extends Application {
     private static Context APPLICATION;

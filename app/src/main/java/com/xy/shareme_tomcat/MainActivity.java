@@ -1,4 +1,4 @@
-package com.xy.shareme_broadcast;
+package com.xy.shareme_tomcat;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -6,7 +6,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.xy.shareme_broadcast.broadcast_helper.managers.RequestManager;
+import com.xy.shareme_tomcat.broadcast_helper.managers.RequestManager;
 
 public class MainActivity extends Activity implements View.OnClickListener {
     private EditText edtRegId, edtSendId;

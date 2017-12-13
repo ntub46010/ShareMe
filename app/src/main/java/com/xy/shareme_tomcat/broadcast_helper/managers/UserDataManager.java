@@ -1,4 +1,4 @@
-package com.xy.shareme_broadcast.broadcast_helper.managers;
+package com.xy.shareme_tomcat.broadcast_helper.managers;
 
 import android.content.Context;
 import android.content.SharedPreferences;

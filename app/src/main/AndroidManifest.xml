@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.xy.shareme_broadcast">
+    package="com.xy.shareme_tomcat">
 
     <application
-        android:name="com.xy.shareme_broadcast.broadcast_helper.PSNApplication"
+        android:name="com.xy.shareme_tomcat.broadcast_helper.PSNApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="com.xy.shareme_broadcast.MainActivity"
+            android:name="com.xy.shareme_tomcat.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme">
             <intent-filter>
@@ -20,13 +20,13 @@
             </intent-filter>
         </activity>
 
-        <service android:name="com.xy.shareme_broadcast.broadcast_helper.services.PSNInstanceIdService">
+        <service android:name="com.xy.shareme_tomcat.broadcast_helper.services.PSNInstanceIdService">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
 
-        <service android:name="com.xy.shareme_broadcast.broadcast_helper.services.PSNMessagingService">
+        <service android:name="com.xy.shareme_tomcat.broadcast_helper.services.PSNMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>

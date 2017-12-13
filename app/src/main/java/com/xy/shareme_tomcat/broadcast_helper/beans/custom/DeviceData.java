@@ -1,4 +1,4 @@
-package com.xy.shareme_broadcast.broadcast_helper.beans.custom;
+package com.xy.shareme_tomcat.broadcast_helper.beans.custom;
 
 import java.io.Serializable;
 

@@ -1,4 +1,4 @@
-package com.xy.shareme_broadcast.broadcast_helper.beans.json;
+package com.xy.shareme_tomcat.broadcast_helper.beans.json;
 
 import org.json.JSONObject;
 

@@ -1,4 +1,4 @@
-package com.xy.shareme_broadcast.broadcast_helper.beans.param;
+package com.xy.shareme_tomcat.broadcast_helper.beans.param;
 
 import com.xy.network.beans.BaseHeaderBean;
 

@@ -1,4 +1,4 @@
-package com.xy.shareme_broadcast.broadcast_helper.constants;
+package com.xy.shareme_tomcat.broadcast_helper.constants;
 
 public class KeyData {
     public static final String TO = "to";

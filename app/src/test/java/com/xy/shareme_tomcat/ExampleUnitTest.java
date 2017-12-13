@@ -1,4 +1,4 @@
-package com.xy.shareme_broadcast;
+package com.xy.shareme_tomcat;
 
 import org.junit.Test;
 

@@ -1,6 +1,6 @@
-package com.xy.shareme_broadcast.broadcast_helper.beans.json;
+package com.xy.shareme_tomcat.broadcast_helper.beans.json;
 
-import com.xy.shareme_broadcast.broadcast_helper.constants.KeyData;
+import com.xy.shareme_tomcat.broadcast_helper.constants.KeyData;
 
 import org.json.JSONException;
 import org.json.JSONObject;

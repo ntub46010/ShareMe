@@ -1,4 +1,4 @@
-package com.xy.shareme_broadcast.broadcast_helper.managers;
+package com.xy.shareme_tomcat.broadcast_helper.managers;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -8,8 +8,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v4.app.NotificationCompat;
 
-import com.xy.shareme_broadcast.R;
-import com.xy.shareme_broadcast.MainActivity;
+import com.xy.shareme_tomcat.R;
+import com.xy.shareme_tomcat.MainActivity;
 
 public class NotificationManager {
     public static final int NOTIFICATION_ID = -Integer.MAX_VALUE;
