@@ -1,6 +1,47 @@
 <resources>
     <string name="app_name">ShareMeTomcat</string>
     <string name="action_settings">Settings</string>
-
     <string name="key_firebase_server" translatable="false">key=AAAAQBhiCzM:APA91bEm5qaY2ouoxD6ARI9iUpCDmRqCrGReFs-Mvy5u3sQd0XXvdxXdKeSfdWWfEB5a__DF3F8e5ae67TINdeYQkSmpTQ24H8bVMBY8N5-_ferzG_7EbwPsppqec6RAcvQS9HtOEYu6</string>
+
+    <string-array name="department">
+        <item>五專會計統計科</item><!--0-->
+        <item>五專財務金融科</item>
+        <item>五專財政稅務科</item>
+        <item>五專國際貿易科</item>
+        <item>五專企業管理科</item>
+        <item>五專資訊管理科</item>
+        <item>五專應用外語科</item>
+        <item>四技會計資訊系</item><!--7-->
+        <item>四技財務金融系</item>
+        <item>四技財政稅務系</item>
+        <item>四技國際商務系</item>
+        <item>四技企業管理系</item>
+        <item>四技資訊管理系</item>
+        <item>四技應用外語系</item>
+        <item>四技商業設計管理系</item>
+        <item>四技商品創意經營系</item>
+        <item>四技數位多媒體設計系</item>
+        <item>二技會計資訊系</item><!--17-->
+        <item>二技財務金融系</item>
+        <item>二技財政稅務系</item>
+        <item>二技國際商務系</item>
+        <item>二技企業管理系</item>
+        <item>二技資訊管理系</item>
+        <item>二技應用外語系</item><!--23-->
+        <item>二技商業設計管理系</item>
+        <item>二技商品創意經營系</item>
+        <item>二技數位多媒體設計系</item><!--26-->
+    </string-array>
+    <string name="sp_fileName">ShareMe</string>
+    <string name="sp_myLoginUserId">loginUserId</string>
+    <string name="sp_myAvatar">myAvatar</string>
+    <string name="sp_myName">myName</string>
+    <string name="sp_myGender">myGender</string>
+    <string name="sp_isFirstUse">isFirstUse</string>
+    <string name="sp_showNotification">showNotification</string>
+
+    <string name="link_avatar">http://111.250.xxx.xxx/avatars/</string>
+    <string name="link_login">http://111.250.11.186:8080/ShareMe/api/login</string>
+
+
 </resources>

@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#444444</color>
-    <color name="colorPrimaryDark">#000000</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimary">#FFFFFF</color>
+    <color name="colorPrimaryDark">#FF000000</color>
+    <color name="windowBackground">#FFFFFF</color>
+
+    <color name="colorAccent">#FF7C80</color> <!--fab、ProgressBar-->
+
+    <color name="blue1">#387498</color> <!--註冊、忘記密碼-->
+    <color name="bg_header">#d95f2f</color>
+    <color name="bg_body_normal">@color/red2</color>
+
+    <color name="red1">#ff7751</color> <!--科系按鈕-->
+    <color name="red2">#C0EDBCB6</color>
 </resources>

@@ -6,6 +6,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.xy.network.base.IApiResponseListener;
+import com.xy.shareme_tomcat.DataHelper;
 import com.xy.shareme_tomcat.R;
 import com.xy.shareme_tomcat.broadcast_helper.PSNApplication;
 import com.xy.shareme_tomcat.broadcast_helper.apis.PostFirebaseApiManager;
@@ -87,6 +88,33 @@ public class RequestManager {
                         pushNotification(title, message, photoUrl, device.getToken());
                     }
                 }else {
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+    }
+
+    public void getTokenById(final String userId) {
+        this.databaseRefUsers.child(UserData.DATABASE_USERS).child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                final UserData pushUser = dataSnapshot.getValue(UserData.class);
+
+                if (pushUser == null || pushUser.getDeviceList() == null || pushUser.getDeviceList().size() == 0) {
+                    DataHelper.tmpToken = ""; //當該user不存在，也給予一個值作為判斷
+                    return;
+                }
+
+                if (pushUser.getDeviceList() != null) {
+                    for (DeviceData device : pushUser.getDeviceList()) {
+                        if (device.getDevice() == null) {
+                            continue;
+                        }
+                        DataHelper.tmpToken = device.getToken();
+                    }
                 }
             }
 
