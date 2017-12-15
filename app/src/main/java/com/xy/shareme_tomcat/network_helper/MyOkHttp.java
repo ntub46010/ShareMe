@@ -1,9 +1,8 @@
 package com.xy.shareme_tomcat.network_helper;
 
 import android.app.Activity;
-import android.content.Context;
 
-import com.xy.shareme_tomcat.DataHelper;
+import com.xy.shareme_tomcat.data.DataHelper;
 
 import java.io.IOException;
 
@@ -22,6 +21,7 @@ public class MyOkHttp {
 
     private Activity activity;
     private TaskListener taskListener;
+    private OkHttpClient client;
 
     public MyOkHttp(Activity activity, TaskListener taskListener) {
         this.activity = activity;
@@ -29,23 +29,7 @@ public class MyOkHttp {
     }
 
     public void execute(String... sendingData) {
-        Request request;
-        if (sendingData.length == 1) { //POST一個帶參數的網址
-            RequestBody formBody = new FormBody.Builder().build();
-            request = new Request.Builder()
-                    .url(sendingData[0])
-                    .post(formBody)
-                    .build();
-        }else { //POST一組JSON字串到某網址
-            RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), sendingData[1]);
-            request = new Request.Builder()
-                    .url(sendingData[0])
-                    .post(requestBody)
-                    .build();
-        }
-
-        OkHttpClient client = new OkHttpClient();
-        Call call = client.newCall(request);
+        Call call = getCall(sendingData);
         call.enqueue(new Callback() {
             @Override
             public void onResponse(Call call, final Response response) {
@@ -68,6 +52,29 @@ public class MyOkHttp {
                 e.printStackTrace();
             }
         });
+    }
+
+    public Call getCall(String... sendingData) {
+        Request request;
+        if (sendingData.length == 1) { //POST一個帶參數的網址
+            RequestBody formBody = new FormBody.Builder().build();
+            request = new Request.Builder()
+                    .url(sendingData[0])
+                    .post(formBody)
+                    .build();
+        }else { //POST一組JSON字串到某網址
+            RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), sendingData[1]);
+            request = new Request.Builder()
+                    .url(sendingData[0])
+                    .post(requestBody)
+                    .build();
+        }
+        client = new OkHttpClient();
+        return client.newCall(request);
+    }
+
+    public void cancel() {
+        client.dispatcher().cancelAll();
     }
 
 }

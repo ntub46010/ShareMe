@@ -14,7 +14,7 @@ import android.widget.Toast;
 
 import com.xy.shareme_tomcat.R;
 
-import static com.xy.shareme_tomcat.DataHelper.setBoardTitle;
+import static com.xy.shareme_tomcat.data.DataHelper.setBoardTitle;
 import static com.xy.shareme_tomcat.MainActivity.context;
 
 public class ProductHomeFrag extends Fragment {

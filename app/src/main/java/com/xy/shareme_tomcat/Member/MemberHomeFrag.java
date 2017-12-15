@@ -1,6 +1,5 @@
 package com.xy.shareme_tomcat.Member;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -11,8 +10,8 @@ import android.widget.ListView;
 
 import com.xy.shareme_tomcat.R;
 
-import static com.xy.shareme_tomcat.DataHelper.myGender;
-import static com.xy.shareme_tomcat.DataHelper.getSimpleAdapter;
+import static com.xy.shareme_tomcat.data.DataHelper.myGender;
+import static com.xy.shareme_tomcat.data.DataHelper.getSimpleAdapter;
 import static com.xy.shareme_tomcat.MainActivity.context;
 
 public class MemberHomeFrag extends Fragment {

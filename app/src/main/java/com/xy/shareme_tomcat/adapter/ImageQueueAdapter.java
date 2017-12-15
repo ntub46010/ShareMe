@@ -27,7 +27,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import static com.xy.shareme_tomcat.DataHelper.getSimpleAdapter;
+import static com.xy.shareme_tomcat.data.DataHelper.getSimpleAdapter;
 
 import com.xy.shareme_tomcat.R;
 import com.xy.shareme_tomcat.data.ImageObject;

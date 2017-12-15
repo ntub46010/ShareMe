@@ -22,7 +22,7 @@ import com.xy.shareme_tomcat.Type.DepartmentFrag;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.xy.shareme_tomcat.DataHelper.setBoardTitle;
+import static com.xy.shareme_tomcat.data.DataHelper.setBoardTitle;
 
 public class MainActivity extends FragmentActivity implements View.OnClickListener {
     public static Context context;

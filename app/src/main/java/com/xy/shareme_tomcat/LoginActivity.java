@@ -24,29 +24,25 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.xy.shareme_tomcat.broadcast_helper.managers.RequestManager;
 import com.xy.shareme_tomcat.network_helper.MyOkHttp;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
-import static com.xy.shareme_tomcat.DataHelper.KEY_AVATAR;
-import static com.xy.shareme_tomcat.DataHelper.KEY_DEPARTMENT;
-import static com.xy.shareme_tomcat.DataHelper.KEY_EMAIL;
-import static com.xy.shareme_tomcat.DataHelper.KEY_GENDER;
-import static com.xy.shareme_tomcat.DataHelper.KEY_NAME;
-import static com.xy.shareme_tomcat.DataHelper.KEY_PASSWORD;
-import static com.xy.shareme_tomcat.DataHelper.KEY_PROFILE;
-import static com.xy.shareme_tomcat.DataHelper.KEY_STATUS;
-import static com.xy.shareme_tomcat.DataHelper.KEY_USER_ID;
-import static com.xy.shareme_tomcat.DataHelper.conFlag;
-import static com.xy.shareme_tomcat.DataHelper.getSpnDepCode;
-import static com.xy.shareme_tomcat.DataHelper.loginUserId;
-import static com.xy.shareme_tomcat.DataHelper.myAvatarUrl;
-import static com.xy.shareme_tomcat.DataHelper.myGender;
-import static com.xy.shareme_tomcat.DataHelper.myName;
-import static com.xy.shareme_tomcat.DataHelper.tmpToken;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_AVATAR;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_DEPARTMENT;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_EMAIL;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_GENDER;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_NAME;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_PASSWORD;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_PROFILE;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_STATUS;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_USER_ID;
+import static com.xy.shareme_tomcat.data.DataHelper.conFlag;
+import static com.xy.shareme_tomcat.data.DataHelper.getSpnDepCode;
+import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
+import static com.xy.shareme_tomcat.data.DataHelper.myAvatarUrl;
+import static com.xy.shareme_tomcat.data.DataHelper.myGender;
+import static com.xy.shareme_tomcat.data.DataHelper.myName;
+import static com.xy.shareme_tomcat.data.DataHelper.tmpToken;
 import static com.xy.shareme_tomcat.broadcast_helper.beans.custom.UserData.DATABASE_USERS;
 
 public class LoginActivity extends Activity {

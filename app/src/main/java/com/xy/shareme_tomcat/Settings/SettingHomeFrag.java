@@ -25,8 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
-import static com.xy.shareme_tomcat.DataHelper.getSimpleAdapter;
-import static com.xy.shareme_tomcat.DataHelper.loginUserId;
+import static com.xy.shareme_tomcat.data.DataHelper.getSimpleAdapter;
+import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
 import static com.xy.shareme_tomcat.MainActivity.context;
 import static com.xy.shareme_tomcat.broadcast_helper.beans.custom.UserData.DATABASE_USERS;
 

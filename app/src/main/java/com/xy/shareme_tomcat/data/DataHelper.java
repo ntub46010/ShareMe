@@ -1,7 +1,9 @@
-package com.xy.shareme_tomcat;
+package com.xy.shareme_tomcat.data;
 
 import android.content.Context;
 import android.widget.SimpleAdapter;
+
+import com.xy.shareme_tomcat.R;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,7 +15,7 @@ import static com.xy.shareme_tomcat.MainActivity.txtBarTitle;
 
 public class DataHelper {
     public static boolean conFlag = false; //表示OKHttp的取資料工作結束，將流程交還原Activity進行後續操作
-    public static String loginUserId = "";
+    public static String loginUserId = "10346010";
     public static String myName = ""; //用於發送推播
     public static int myGender = -1; //用於發送icon，包含從信箱退出時的狀況
     public static String myAvatarUrl = ""; //用於發送推播
@@ -26,10 +28,31 @@ public class DataHelper {
     public static final String KEY_DEPARTMENT = "Department";
     public static final String KEY_GENDER = "Gender";
     public static final String KEY_EMAIL = "Email";
+    public static final String KEY_TYPE = "Type";
+    public static final String KEY_KEYWORD = "Keyword";
+    public static final String KEY_TITLE = "Title";
+    public static final String KEY_PRICE = "Price";
+    public static final String KEY_CONDITION = "Condition";
+    public static final String KEY_NOTE = "Note";
+    public static final String KEY_PS = "PS";
+    public static final String KEY_SELLER = "Seller";
+    public static final String KEY_PHOTO1 = "Photo1";
+    public static final String KEY_PHOTO2 = "Photo2";
+    public static final String KEY_PHOTO3 = "Photo3";
+    public static final String KEY_PHOTO4 = "Photo4";
+    public static final String KEY_PHOTO5 = "Photo5";
+    public static final String KEY_PRODUCT_ID = "ProductId";
+    public static final String KEY_ANYWAY = "Anyway";
+    public static final String KEY_SELLER_ID = "SellerId";
+    public static final String KEY_SELLER_NAME = "SellerName";
+    public static final String KEY_POST_TIME = "PostTime";
+    public static final String KEY_EDIT_TIME = "EditTime";
+    public static final String KEY_FAVORITE = "Favorite";
     //
     public static final String KEY_AVATAR = "Avatar";
     //---
     public static final String KEY_PROFILE = "Profile";
+    public static final String KEY_PRODUCT = "Product";
 
 
 
@@ -180,5 +203,30 @@ public class DataHelper {
         );
 
         return  adapter;
+    }
+
+    public static int getNotFoundImg() {
+        int imgId;
+        switch ((int) (Math.random()* 5) + 1) {
+            case 1:
+                imgId = R.drawable.sad_gray_1;
+                break;
+            case 2:
+                imgId = R.drawable.sad_gray_2;
+                break;
+            case 3:
+                imgId = R.drawable.sad_gray_3;
+                break;
+            case 4:
+                imgId = R.drawable.sad_gray_4;
+                break;
+            case 5:
+                imgId = R.drawable.sad_gray_5;
+                break;
+            default:
+                imgId = R.drawable.sad_gray_1;
+                break;
+        }
+        return imgId;
     }
 }
