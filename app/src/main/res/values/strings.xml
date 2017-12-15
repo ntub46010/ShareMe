@@ -32,6 +32,14 @@
         <item>二技商品創意經營系</item>
         <item>二技數位多媒體設計系</item><!--26-->
     </string-array>
+    <string-array name="book_note_condition">
+        <item>請選擇</item>
+        <item>未附筆記</item>
+        <item>寫在書中</item>
+        <item>另附筆記本</item>
+        <item>寫在書中及筆記本</item>
+    </string-array>
+
     <string name="sp_fileName">ShareMe</string>
     <string name="sp_myLoginUserId">loginUserId</string>
     <string name="sp_myAvatar">myAvatar</string>
@@ -41,7 +49,10 @@
     <string name="sp_showNotification">showNotification</string>
 
     <string name="link_avatar">http://111.250.xxx.xxx/avatars/</string>
-    <string name="link_login">http://111.250.11.186:8080/ShareMe/api/login</string>
+    <string name="link_login">http://111.250.25.74:8080/ShareMe/api/login</string>
+    <string name="link_register">http://111.250.25.74:8080/ShareMe/api/register</string>
+
+    <string name="hint_edit_product_photo">可選五張圖，第一張將做為預覽，長按可調整順序</string>
 
 
 </resources>

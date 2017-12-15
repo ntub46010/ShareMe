@@ -3,4 +3,7 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
+
+    <dimen name="card_book_img_width">135dp</dimen>
+    <dimen name="card_book_img_height">180dp</dimen>
 </resources>

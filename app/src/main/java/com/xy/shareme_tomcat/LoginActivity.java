@@ -24,10 +24,16 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.xy.shareme_tomcat.broadcast_helper.managers.RequestManager;
 import com.xy.shareme_tomcat.network_helper.MyOkHttp;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import static com.xy.shareme_tomcat.DataHelper.KEY_AVATAR;
+import static com.xy.shareme_tomcat.DataHelper.KEY_DEPARTMENT;
+import static com.xy.shareme_tomcat.DataHelper.KEY_EMAIL;
 import static com.xy.shareme_tomcat.DataHelper.KEY_GENDER;
 import static com.xy.shareme_tomcat.DataHelper.KEY_NAME;
 import static com.xy.shareme_tomcat.DataHelper.KEY_PASSWORD;
@@ -55,7 +61,7 @@ public class LoginActivity extends Activity {
     private Spinner spnRegDep;
     private ProgressBar prgBar;
 
-    private String userId = "", pwd = "", department = "";
+    private String userId = "", pwd = "", department = "51", method = "";
     private Thread trdFlag, trdTimer, trdWaitDelete, trdWaitLogin;
 
     @Override
@@ -131,7 +137,7 @@ public class LoginActivity extends Activity {
                 }
 
                 if (isInfoValid(acc, pwd, pwd2, name, email, gender)) {
-                    //registerMember(acc, pwd, name, email, gender);
+                    registerMember(acc, pwd, name, email, gender);
                 }
 
             }
@@ -156,6 +162,7 @@ public class LoginActivity extends Activity {
         //連線確認登入帳密，成功後一律向Firebase重新註冊裝置Token，再取回
         layLoginField.setVisibility(View.GONE);
         prgBar.setVisibility(View.VISIBLE);
+        method = "registerDevice";
         initTrdTimer(true); //開始計時，30秒未登入成功將會顯示逾時
         initTrdFlag(true);
 
@@ -234,6 +241,53 @@ public class LoginActivity extends Activity {
         }
     }
 
+    private void registerMember(final String userId, final String pwd, String name, String email, String gender) {
+        layRegisterField.setVisibility(View.GONE);
+        prgBar.setVisibility(View.VISIBLE);
+        initTrdFlag(true);
+        method = "registerMember";
+
+        MyOkHttp conn = new MyOkHttp(LoginActivity.this, new MyOkHttp.TaskListener() {
+            @Override
+            public void onFinished(String result) {
+                if (result == null) {
+                    Toast.makeText(context, "連線失敗", Toast.LENGTH_SHORT).show();
+                    layRegisterField.setVisibility(View.VISIBLE);
+                    prgBar.setVisibility(View.GONE);
+                    return;
+                }
+                try {
+                    JSONObject resObj = new JSONObject(result);
+                    if (resObj.getBoolean(KEY_STATUS)) {
+                        //註冊成功
+                    }else {
+                        method = "";
+                        Toast.makeText(context, "該帳號已被使用", Toast.LENGTH_SHORT).show();
+                        layRegisterField.setVisibility(View.VISIBLE);
+                        prgBar.setVisibility(View.GONE);
+                    }
+                }catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        //開始連線
+        try {
+            JSONObject reqObj = new JSONObject();
+            reqObj.put(KEY_USER_ID, userId);
+            reqObj.put(KEY_PASSWORD, pwd);
+            reqObj.put(KEY_NAME, name);
+            reqObj.put(KEY_DEPARTMENT, department);
+            reqObj.put(KEY_GENDER, gender);
+            reqObj.put(KEY_EMAIL, email);
+            conn.execute(getString(R.string.link_register), reqObj.toString());
+        }catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
     private void initTrdTimer(boolean restart) {
         trdTimer = new Thread(new Runnable() {
             @Override
@@ -287,8 +341,18 @@ public class LoginActivity extends Activity {
             super.handleMessage(msg);
             if (conFlag) {
                 conFlag = false;
-                deleteOriginalToken(userId);
                 initTrdFlag(false);
+                switch (method) {
+                    case "registerDevice":
+                        deleteOriginalToken(userId);
+                        break;
+                    case "registerMember":
+                        Toast.makeText(context, "註冊成功", Toast.LENGTH_SHORT).show();
+                        registerDevice(userId, pwd);
+                        break;
+                    case "":
+                        break;
+                }
             }else
                 initTrdFlag(true);
         }

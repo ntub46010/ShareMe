@@ -20,28 +20,28 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="50dp"
                 android:orientation="vertical">
-                <EditText
+                <EditText android:text="12345678"
                     android:id="@+id/edtRegAccount"
                     style="@style/edt_register"
                     android:hint="帳號，8~10位英數"/>
-                <EditText
+                <EditText android:text="12345678"
                     android:id="@+id/edtRegPassword"
                     style="@style/edt_register"
                     android:layout_marginTop="5dp"
                     android:hint="密碼，6~15位英數"
                     android:inputType="textPassword"/>
-                <EditText
+                <EditText android:text="12345678"
                     android:id="@+id/edtRegPasswordAgain"
                     style="@style/edt_register"
                     android:layout_marginTop="5dp"
                     android:hint="確認密碼"
                     android:inputType="textPassword"/>
-                <EditText
+                <EditText android:text="Vincent"
                     android:id="@+id/edtRegName"
                     style="@style/edt_register"
                     android:layout_marginTop="5dp"
                     android:hint="姓名"/>
-                <EditText
+                <EditText android:text="eric61011@gmail.com"
                     android:id="@+id/edtRegEmail"
                     style="@style/edt_register"
                     android:layout_marginTop="5dp"

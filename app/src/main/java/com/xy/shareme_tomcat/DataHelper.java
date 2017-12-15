@@ -1,5 +1,13 @@
 package com.xy.shareme_tomcat;
 
+import android.content.Context;
+import android.widget.SimpleAdapter;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static com.xy.shareme_tomcat.MainActivity.board;
 import static com.xy.shareme_tomcat.MainActivity.txtBarTitle;
 
@@ -15,8 +23,9 @@ public class DataHelper {
     public static final String KEY_USER_ID = "UserId";
     public static final String KEY_PASSWORD = "Password";
     public static final String KEY_NAME = "Name";
-    //
+    public static final String KEY_DEPARTMENT = "Department";
     public static final String KEY_GENDER = "Gender";
+    public static final String KEY_EMAIL = "Email";
     //
     public static final String KEY_AVATAR = "Avatar";
     //---
@@ -153,5 +162,23 @@ public class DataHelper {
         }
     }
 
+    public static SimpleAdapter getSimpleAdapter(Context context, int layoutId, int layoutIconId, int layoutTitleId, int[] icon, String[] title) {
+        List<Map<String, Object>> list = new ArrayList<>();
+        for (int i = 0; i< icon.length ; i++) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("icon", icon[i]);
+            item.put("title", title[i]);
+            list.add(item);
+        }
 
+        SimpleAdapter adapter = new SimpleAdapter(
+                context,
+                list,
+                layoutId,
+                new String[] {"icon", "title"},
+                new int[] {layoutIconId, layoutTitleId}
+        );
+
+        return  adapter;
+    }
 }
