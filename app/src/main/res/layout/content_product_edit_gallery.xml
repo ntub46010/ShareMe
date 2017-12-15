@@ -10,14 +10,14 @@
 
     <TextView
         style="@style/txt_goods_detail_title"
-        android:layout_marginTop="0dp"
+        android:layout_marginTop="3dp"
         android:text="書籍圖片：" />
 
     <TextView
         android:id="@+id/txtPhotoHint"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="3dp"
+        android:layout_marginTop="2dp"
         android:text="@string/hint_edit_product_photo" />
 
     <android.support.v7.widget.RecyclerView
