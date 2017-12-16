@@ -352,7 +352,7 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
             reqObj.put(KEY_CONDITION, condition);
             reqObj.put(KEY_NOTE, note);
             reqObj.put(KEY_PS, ps);
-            reqObj.put(KEY_SELLER, loginUserId);
+            reqObj.put(KEY_SELLER, "10346011");
             reqObj.put(KEY_PHOTO1, fileName[0]);
             reqObj.put(KEY_PHOTO2, fileName[1]);
             reqObj.put(KEY_PHOTO3, fileName[2]);

@@ -21,6 +21,9 @@ public class DataHelper {
     public static String myAvatarUrl = ""; //用於發送推播
     public static String tmpToken = "token"; //登入時接收自己token(確認Firebase註冊成功)，或進交談室時接收對方token(確認可推播)。空字串代表無該帳號，token字串代表尚未取得
 
+    public static boolean isFromDepartment = false; //是否因為按了科系按鈕，而移動到商品首頁
+    public static boolean isProductDisplayAlive = false; //用來控制動態下載圖片的工作是否繼續進行
+
     public static final String KEY_STATUS = "Status";
     public static final String KEY_USER_ID = "UserId";
     public static final String KEY_PASSWORD = "Password";
@@ -48,11 +51,13 @@ public class DataHelper {
     public static final String KEY_POST_TIME = "PostTime";
     public static final String KEY_EDIT_TIME = "EditTime";
     public static final String KEY_FAVORITE = "Favorite";
+    public static final String KEY_IS_ADD = "IsAdd";
     //
     public static final String KEY_AVATAR = "Avatar";
     //---
     public static final String KEY_PROFILE = "Profile";
     public static final String KEY_PRODUCT = "Product";
+    public static final String KEY_PRODUCTS = "Products";
 
 
 
@@ -146,7 +151,7 @@ public class DataHelper {
 
     public static void setBoardTitle() {
         switch (board) {
-            case "-1":
+            case "":
                 txtBarTitle.setText("全部");
                 break;
             case "00":

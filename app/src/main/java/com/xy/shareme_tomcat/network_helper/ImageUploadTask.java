@@ -105,7 +105,7 @@ public class ImageUploadTask {
 
                 // Responses from the server (code and message)
                 serverResponseCode = conn.getResponseCode();
-                //String serverResponseMessage = conn.getResponseMessage();
+                //String serverResponseMessage = conProductHome.getResponseMessage();
 
                 if(serverResponseCode == 200) {}
 
@@ -195,7 +195,7 @@ public class ImageUploadTask {
 
                 // Responses from the server (code and message)
                 serverResponseCode = conn.getResponseCode();
-                //String serverResponseMessage = conn.getResponseMessage();
+                //String serverResponseMessage = conProductHome.getResponseMessage();
 
                 if(serverResponseCode == 200) {}
 

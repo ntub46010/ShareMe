@@ -1,9 +1,12 @@
 package com.xy.shareme_tomcat.Product;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageView;
@@ -13,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.xy.shareme_tomcat.R;
+import com.xy.shareme_tomcat.adapter.ImageGroupAdapter;
 import com.xy.shareme_tomcat.data.Book;
 import com.xy.shareme_tomcat.data.ImageObj;
 import com.xy.shareme_tomcat.network_helper.GetBitmapBatch;
@@ -27,6 +31,7 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_ANYWAY;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_CONDITION;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_EDIT_TIME;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_FAVORITE;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_IS_ADD;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_NOTE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_PHOTO1;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_PHOTO2;
@@ -53,7 +58,10 @@ public class ProductDetailActivity extends AppCompatActivity {
     private ProgressBar prgBar;
     private TextView txtId, txtTitle, txtDep, txtStatus, txtNote, txtPrice, txtPS, txtSeller, txtPost, txtEdit;
     private FloatingActionButton fabContact, fabFavorite;
+
     private ArrayList<ImageObj> books;
+    public static ArrayList<Bitmap> images;
+    public static int indexSelectedImage;
 
     private String productId, sellerId, sellerName;
 
@@ -111,7 +119,7 @@ public class ProductDetailActivity extends AppCompatActivity {
         fabFavorite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                addFavorite();
             }
         });
     }
@@ -128,11 +136,12 @@ public class ProductDetailActivity extends AppCompatActivity {
                 try {
                     JSONObject resObj = new JSONObject(result);
                     if (resObj.getBoolean(KEY_STATUS)) {
-                        //若已在最愛清單，就改變愛心顏色
-                        if (resObj.getBoolean(KEY_FAVORITE))
-                            fabFavorite.setImageResource(R.drawable.ic_favorite_pink);
-
                         JSONObject obj = resObj.getJSONObject(KEY_PRODUCT);
+
+                        //若已在最愛清單，就改變愛心顏色
+                        if (obj.getBoolean(KEY_FAVORITE))
+                            fabFavorite.setImageResource(R.drawable.ic_favorite_yellow);
+
                         books.add(new Book(
                                 productId,
                                 obj.getString(KEY_PHOTO1),
@@ -162,11 +171,13 @@ public class ProductDetailActivity extends AppCompatActivity {
                         // 執行圖片下載
                         getBitmap.execute();
                     }else {
-                        Toast.makeText(context, "商品已下架", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "商品不存在", Toast.LENGTH_SHORT).show();
+                        prgBar.setVisibility(View.GONE);
                         showFoundStatus();
                     }
                 }catch (JSONException e) {
                     Toast.makeText(context, "伺服器發生例外", Toast.LENGTH_SHORT).show();
+                    prgBar.setVisibility(View.GONE);
                 }
             }
         });
@@ -224,13 +235,65 @@ public class ProductDetailActivity extends AppCompatActivity {
         }
 
         layDetail.setVisibility(View.VISIBLE);
-        prgBar.setVisibility(View.VISIBLE);
+        prgBar.setVisibility(View.GONE);
 
         showImages(book);
     }
 
     private void showImages(Book book) {
+        images = new ArrayList<>();
+        if (!book.getImgURL().equals("")) images.add(book.getImg());
+        if (!book.getImgURL2().equals("")) images.add(book.getImg2());
+        if (!book.getImgURL3().equals("")) images.add(book.getImg3());
+        if (!book.getImgURL4().equals("")) images.add(book.getImg4());
+        if (!book.getImgURL5().equals("")) images.add(book.getImg5());
 
+        // 產生 RecyclerView
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recy_books);
+        recyclerView.setHasFixedSize(true);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
+        linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+        recyclerView.setLayoutManager(linearLayoutManager);
+
+        // 產生一個Adapter物件，連結圖片資料
+        ImageGroupAdapter adapter = new ImageGroupAdapter(context, images, true);
+        recyclerView.setAdapter(adapter);
+    }
+
+    private void addFavorite() {
+        MyOkHttp conn = new MyOkHttp(ProductDetailActivity.this, new MyOkHttp.TaskListener() {
+            @Override
+            public void onFinished(String result) {
+                if (result == null) {
+                    Toast.makeText(context, "連線失敗", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                try {
+                    JSONObject resObj = new JSONObject(result);
+                    if (resObj.getBoolean(KEY_STATUS)) {
+                        if (resObj.getBoolean(KEY_IS_ADD)) {
+                            Toast.makeText(context, "加入到我的最愛", Toast.LENGTH_SHORT).show();
+                            fabFavorite.setImageResource(R.drawable.ic_favorite_yellow);
+                        }else {
+                            Toast.makeText(context, "從我的最愛移除", Toast.LENGTH_SHORT).show();
+                            fabFavorite.setImageResource(R.drawable.ic_favorite_white);
+                        }
+                    }else
+                        Toast.makeText(context, "伺服器發生例外", Toast.LENGTH_SHORT).show();
+                }catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        //開始連線
+        try {
+            JSONObject reqObj = new JSONObject();
+            reqObj.put(KEY_USER_ID, loginUserId);
+            reqObj.put(KEY_PRODUCT_ID, productId);
+            conn.execute(getString(R.string.link_add_favorite), reqObj.toString());
+        }catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     private void showFoundStatus() {

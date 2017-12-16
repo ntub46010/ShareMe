@@ -17,7 +17,8 @@
         <activity
             android:name=".LoginActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme">
+            android:theme="@style/AppTheme"
+            android:screenOrientation="portrait" >
         </activity>
         <activity
             android:name=".MainActivity"
@@ -40,8 +41,15 @@
             </intent-filter>
         </service>
 
-        <activity android:name=".Product.ProductPostActivity" />
-        <activity android:name=".Product.ProductDetailActivity" />
+        <activity
+            android:name=".Product.ProductPostActivity"
+            android:screenOrientation="portrait"  />
+        <activity
+            android:name=".Product.ProductDetailActivity"
+            android:screenOrientation="portrait"  />
+        <activity
+            android:name=".ImageActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

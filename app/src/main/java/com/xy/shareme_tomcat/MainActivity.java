@@ -33,7 +33,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     public static ViewPager vpgHome;
     public static int lastPosition = 1;
     private ViewPagerAdapter vpgAdapter;
-    public static String board = "-1";
+    public static String board = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

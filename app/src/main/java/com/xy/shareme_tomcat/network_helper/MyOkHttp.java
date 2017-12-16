@@ -40,6 +40,7 @@ public class MyOkHttp {
                         try {
                             DataHelper.conFlag = true;
                             taskListener.onFinished(response.body().string());
+                            DataHelper.conFlag = false;
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
