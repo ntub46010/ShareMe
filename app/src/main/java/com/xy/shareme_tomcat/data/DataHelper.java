@@ -190,6 +190,49 @@ public class DataHelper {
         }
     }
 
+    public static String getBoardNickname() {
+        String title = "";
+        switch (board) {
+            case "":
+                title = "全部";
+                break;
+            case "00":
+                title = "通識類";
+                break;
+            case "01":
+                title = "會資系";
+                break;
+            case "02":
+                title = "財金系";
+                break;
+            case "03":
+                title = "財稅系";
+                break;
+            case "04":
+                title = "國商系";
+                break;
+            case "05":
+                title = "企管系";
+                break;
+            case "06":
+                title = "資管系";
+                break;
+            case "07":
+                title = "應外系";
+                break;
+            case "A":
+                title = "商設系";
+                break;
+            case "B":
+                title = "商創系";
+                break;
+            case "C":
+                title = "數媒系";
+                break;
+        }
+        return title;
+    }
+
     public static SimpleAdapter getSimpleAdapter(Context context, int layoutId, int layoutIconId, int layoutTitleId, int[] icon, String[] title) {
         List<Map<String, Object>> list = new ArrayList<>();
         for (int i = 0; i< icon.length ; i++) {

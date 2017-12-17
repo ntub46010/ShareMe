@@ -71,12 +71,9 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
     private StringBuffer sbDep;
 
     private ImageUploadTask imageTask;
-    private Thread trdWaitPhoto;
     private TextView txtUploadHint;
     private Dialog dlgUpload;
     private MyOkHttp conPostProduct;
-
-    private JSONObject obj;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -253,7 +250,7 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void initTrdWaitPhoto(boolean restart) {
-        trdWaitPhoto = new Thread(new Runnable() {
+        Thread trdWaitPhoto = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -360,7 +357,6 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
             reqObj.put(KEY_PHOTO5, fileName[4]);
             conPostProduct.execute(getString(R.string.link_post_product), reqObj.toString());
         }catch (JSONException e) {
-            Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).cancel();
             e.printStackTrace();
         }
     }
@@ -392,7 +388,7 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
                         }).start();
                         initTrdWaitPhoto(true); //監聽正在上傳的圖片檔名
 
-                        txtUploadHint.setText("上傳中，長按取消...  (" + String.valueOf(itemIndex + 1) + "/" + String.valueOf(itemAmount) + ")");
+                        txtUploadHint.setText("上傳中，點擊取消...  (" + String.valueOf(itemIndex + 1) + "/" + String.valueOf(itemAmount) + ")");
                         dlgUpload.show();
                         break;
                     }
@@ -416,7 +412,7 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
                                     dlgUpload.dismiss();
                                     Toast.makeText(context, "上傳已取消", Toast.LENGTH_SHORT).show();
                                 }catch (NullPointerException e) {
-                                    Toast.makeText(context, "NullPointerException @ cancel", Toast.LENGTH_SHORT).show();
+                                    e.printStackTrace();
                                 }
                             }
                         }).show();

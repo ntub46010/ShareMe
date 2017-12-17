@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.xy.shareme_tomcat.Product.ProductDetailActivity;
 import com.xy.shareme_tomcat.R;
@@ -37,7 +38,6 @@ public class ProductDisplayAdapter extends RecyclerView.Adapter<ProductDisplayAd
     private boolean isFirstToHead = true, canCheckLoop = true;
     private Thread trdCheckImg = null;
     private int head = 0, tail = 9, section = 8;
-    private int lastPosition = 0;
     private boolean[] loadLock = null;
 
     public class DataViewHolder extends RecyclerView.ViewHolder {
@@ -105,7 +105,6 @@ public class ProductDisplayAdapter extends RecyclerView.Adapter<ProductDisplayAd
     public void onBindViewHolder(ProductDisplayAdapter.DataViewHolder dataViewHolder, int i) {
         // 顯示資料物件及資料項目 的對應
         setContent(i);
-        lastPosition = i;
         try {
             dataViewHolder.layProductCard.setBackgroundColor(res.getColor(backgroundColor));
         }catch (NullPointerException e) {}
@@ -181,7 +180,7 @@ public class ProductDisplayAdapter extends RecyclerView.Adapter<ProductDisplayAd
             @Override
             public void run() {
                 try {
-                    Thread.sleep(250);
+                    Thread.sleep(200);
                     hdrCheckImg.sendMessage(hdrCheckImg.obtainMessage());
                 }catch (Exception e) {}
             }
@@ -196,14 +195,22 @@ public class ProductDisplayAdapter extends RecyclerView.Adapter<ProductDisplayAd
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             if (canCheckLoop && isProductDisplayAlive) {
+                //Toast.makeText(context, "prepareImgs1", Toast.LENGTH_SHORT).show();
                 prepareImgs();
                 initCheckThread(true);
             }else {
+                //Toast.makeText(context, "prepareImgs2", Toast.LENGTH_SHORT).show();
                 canCheckLoop = true; //false ？
                 initCheckThread(false);
             }
         }
     };
+
+    public void setAllImagesNull () {
+        for (int i=0; i<books.size(); i++) {
+            books.get(i).setImg(null);
+        }
+    }
 
     public void setBackgroundColor(Resources r, int color) {
         this.backgroundColor = color;

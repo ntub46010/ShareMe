@@ -62,8 +62,10 @@ public class ProductDetailActivity extends AppCompatActivity {
     private ArrayList<ImageObj> books;
     public static ArrayList<Bitmap> images;
     public static int indexSelectedImage;
+    private String productId;
 
-    private String productId, sellerId, sellerName;
+    private MyOkHttp conn;
+    private GetBitmapBatch getBitmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,7 +128,7 @@ public class ProductDetailActivity extends AppCompatActivity {
 
     private void loadData() {
         books = new ArrayList<>();
-        MyOkHttp conn = new MyOkHttp(ProductDetailActivity.this, new MyOkHttp.TaskListener() {
+        conn = new MyOkHttp(ProductDetailActivity.this, new MyOkHttp.TaskListener() {
             @Override
             public void onFinished(String result) {
                 if (result == null) {
@@ -161,7 +163,7 @@ public class ProductDetailActivity extends AppCompatActivity {
                                 obj.getString(KEY_EDIT_TIME)
                         ));
                         // 產生物件ArrayList資料後，由圖片位址下載圖片，完成後再顯示資料.
-                        GetBitmapBatch getBitmap = new GetBitmapBatch(context, getResources(), books, new GetBitmapBatch.TaskListener() {
+                        getBitmap = new GetBitmapBatch(context, getResources(), books, new GetBitmapBatch.TaskListener() {
                             // 下載圖片完成後執行的方法
                             @Override
                             public void onFinished() {
@@ -206,8 +208,8 @@ public class ProductDetailActivity extends AppCompatActivity {
         if (book.getEditDate().equals(""))
             txtEdit.setVisibility(View.GONE);
 
-        sellerId = book.getSeller();
-        sellerName = book.getSellerName();
+        String sellerId = book.getSeller();
+        String sellerName = book.getSellerName();
         txtSeller.setText(sellerName + " (" + sellerId + ")");
 
         //顯示科系
@@ -312,4 +314,15 @@ public class ProductDetailActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onDestroy() {
+        try {
+            conn.cancel();
+            getBitmap.cancel(true);
+        }catch (NullPointerException e) {}
+        books = null;
+        images = null;
+        System.gc();
+        super.onDestroy();
+    }
 }

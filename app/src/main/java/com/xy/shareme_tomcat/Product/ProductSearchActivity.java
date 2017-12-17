@@ -1,17 +1,16 @@
 package com.xy.shareme_tomcat.Product;
 
-import android.content.Intent;
+import android.content.Context;
+import android.graphics.Color;
+import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,59 +37,80 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_SELLER_NAME;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_STATUS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TYPE;
+import static com.xy.shareme_tomcat.data.DataHelper.getBoardNickname;
 import static com.xy.shareme_tomcat.data.DataHelper.getNotFoundImg;
-import static com.xy.shareme_tomcat.data.DataHelper.isFromDepartment;
 import static com.xy.shareme_tomcat.data.DataHelper.isProductDisplayAlive;
-import static com.xy.shareme_tomcat.data.DataHelper.setBoardTitle;
-import static com.xy.shareme_tomcat.MainActivity.context;
 
-public class ProductHomeFrag extends Fragment {
-    public static RecyclerView recyProduct;
-    private SwipeRefreshLayout swipeRefreshLayout;
+public class ProductSearchActivity extends AppCompatActivity {
+    private Context context;
+    private SearchView searchView;
     private ProgressBar prgBar;
+    private RecyclerView recyProduct;
 
     private ArrayList<ImageObj> books;
-    public static ProductDisplayAdapter adpProductHome;
-    public static MyOkHttp conProductHome;
-    public static GetBitmap gbmProductHome;
+    private ProductDisplayAdapter adapter;
+
+    private MyOkHttp conn;
+    private GetBitmap getBitmap;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.frag_product_home, container, false);
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        setBoardTitle();
-        prgBar = (ProgressBar) getView().findViewById(R.id.prgBar);
-
-        recyProduct = (RecyclerView) getView().findViewById(R.id.recyclerView); //若在執行showData前切換科系，DepartmentFrag會在setVisibility時NPE
-        swipeRefreshLayout = (SwipeRefreshLayout) getView().findViewById(R.id.swipeRefreshLayout);
-        swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_light);
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_product_search);
+        context = this;
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
-            public void onRefresh() {
-                loadData("");
+            public void onClick(View v) {
+                finish();
             }
         });
 
-        setFab();
+        recyProduct = (RecyclerView) findViewById(R.id.recyclerView);
+        prgBar = (ProgressBar) findViewById(R.id.prgBar);
 
-        loadData("");
+        //搜尋框
+        searchView = (SearchView) toolbar.findViewById(R.id.searchview);
+        searchView.setIconifiedByDefault(false);
+        searchView.setSubmitButtonEnabled(true);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                if (!s.equals("")) {
+                    loadData(s);
+                }
+                searchView.clearFocus();
+                return true;
+            }
+            @Override
+            public boolean onQueryTextChange(String s) {
+                return false;
+            }
+        });
+        searchView.setQueryHint("搜尋" + getBoardNickname() + "商品");
+
+        //搜尋框提示字體顏色
+        try {
+            int id = searchView.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
+            TextView textView = (TextView) searchView.findViewById(id);
+            textView.setTextColor(Color.parseColor("#FFFFFF"));
+            textView.setHintTextColor(Color.parseColor("#80FFFFFF"));
+        }catch (Exception e) {
+        }
     }
 
     @Override
     public void onStart() {
         super.onStart();
         isProductDisplayAlive = true;
-        //不寫在onResume是因為切換Fragment後必執行onResume，則循環旗標又會被設為true，無法及時中止舊的執行緒
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    adpProductHome.setCanCheckLoop(true);
-                    adpProductHome.initCheckThread(true);
+                    adapter.setCanCheckLoop(true);
+                    adapter.initCheckThread(true);
                 }catch (NullPointerException e) {
                     //第一次開啟，adapter尚未準備好
                 }
@@ -98,44 +118,20 @@ public class ProductHomeFrag extends Fragment {
         }).start();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (isFromDepartment) {
-            isFromDepartment = false;
-            loadData("");
-        }
-    }
-
-    private void setFab () {
-        FloatingActionButton fabTop = (FloatingActionButton) getView().findViewById(R.id.fab_top);
-        fabTop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-                    recyProduct.scrollToPosition(0);
-                }catch (Exception e) {
-                    e.printStackTrace();
-                    Toast.makeText(context, "沒有商品，不能往上", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-        FloatingActionButton fabPost = (FloatingActionButton) getView().findViewById(R.id.fab_add);
-        fabPost.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(context, ProductPostActivity.class));
-            }
-        });
-    }
-
     private void loadData(String keyword) {
-        swipeRefreshLayout.setEnabled(false);
+        try {
+            adapter.setCanCheckLoop(false);
+            adapter.setAllImagesNull();
+            conn.cancel();
+            getBitmap.cancel(true);
+        }catch (NullPointerException e) {}
+        System.gc();
+
         prgBar.setVisibility(View.VISIBLE);
+        recyProduct.setVisibility(View.GONE);
 
         books = new ArrayList<>();
-        conProductHome = new MyOkHttp(getActivity(), new MyOkHttp.TaskListener() {
+        conn = new MyOkHttp(ProductSearchActivity.this, new MyOkHttp.TaskListener() {
             @Override
             public void onFinished(String result) {
                 if (result == null) {
@@ -157,16 +153,14 @@ public class ProductHomeFrag extends Fragment {
                                     obj.getString(KEY_SELLER_NAME)
                             ));
                         }
-
-                        gbmProductHome = new GetBitmap(context, getResources(), books, new GetBitmap.TaskListener() {
+                        getBitmap = new GetBitmap(context, getResources(), books, new GetBitmap.TaskListener() {
                             @Override
                             public void onFinished() {
                                 showData();
                             }
                         });
-                        gbmProductHome.setPreLoadAmount(12);
-                        gbmProductHome.execute();
-
+                        getBitmap.setPreLoadAmount(4);
+                        getBitmap.execute();
                     }else {
                         Toast.makeText(context, "沒有找到商品", Toast.LENGTH_SHORT).show();
                         showFoundStatus();
@@ -182,7 +176,7 @@ public class ProductHomeFrag extends Fragment {
             JSONObject reqObj = new JSONObject();
             reqObj.put(KEY_TYPE, board);
             reqObj.put(KEY_KEYWORD, keyword);
-            conProductHome.execute(getString(R.string.link_list_product), reqObj.toString());
+            conn.execute(getString(R.string.link_list_product), reqObj.toString());
         }catch (JSONException e) {
             e.printStackTrace();
         }
@@ -193,22 +187,31 @@ public class ProductHomeFrag extends Fragment {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
         recyProduct.setLayoutManager(linearLayoutManager);
 
-        adpProductHome = new ProductDisplayAdapter(context, getResources(), books);
-        adpProductHome.setBackgroundColor(getResources(), R.color.card_product);
-        recyProduct.setAdapter(adpProductHome);
+        adapter = new ProductDisplayAdapter(context, getResources(), books);
+        adapter.setBackgroundColor(getResources(), R.color.card_product);
+        recyProduct.setAdapter(adapter);
+        books = null;
 
-        swipeRefreshLayout.setEnabled(true);
-        swipeRefreshLayout.setRefreshing(false);
         prgBar.setVisibility(View.GONE);
         recyProduct.setVisibility(View.VISIBLE);
-
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    adapter.setCanCheckLoop(true);
+                    adapter.initCheckThread(true);
+                }catch (NullPointerException e) {
+                    //第一次開啟，adapter尚未準備好
+                }
+            }
+        }).start();
         Toast.makeText(context, "顯示完成", Toast.LENGTH_SHORT).show();
     }
 
     private void showFoundStatus() {
-        //若未找到書，則說明沒有找到
-        TextView txtNotFound = (TextView) getView().findViewById(R.id.txtNotFound);
-        ImageView imgNotFound = (ImageView) getView().findViewById(R.id.imgNotFound);
+        //若未找到最愛的書，則說明沒有找到
+        TextView txtNotFound = (TextView) findViewById(R.id.txtNotFound);
+        ImageView imgNotFound = (ImageView) findViewById(R.id.imgNotFound);
         if (books == null || books.isEmpty()) {
             txtNotFound.setText("沒有找到商品");
             txtNotFound.setVisibility(View.VISIBLE);
@@ -228,8 +231,8 @@ public class ProductHomeFrag extends Fragment {
             @Override
             public void run() {
                 try {
-                    adpProductHome.setCanCheckLoop(false);
-                    adpProductHome.initCheckThread(false);
+                    adapter.setCanCheckLoop(false);
+                    adapter.initCheckThread(false);
                 }catch (NullPointerException e) {
                     //第一次開啟，adapter尚未準備好
                 }
@@ -241,11 +244,11 @@ public class ProductHomeFrag extends Fragment {
     @Override
     public void onDestroy() {
         try {
-            conProductHome.cancel();
-            gbmProductHome.cancel(true);
+            conn.cancel();
+            getBitmap.cancel(true);
         }catch (NullPointerException e) {}
+        books = null;
         System.gc();
         super.onDestroy();
     }
 }
-

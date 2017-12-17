@@ -1,6 +1,7 @@
 package com.xy.shareme_tomcat;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -16,6 +17,7 @@ import android.widget.TextView;
 
 import com.xy.shareme_tomcat.Member.MemberHomeFrag;
 import com.xy.shareme_tomcat.Product.ProductHomeFrag;
+import com.xy.shareme_tomcat.Product.ProductSearchActivity;
 import com.xy.shareme_tomcat.Settings.SettingHomeFrag;
 import com.xy.shareme_tomcat.Type.DepartmentFrag;
 
@@ -72,7 +74,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                     btnSearch.setVisibility(View.GONE);
                 }
 
-                //MyHelper.canShowProduct = true; //被選一定要顯示
                 if (lastPosition == 0 && position == 1) //從科系移動到商品後必重新刷新商品
                     vpgAdapter.getItem(position).onResume();
 
@@ -88,14 +89,13 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         vpgHome.setCurrentItem(1); //開啟Activity第一個顯示的頁面
     }
 
-    private void setupViewPager(/*ViewPager viewPager*/) {
+    private void setupViewPager() {
         //加入頁面
         vpgAdapter = new ViewPagerAdapter(getSupportFragmentManager());
         vpgAdapter.addFragment(new DepartmentFrag(), "科系");
         vpgAdapter.addFragment(new ProductHomeFrag(), "商品");
         vpgAdapter.addFragment(new MemberHomeFrag(), "會員專區");
         vpgAdapter.addFragment(new SettingHomeFrag(), "設定");
-        //viewPager.setAdapter(vpgAdapter);
         vpgHome.setAdapter(vpgAdapter);
     }
 
@@ -103,7 +103,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btnSearchProduct:
-                //startActivity(new Intent(context, ProductSearchActivity.class));
+                startActivity(new Intent(context, ProductSearchActivity.class));
                 break;
 
         }

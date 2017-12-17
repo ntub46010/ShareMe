@@ -1,6 +1,8 @@
 package com.xy.shareme_tomcat.network_helper;
 
 import android.app.Activity;
+import android.os.NetworkOnMainThreadException;
+import android.widget.Toast;
 
 import com.xy.shareme_tomcat.data.DataHelper;
 
@@ -34,18 +36,31 @@ public class MyOkHttp {
             @Override
             public void onResponse(Call call, final Response response) {
                 //連線成功
+                try {
+                    DataHelper.conFlag = true;
+                    taskListener.onFinished(response.body().string());
+                    DataHelper.conFlag = false; //NetworkOnMainThreadException
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (NetworkOnMainThreadException e) {
+                    Toast.makeText(activity, "NetworkOnMainThreadException", Toast.LENGTH_LONG).show();
+                }
+                /*
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         try {
                             DataHelper.conFlag = true;
                             taskListener.onFinished(response.body().string());
-                            DataHelper.conFlag = false;
+                            DataHelper.conFlag = false; //NetworkOnMainThreadException
                         } catch (IOException e) {
                             e.printStackTrace();
+                        } catch (NetworkOnMainThreadException e) {
+                            Toast.makeText(activity, "NetworkOnMainThreadException", Toast.LENGTH_LONG).show();
                         }
                     }
                 });
+                */
             }
             @Override
             public void onFailure(Call call, IOException e) {
