@@ -13,11 +13,11 @@
         android:id="@+id/toolbar"
         style="@style/toolbar"
         app:titleTextColor="#FFFFFF">
-        <SearchView
+        <!--<SearchView
             android:id="@+id/searchview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:queryHint="搜尋"/>
+            android:queryHint="搜尋"/>-->
     </android.support.v7.widget.Toolbar>
 
     <include layout="@layout/content_product_display" />

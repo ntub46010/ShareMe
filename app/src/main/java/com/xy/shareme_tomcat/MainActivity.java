@@ -3,6 +3,7 @@ package com.xy.shareme_tomcat;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -12,7 +13,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.ImageView;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.xy.shareme_tomcat.Member.MemberHomeFrag;
@@ -24,13 +25,15 @@ import com.xy.shareme_tomcat.Type.DepartmentFrag;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_KEYWORD;
+import static com.xy.shareme_tomcat.data.DataHelper.getBoardNickname;
 import static com.xy.shareme_tomcat.data.DataHelper.setBoardTitle;
 
-public class MainActivity extends FragmentActivity implements View.OnClickListener {
+public class MainActivity extends FragmentActivity {
     public static Context context;
     public static Toolbar toolbar;
     public static TextView txtBarTitle;
-    private ImageView btnSearch;
+    public static SearchView searchView;
     private TabLayout tabHome;
     public static ViewPager vpgHome;
     public static int lastPosition = 1;
@@ -54,8 +57,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                     .apply();
         }
 
-        btnSearch = (ImageView) toolbar.findViewById(R.id.btnSearchProduct);
-        btnSearch.setOnClickListener(this);
+        initSearchView();
 
         vpgHome = (ViewPager) findViewById(R.id.vpgHome);
         vpgHome.setOffscreenPageLimit(15);
@@ -65,13 +67,18 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
             @Override
             public void onPageSelected(int position) {
-                //設定標題和搜尋按鈕
-                if (position == 0 || position == 1) {
+                //設定標題
+                if (position == 0 || position == 1)
                     setBoardTitle();
-                    btnSearch.setVisibility(View.VISIBLE);
-                }else {
+                else
                     txtBarTitle.setText(getString(R.string.app_name));
-                    btnSearch.setVisibility(View.GONE);
+
+                //設定搜尋鈕
+                if (position == 1)
+                    searchView.setVisibility(View.VISIBLE);
+                else {
+                    searchView.setVisibility(View.GONE);
+                    searchView.onActionViewCollapsed();
                 }
 
                 if (lastPosition == 0 && position == 1) //從科系移動到商品後必重新刷新商品
@@ -99,13 +106,56 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         vpgHome.setAdapter(vpgAdapter);
     }
 
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.btnSearchProduct:
-                startActivity(new Intent(context, ProductSearchActivity.class));
-                break;
+    public void initSearchView() {
+        searchView = (SearchView) toolbar.findViewById(R.id.searchview);
+        searchView.setIconifiedByDefault(true);
+        searchView.setSubmitButtonEnabled(true);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                if (!s.equals("")) {
+                    Intent it = new Intent(context, ProductSearchActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putString(KEY_KEYWORD, s);
+                    it.putExtras(bundle);
+                    startActivity(it);
+                    searchView.clearFocus();
+                    searchView.onActionViewCollapsed();
+                }
+                return true;
+            }
+            @Override
+            public boolean onQueryTextChange(String s) {
+                return false;
+            }
+        });
 
+        searchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus)
+                    txtBarTitle.setVisibility(View.GONE);
+                else
+                    txtBarTitle.setVisibility(View.VISIBLE);
+            }
+        });
+
+        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                searchView.onActionViewCollapsed();
+                return true;
+            }
+        });
+        searchView.setQueryHint(getString(R.string.hint_search_product, getBoardNickname()));
+
+        //搜尋框提示字體顏色
+        try {
+            int id = searchView.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
+            TextView textView = (TextView) searchView.findViewById(id);
+            textView.setTextColor(Color.parseColor("#FFFFFF"));
+            textView.setHintTextColor(Color.parseColor("#80FFFFFF"));
+        }catch (Exception e) {
         }
     }
 

@@ -1,7 +1,6 @@
 package com.xy.shareme_tomcat.Product;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -10,7 +9,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,7 +41,6 @@ import static com.xy.shareme_tomcat.data.DataHelper.isProductDisplayAlive;
 
 public class ProductSearchActivity extends AppCompatActivity {
     private Context context;
-    private SearchView searchView;
     private ProgressBar prgBar;
     private RecyclerView recyProduct;
 
@@ -58,7 +55,10 @@ public class ProductSearchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_search);
         context = this;
+        Bundle bundle = getIntent().getExtras();
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle(getString(R.string.hint_search_result, bundle.getString(KEY_KEYWORD)));
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -71,34 +71,7 @@ public class ProductSearchActivity extends AppCompatActivity {
         recyProduct = (RecyclerView) findViewById(R.id.recyclerView);
         prgBar = (ProgressBar) findViewById(R.id.prgBar);
 
-        //搜尋框
-        searchView = (SearchView) toolbar.findViewById(R.id.searchview);
-        searchView.setIconifiedByDefault(false);
-        searchView.setSubmitButtonEnabled(true);
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String s) {
-                if (!s.equals("")) {
-                    loadData(s);
-                }
-                searchView.clearFocus();
-                return true;
-            }
-            @Override
-            public boolean onQueryTextChange(String s) {
-                return false;
-            }
-        });
-        searchView.setQueryHint("搜尋" + getBoardNickname() + "商品");
-
-        //搜尋框提示字體顏色
-        try {
-            int id = searchView.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
-            TextView textView = (TextView) searchView.findViewById(id);
-            textView.setTextColor(Color.parseColor("#FFFFFF"));
-            textView.setHintTextColor(Color.parseColor("#80FFFFFF"));
-        }catch (Exception e) {
-        }
+        loadData(bundle.getString(KEY_KEYWORD));
     }
 
     @Override
@@ -125,7 +98,6 @@ public class ProductSearchActivity extends AppCompatActivity {
             conn.cancel();
             getBitmap.cancel(true);
         }catch (NullPointerException e) {}
-        System.gc();
 
         prgBar.setVisibility(View.VISIBLE);
         recyProduct.setVisibility(View.GONE);
@@ -162,9 +134,14 @@ public class ProductSearchActivity extends AppCompatActivity {
                         getBitmap.setPreLoadAmount(4);
                         getBitmap.execute();
                     }else {
-                        Toast.makeText(context, "沒有找到商品", Toast.LENGTH_SHORT).show();
-                        showFoundStatus();
-                        prgBar.setVisibility(View.GONE);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(context, "沒有找到商品", Toast.LENGTH_SHORT).show();
+                                showFoundStatus();
+                                prgBar.setVisibility(View.GONE);
+                            }
+                        });
                     }
                 }catch (JSONException e) {
                     e.printStackTrace();

@@ -51,16 +51,18 @@
     <string name="link_avatar">http://140.131.115.73/avatars/</string>
     <string name="link_image">http://140.131.115.73/images/</string>
 
-    <string name="link_login">http://111.250.24.116:8080/ShareMe/api/login</string>
-    <string name="link_register">http://111.250.24.116:8080/ShareMe/api/register</string>
-    <string name="link_list_product">http://111.250.24.116:8080/ShareMe/api/list_products</string>
-    <string name="link_post_product">http://111.250.24.116:8080/ShareMe/api/post_product</string>
-    <string name="link_product_detail">http://111.250.24.116:8080/ShareMe/api/product_detail</string>
-    <string name="link_add_favorite">http://111.250.24.116:8080/ShareMe/api/add_favorite</string>
+    <string name="link_login">http://111.250.15.59:8080/ShareMe/api/login</string>
+    <string name="link_register">http://111.250.15.59:8080/ShareMe/api/register</string>
+    <string name="link_list_product">http://111.250.15.59:8080/ShareMe/api/list_products</string>
+    <string name="link_post_product">http://111.250.15.59:8080/ShareMe/api/post_product</string>
+    <string name="link_product_detail">http://111.250.15.59:8080/ShareMe/api/product_detail</string>
+    <string name="link_add_favorite">http://111.250.15.59:8080/ShareMe/api/add_favorite</string>
 
     <string name="link_upload_image">http://140.131.115.73/upload_images</string>
 
     <string name="hint_edit_product_photo">可選五張圖，第一張將做為預覽，長按可調整順序</string>
+    <string name="hint_search_product">搜尋%1s商品</string>
+    <string name="hint_search_result">%1s的搜尋結果</string>
 
 
 </resources>
