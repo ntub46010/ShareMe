@@ -7,6 +7,7 @@
     <color name="colorAccent">#FF7C80</color> <!--fab、ProgressBar-->
 
     <color name="card_product">#C0ff7751</color> <!--商品首頁清單-->
+    <color name="card_favorite">#ccecE5</color> <!--我的最愛清單-->
 
     <color name="blue1">#387498</color> <!--註冊、忘記密碼-->
     <color name="bg_header">#d95f2f</color>

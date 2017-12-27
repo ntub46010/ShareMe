@@ -85,17 +85,12 @@ public class ProductHomeFrag extends Fragment {
         super.onStart();
         isProductDisplayAlive = true;
         //不寫在onResume是因為切換Fragment後必執行onResume，則循環旗標又會被設為true，無法及時中止舊的執行緒
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    adpProductHome.setCanCheckLoop(true);
-                    adpProductHome.initCheckThread(true);
-                }catch (NullPointerException e) {
-                    //第一次開啟，adapter尚未準備好
-                }
-            }
-        }).start();
+        try {
+            adpProductHome.setCanCheckLoop(true);
+            adpProductHome.initCheckThread(true);
+        }catch (NullPointerException e) {
+            //第一次開啟，adapter尚未準備好
+        }
     }
 
     @Override

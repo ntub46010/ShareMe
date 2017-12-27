@@ -1,5 +1,6 @@
 package com.xy.shareme_tomcat.Member;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -71,7 +72,7 @@ public class MemberHomeFrag extends Fragment {
                 */
                 break;
             case "我的最愛":
-                //startActivity(new Intent(context, MemberFavoriteActivity.class));
+                startActivity(new Intent(context, MemberFavoriteActivity.class));
                 break;
             case "信箱":
                 //startActivity(new Intent(context, MemberMailboxActivity.class));

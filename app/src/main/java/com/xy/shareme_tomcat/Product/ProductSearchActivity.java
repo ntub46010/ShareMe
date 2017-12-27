@@ -78,17 +78,12 @@ public class ProductSearchActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         isProductDisplayAlive = true;
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    adapter.setCanCheckLoop(true);
-                    adapter.initCheckThread(true);
-                }catch (NullPointerException e) {
-                    //第一次開啟，adapter尚未準備好
-                }
-            }
-        }).start();
+        try {
+            adapter.setCanCheckLoop(true);
+            adapter.initCheckThread(true);
+        }catch (NullPointerException e) {
+            //第一次開啟，adapter尚未準備好
+        }
     }
 
     private void loadData(String keyword) {

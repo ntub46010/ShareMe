@@ -130,57 +130,63 @@ public class ProductDetailActivity extends AppCompatActivity {
         books = new ArrayList<>();
         conn = new MyOkHttp(ProductDetailActivity.this, new MyOkHttp.TaskListener() {
             @Override
-            public void onFinished(String result) {
+            public void onFinished(final String result) {
                 if (result == null) {
                     Toast.makeText(context, "連線失敗", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                try {
-                    JSONObject resObj = new JSONObject(result);
-                    if (resObj.getBoolean(KEY_STATUS)) {
-                        JSONObject obj = resObj.getJSONObject(KEY_PRODUCT);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            JSONObject resObj = new JSONObject(result);
+                            if (resObj.getBoolean(KEY_STATUS)) {
+                                JSONObject obj = resObj.getJSONObject(KEY_PRODUCT);
 
-                        //若已在最愛清單，就改變愛心顏色
-                        if (obj.getBoolean(KEY_FAVORITE))
-                            fabFavorite.setImageResource(R.drawable.ic_favorite_yellow);
+                                //若已在最愛清單，就改變愛心顏色
+                                if (obj.getBoolean(KEY_FAVORITE))
+                                    fabFavorite.setImageResource(R.drawable.ic_favorite_yellow);
 
-                        books.add(new Book(
-                                productId,
-                                obj.getString(KEY_PHOTO1),
-                                obj.getString(KEY_PHOTO2),
-                                obj.getString(KEY_PHOTO3),
-                                obj.getString(KEY_PHOTO4),
-                                obj.getString(KEY_PHOTO5),
-                                obj.getString(KEY_TITLE),
-                                obj.getString(KEY_CONDITION),
-                                obj.getString(KEY_NOTE),
-                                obj.getString(KEY_PRICE),
-                                obj.getString(KEY_PS),
-                                obj.getString(KEY_SELLER_ID),
-                                obj.getString(KEY_SELLER_NAME),
-                                obj.getString(KEY_TYPE),
-                                obj.getString(KEY_POST_TIME),
-                                obj.getString(KEY_EDIT_TIME)
-                        ));
-                        // 產生物件ArrayList資料後，由圖片位址下載圖片，完成後再顯示資料.
-                        getBitmap = new GetBitmapBatch(context, getResources(), books, new GetBitmapBatch.TaskListener() {
-                            // 下載圖片完成後執行的方法
-                            @Override
-                            public void onFinished() {
-                                showData();
+                                    books.add(new Book(
+                                            productId,
+                                            obj.getString(KEY_PHOTO1),
+                                            obj.getString(KEY_PHOTO2),
+                                            obj.getString(KEY_PHOTO3),
+                                            obj.getString(KEY_PHOTO4),
+                                            obj.getString(KEY_PHOTO5),
+                                            obj.getString(KEY_TITLE),
+                                            obj.getString(KEY_CONDITION),
+                                            obj.getString(KEY_NOTE),
+                                            obj.getString(KEY_PRICE),
+                                            obj.getString(KEY_PS),
+                                            obj.getString(KEY_SELLER_ID),
+                                            obj.getString(KEY_SELLER_NAME),
+                                            obj.getString(KEY_TYPE),
+                                            obj.getString(KEY_POST_TIME),
+                                            obj.getString(KEY_EDIT_TIME)
+                                    ));
+                                // 產生物件ArrayList資料後，由圖片位址下載圖片，完成後再顯示資料.
+                                getBitmap = new GetBitmapBatch(context, getResources(), books, new GetBitmapBatch.TaskListener() {
+                                    // 下載圖片完成後執行的方法
+                                    @Override
+                                    public void onFinished() {
+                                        showData();
+                                    }
+                                });
+                                // 執行圖片下載
+                                getBitmap.execute();
+                            }else {
+                                Toast.makeText(context, "商品不存在", Toast.LENGTH_SHORT).show();
+                                prgBar.setVisibility(View.GONE);
+                                showFoundStatus();
                             }
-                        });
-                        // 執行圖片下載
-                        getBitmap.execute();
-                    }else {
-                        Toast.makeText(context, "商品不存在", Toast.LENGTH_SHORT).show();
-                        prgBar.setVisibility(View.GONE);
-                        showFoundStatus();
+                        }catch (JSONException e) {
+                            Toast.makeText(context, "伺服器發生例外", Toast.LENGTH_SHORT).show();
+                            prgBar.setVisibility(View.GONE);
+                        }
                     }
-                }catch (JSONException e) {
-                    Toast.makeText(context, "伺服器發生例外", Toast.LENGTH_SHORT).show();
-                    prgBar.setVisibility(View.GONE);
-                }
+                });
+
             }
         });
         //開始連線
@@ -265,26 +271,31 @@ public class ProductDetailActivity extends AppCompatActivity {
     private void addFavorite() {
         MyOkHttp conn = new MyOkHttp(ProductDetailActivity.this, new MyOkHttp.TaskListener() {
             @Override
-            public void onFinished(String result) {
+            public void onFinished(final String result) {
                 if (result == null) {
                     Toast.makeText(context, "連線失敗", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                try {
-                    JSONObject resObj = new JSONObject(result);
-                    if (resObj.getBoolean(KEY_STATUS)) {
-                        if (resObj.getBoolean(KEY_IS_ADD)) {
-                            Toast.makeText(context, "加入到我的最愛", Toast.LENGTH_SHORT).show();
-                            fabFavorite.setImageResource(R.drawable.ic_favorite_yellow);
-                        }else {
-                            Toast.makeText(context, "從我的最愛移除", Toast.LENGTH_SHORT).show();
-                            fabFavorite.setImageResource(R.drawable.ic_favorite_white);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            JSONObject resObj = new JSONObject(result);
+                            if (resObj.getBoolean(KEY_STATUS)) {
+                                if (resObj.getBoolean(KEY_IS_ADD)) {
+                                    Toast.makeText(context, "加入到我的最愛", Toast.LENGTH_SHORT).show();
+                                    fabFavorite.setImageResource(R.drawable.ic_favorite_yellow);
+                                }else {
+                                    Toast.makeText(context, "從我的最愛移除", Toast.LENGTH_SHORT).show();
+                                    fabFavorite.setImageResource(R.drawable.ic_favorite_white);
+                                }
+                            }else
+                                Toast.makeText(context, "伺服器發生例外", Toast.LENGTH_SHORT).show();
+                        }catch (JSONException e) {
+                            e.printStackTrace();
                         }
-                    }else
-                        Toast.makeText(context, "伺服器發生例外", Toast.LENGTH_SHORT).show();
-                }catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                    }
+                });
             }
         });
         //開始連線
