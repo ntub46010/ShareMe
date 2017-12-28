@@ -50,7 +50,8 @@
             android:name=".ImageActivity"
             android:screenOrientation="portrait" />
         <activity android:name=".Product.ProductSearchActivity" />
-        <activity android:name=".Member.MemberFavoriteActivity"></activity>
+        <activity android:name=".Member.MemberFavoriteActivity" />
+        <activity android:name=".Member.MemberStockActivity"></activity>
     </application>
 
 </manifest>

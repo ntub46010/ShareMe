@@ -8,8 +8,13 @@
 
     <color name="card_product">#C0ff7751</color> <!--商品首頁清單-->
     <color name="card_favorite">#ccecE5</color> <!--我的最愛清單-->
+    <color name="lst_stock">#FAFAFA</color><!--商品管理清單-->
 
     <color name="blue1">#387498</color> <!--註冊、忘記密碼-->
+
+    <color name="bg_gridview_plain">#00FAFAFA</color>
+    <color name="bg_gridview_press">#80FF7C80</color>
+
     <color name="bg_header">#d95f2f</color>
     <color name="bg_body_normal">@color/red2</color>
 

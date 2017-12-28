@@ -131,13 +131,13 @@ public class ProductDetailActivity extends AppCompatActivity {
         conn = new MyOkHttp(ProductDetailActivity.this, new MyOkHttp.TaskListener() {
             @Override
             public void onFinished(final String result) {
-                if (result == null) {
-                    Toast.makeText(context, "連線失敗", Toast.LENGTH_SHORT).show();
-                    return;
-                }
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        if (result == null) {
+                            Toast.makeText(context, "連線失敗", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                         try {
                             JSONObject resObj = new JSONObject(result);
                             if (resObj.getBoolean(KEY_STATUS)) {

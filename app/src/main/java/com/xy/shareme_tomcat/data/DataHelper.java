@@ -23,6 +23,7 @@ public class DataHelper {
 
     public static boolean isFromDepartment = false; //是否因為按了科系按鈕，而移動到商品首頁
     public static boolean isProductDisplayAlive = false; //用來控制動態下載圖片的工作是否繼續進行
+    public static boolean isStockDisplayAlive = false;
 
     public static final String KEY_STATUS = "Status";
     public static final String KEY_USER_ID = "UserId";
@@ -58,6 +59,7 @@ public class DataHelper {
     public static final String KEY_PROFILE = "Profile";
     public static final String KEY_PRODUCT = "Product";
     public static final String KEY_PRODUCTS = "Products";
+    public static final String KEY_STOCK = "Stock";
 
 
 

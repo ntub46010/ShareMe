@@ -51,7 +51,6 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_SELLER;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_STATUS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TYPE;
-import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
 import static com.xy.shareme_tomcat.adapter.ImageQueueAdapter.REQUEST_ALBUM;
 import static com.xy.shareme_tomcat.adapter.ImageQueueAdapter.REQUEST_CROP;
 
@@ -73,7 +72,7 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
     private ImageUploadTask imageTask;
     private TextView txtUploadHint;
     private Dialog dlgUpload;
-    private MyOkHttp conPostProduct;
+    private MyOkHttp conn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -301,7 +300,7 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
     };
 
     private void postProduct() {
-        conPostProduct = new MyOkHttp(ProductPostActivity.this, new MyOkHttp.TaskListener() {
+        conn = new MyOkHttp(ProductPostActivity.this, new MyOkHttp.TaskListener() {
             @Override
             public void onFinished(String result) {
                 if (result == null) {
@@ -355,7 +354,7 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
             reqObj.put(KEY_PHOTO3, fileName[2]);
             reqObj.put(KEY_PHOTO4, fileName[3]);
             reqObj.put(KEY_PHOTO5, fileName[4]);
-            conPostProduct.execute(getString(R.string.link_post_product), reqObj.toString());
+            conn.execute(getString(R.string.link_post_product), reqObj.toString());
         }catch (JSONException e) {
             e.printStackTrace();
         }
@@ -408,7 +407,7 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 try {
                                     imageTask = null;
-                                    conPostProduct.cancel();
+                                    conn.cancel();
                                     dlgUpload.dismiss();
                                     Toast.makeText(context, "上傳已取消", Toast.LENGTH_SHORT).show();
                                 }catch (NullPointerException e) {
