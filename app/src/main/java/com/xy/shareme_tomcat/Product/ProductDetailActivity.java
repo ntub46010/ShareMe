@@ -66,6 +66,7 @@ public class ProductDetailActivity extends AppCompatActivity {
 
     private MyOkHttp conn;
     private GetBitmapBatch getBitmap;
+    private boolean isShown = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,8 +106,13 @@ public class ProductDetailActivity extends AppCompatActivity {
         txtPost = (TextView) findViewById(R.id.txtPostDate);
         txtEdit = (TextView) findViewById(R.id.txtEditDate);
         setFab();
+    }
 
-        loadData();
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (!isShown)
+            loadData();
     }
 
     private void setFab() {
@@ -186,7 +192,6 @@ public class ProductDetailActivity extends AppCompatActivity {
                         }
                     }
                 });
-
             }
         });
         //開始連線
@@ -246,6 +251,8 @@ public class ProductDetailActivity extends AppCompatActivity {
         prgBar.setVisibility(View.GONE);
 
         showImages(book);
+        isShown = true;
+        books = null;
     }
 
     private void showImages(Book book) {
@@ -326,14 +333,25 @@ public class ProductDetailActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onPause() {
+        cancelConnection();
+        super.onPause();
+    }
+
+    @Override
     public void onDestroy() {
-        try {
-            conn.cancel();
-            getBitmap.cancel(true);
-        }catch (NullPointerException e) {}
-        books = null;
         images = null;
         System.gc();
         super.onDestroy();
     }
+
+    private void cancelConnection() {
+        try {
+            conn.cancel();
+        }catch (NullPointerException e) {}
+        try {
+            getBitmap.cancel(true);
+        }catch (NullPointerException e) {}
+    }
+
 }

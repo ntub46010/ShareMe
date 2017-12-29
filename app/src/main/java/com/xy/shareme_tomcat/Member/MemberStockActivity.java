@@ -59,6 +59,7 @@ public class MemberStockActivity extends AppCompatActivity {
 
     private MyOkHttp conLoadStock, conDropProduct;
     private GetBitmap getBitmap;
+    private boolean isShown = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,14 +101,15 @@ public class MemberStockActivity extends AppCompatActivity {
 
         prgBar = (ProgressBar) findViewById(R.id.prgBar);
         prepareDialog();
-
-        loadData();
     }
 
     @Override
     public void onResume() {
         super.onResume();
         isStockDisplayAlive = true;
+        if (!isShown)
+            loadData();
+
         try {
             stockAdapter.initCheckThread(true);
         }catch (NullPointerException e) {
@@ -152,10 +154,10 @@ public class MemberStockActivity extends AppCompatActivity {
                         startActivity(it);
                         break;
                     case 1:
-                        /*it = new Intent(context, ProductEditActivity.class);
-                        bundle.putString("productId", bookId);
+                        it = new Intent(context, ProductEditActivity.class);
+                        bundle.putString(KEY_PRODUCT_ID, bookId);
                         it.putExtras(bundle);
-                        startActivity(it);*/
+                        startActivity(it);
                         break;
                     case 2:
                         AlertDialog.Builder msgbox = new AlertDialog.Builder(context);
@@ -248,6 +250,7 @@ public class MemberStockActivity extends AppCompatActivity {
         swipeRefreshLayout.setEnabled(true);
         swipeRefreshLayout.setRefreshing(false);
 
+        isShown = true;
         System.gc();
     }
 
@@ -308,6 +311,7 @@ public class MemberStockActivity extends AppCompatActivity {
 
     @Override
     public void onPause() {
+        cancelConnection();
         isStockDisplayAlive = false;
         try {
             stockAdapter.setCanCheckLoop(false);
@@ -320,10 +324,19 @@ public class MemberStockActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-        isStockDisplayAlive = false;
-        conLoadStock.cancel();
-        conDropProduct.cancel();
         System.gc();
         super.onDestroy();
+    }
+
+    private void cancelConnection() {
+        try {
+            conLoadStock.cancel();
+        }catch (NullPointerException e) {}
+        try {
+            conDropProduct.cancel();
+        }catch (NullPointerException e) {}
+        try {
+            getBitmap.cancel(true);
+        }catch (NullPointerException e) {}
     }
 }

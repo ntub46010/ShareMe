@@ -53,6 +53,7 @@ public class ProductHomeFrag extends Fragment {
     public static ProductDisplayAdapter adpProductHome;
     public static MyOkHttp conProductHome;
     public static GetBitmap gbmProductHome;
+    private boolean isShown = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -99,7 +100,8 @@ public class ProductHomeFrag extends Fragment {
         if (isFromDepartment) {
             isFromDepartment = false;
             loadData("");
-        }
+        }/*else if (!isShown)
+            loadData("");*/
     }
 
     private void setFab () {
@@ -197,7 +199,8 @@ public class ProductHomeFrag extends Fragment {
         prgBar.setVisibility(View.GONE);
         recyProduct.setVisibility(View.VISIBLE);
 
-        Toast.makeText(context, "顯示完成", Toast.LENGTH_SHORT).show();
+        //books = null;
+        isShown = true;
     }
 
     private void showFoundStatus() {
@@ -218,6 +221,7 @@ public class ProductHomeFrag extends Fragment {
 
     @Override
     public void onPause() {
+        cancelConnection();
         isProductDisplayAlive = false;
         new Thread(new Runnable() {
             @Override
@@ -235,12 +239,17 @@ public class ProductHomeFrag extends Fragment {
 
     @Override
     public void onDestroy() {
-        try {
-            conProductHome.cancel();
-            gbmProductHome.cancel(true);
-        }catch (NullPointerException e) {}
         System.gc();
         super.onDestroy();
+    }
+
+    private void cancelConnection() {
+        try {
+            conProductHome.cancel();
+        }catch (NullPointerException e) {}
+        try {
+            gbmProductHome.cancel(true);
+        }catch (NullPointerException e) {}
     }
 }
 

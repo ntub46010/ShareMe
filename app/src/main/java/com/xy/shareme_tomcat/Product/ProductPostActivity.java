@@ -64,7 +64,6 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
 
     private EditText edtTitle, edtStatus, edtPrice, edtPS;
     private CheckBox chkAI, chkFN, chkFT, chkIB, chkBM, chkIM, chkAF, chkCD, chkCC, chkDM, chkGN;
-    private Spinner spnNote;
 
     private String title, condition, note, price, ps;
     private StringBuffer sbDep;
@@ -124,7 +123,7 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
         chkDM = (CheckBox) findViewById(R.id.chkDM);
         chkGN = (CheckBox) findViewById(R.id.chkGN);
 
-        spnNote = (Spinner) findViewById(R.id.spnNote);
+        Spinner spnNote = (Spinner) findViewById(R.id.spnNote);
         spnNote.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -136,13 +135,7 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
         });
 
         //上傳進度的Dialog
-        dlgUpload = new Dialog(context);
-        dlgUpload.setContentView(R.layout.dlg_uploading);
-        dlgUpload.setCancelable(false);
-        txtUploadHint = (TextView) dlgUpload.findViewById(R.id.txtHint);
-
-        LinearLayout layUpload = (LinearLayout) dlgUpload.findViewById(R.id.layUpload);
-        layUpload.setOnClickListener(this);
+        prepareDialog();
     }
 
     @Override
@@ -248,6 +241,38 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
             return true;
     }
 
+    private void prepareDialog() {
+        dlgUpload = new Dialog(context);
+        dlgUpload.setContentView(R.layout.dlg_uploading);
+        dlgUpload.setCancelable(false);
+        txtUploadHint = (TextView) dlgUpload.findViewById(R.id.txtHint);
+
+        LinearLayout layUpload = (LinearLayout) dlgUpload.findViewById(R.id.layUpload);
+        layUpload.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                AlertDialog.Builder msgbox = new AlertDialog.Builder(context);
+                msgbox.setTitle("刊登商品")
+                        .setMessage("確定取消上傳嗎？")
+                        .setNegativeButton("否", null)
+                        .setPositiveButton("是", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                try {
+                                    imageTask = null;
+                                    conn.cancel();
+                                    dlgUpload.dismiss();
+                                    Toast.makeText(context, "上傳已取消", Toast.LENGTH_SHORT).show();
+                                }catch (NullPointerException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }).show();
+                return true;
+            }
+        });
+    }
+
     private void initTrdWaitPhoto(boolean restart) {
         Thread trdWaitPhoto = new Thread(new Runnable() {
             @Override
@@ -294,7 +319,7 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
                     }
                 }).start();
                 initTrdWaitPhoto(true);
-                txtUploadHint.setText("上傳中，長按取消...  (" + String.valueOf(itemIndex + 1) + "/" + String.valueOf(itemAmount) + ")");
+                txtUploadHint.setText(getString(R.string.hint_upload_photo, String.valueOf(itemIndex + 1), String.valueOf(itemAmount)));
             }
         }
     };
@@ -325,7 +350,6 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
                     }else
                         Toast.makeText(context, "伺服器發生例外", Toast.LENGTH_SHORT).show();
                 }catch (JSONException e) {
-                    Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).cancel();
                     e.printStackTrace();
                 }
             }
@@ -387,7 +411,7 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
                         }).start();
                         initTrdWaitPhoto(true); //監聽正在上傳的圖片檔名
 
-                        txtUploadHint.setText("上傳中，點擊取消...  (" + String.valueOf(itemIndex + 1) + "/" + String.valueOf(itemAmount) + ")");
+                        txtUploadHint.setText(getString(R.string.hint_upload_photo, String.valueOf(itemIndex + 1), String.valueOf(itemAmount)));
                         dlgUpload.show();
                         break;
                     }
@@ -396,26 +420,19 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
                         Toast.makeText(context, "未選擇圖片", Toast.LENGTH_SHORT).show();
                 }
                 break;
-
-            case R.id.layUpload:
-                AlertDialog.Builder msgbox = new AlertDialog.Builder(context);
-                msgbox.setTitle("刊登商品")
-                        .setMessage("確定取消上傳嗎？")
-                        .setNegativeButton("否", null)
-                        .setPositiveButton("是", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                try {
-                                    imageTask = null;
-                                    conn.cancel();
-                                    dlgUpload.dismiss();
-                                    Toast.makeText(context, "上傳已取消", Toast.LENGTH_SHORT).show();
-                                }catch (NullPointerException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }).show();
-                break;
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        cancelConnection();
+        System.gc();
+        super.onDestroy();
+    }
+
+    private void cancelConnection() {
+        try {
+            conn.cancel();
+        }catch (NullPointerException e) {}
     }
 }

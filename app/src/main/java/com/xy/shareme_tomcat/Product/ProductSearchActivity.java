@@ -43,22 +43,24 @@ public class ProductSearchActivity extends AppCompatActivity {
     private Context context;
     private ProgressBar prgBar;
     private RecyclerView recyProduct;
+    private String keyword;
 
     private ArrayList<ImageObj> books;
     private ProductDisplayAdapter adapter;
 
     private MyOkHttp conn;
     private GetBitmap getBitmap;
+    private boolean isShown = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_search);
         context = this;
-        Bundle bundle = getIntent().getExtras();
+        keyword = getIntent().getExtras().getString(KEY_KEYWORD);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle(getString(R.string.hint_search_result, bundle.getString(KEY_KEYWORD)));
+        toolbar.setTitle(getString(R.string.hint_search_result, keyword));
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -70,14 +72,15 @@ public class ProductSearchActivity extends AppCompatActivity {
 
         recyProduct = (RecyclerView) findViewById(R.id.recyclerView);
         prgBar = (ProgressBar) findViewById(R.id.prgBar);
-
-        loadData(bundle.getString(KEY_KEYWORD));
     }
 
     @Override
     public void onStart() {
         super.onStart();
         isProductDisplayAlive = true;
+        if (!isShown)
+            loadData(keyword);
+
         try {
             adapter.setCanCheckLoop(true);
             adapter.initCheckThread(true);
@@ -87,12 +90,12 @@ public class ProductSearchActivity extends AppCompatActivity {
     }
 
     private void loadData(String keyword) {
-        try {
+        /*try {
             adapter.setCanCheckLoop(false);
             adapter.setAllImagesNull();
             conn.cancel();
             getBitmap.cancel(true);
-        }catch (NullPointerException e) {}
+        }catch (NullPointerException e) {}*/
 
         prgBar.setVisibility(View.VISIBLE);
         recyProduct.setVisibility(View.GONE);
@@ -177,7 +180,8 @@ public class ProductSearchActivity extends AppCompatActivity {
                 }
             }
         }).start();
-        Toast.makeText(context, "顯示完成", Toast.LENGTH_SHORT).show();
+
+        isShown = true;
     }
 
     private void showFoundStatus() {
@@ -198,6 +202,7 @@ public class ProductSearchActivity extends AppCompatActivity {
 
     @Override
     public void onPause() {
+        cancelConnection();
         isProductDisplayAlive = false;
         new Thread(new Runnable() {
             @Override
@@ -215,12 +220,16 @@ public class ProductSearchActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-        try {
-            conn.cancel();
-            getBitmap.cancel(true);
-        }catch (NullPointerException e) {}
-        books = null;
         System.gc();
         super.onDestroy();
+    }
+
+    private void cancelConnection() {
+        try {
+            conn.cancel();
+        }catch (NullPointerException e) {}
+        try {
+            getBitmap.cancel(true);
+        }catch (NullPointerException e) {}
     }
 }

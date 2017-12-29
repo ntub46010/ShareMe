@@ -51,7 +51,8 @@
             android:screenOrientation="portrait" />
         <activity android:name=".Product.ProductSearchActivity" />
         <activity android:name=".Member.MemberFavoriteActivity" />
-        <activity android:name=".Member.MemberStockActivity"></activity>
+        <activity android:name=".Member.MemberStockActivity" />
+        <activity android:name=".Member.ProductEditActivity"></activity>
     </application>
 
 </manifest>

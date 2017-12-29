@@ -81,7 +81,7 @@ public class ProductDisplayAdapter extends RecyclerView.Adapter<ProductDisplayAd
         this.res = res;
         this.books = books;
 
-        loadLock = new boolean[books.size()];
+        loadLock = new boolean[this.books.size()];
         for (int i=0; i<loadLock.length; i++)
             loadLock[i] = true;
 

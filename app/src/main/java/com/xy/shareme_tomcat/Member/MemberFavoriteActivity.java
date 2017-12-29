@@ -49,6 +49,7 @@ public class MemberFavoriteActivity extends AppCompatActivity {
 
     private MyOkHttp conn;
     private GetBitmap getBitmap;
+    private boolean isShown = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,14 +76,14 @@ public class MemberFavoriteActivity extends AppCompatActivity {
             }
         });
         prgBar = (ProgressBar) findViewById(R.id.prgBar);
-
-        loadData();
     }
 
     @Override
     public void onResume() {
         super.onResume();
         isProductDisplayAlive = true;
+        if (!isShown)
+            loadData();
         try {
             adapter.setCanCheckLoop(true);
             adapter.initCheckThread(true);
@@ -164,6 +165,9 @@ public class MemberFavoriteActivity extends AppCompatActivity {
         swipeRefreshLayout.setEnabled(true);
         swipeRefreshLayout.setRefreshing(false);
         prgBar.setVisibility(View.GONE);
+
+        books = null;
+        isShown = true;
     }
 
     private void showFoundStatus() {
@@ -184,6 +188,7 @@ public class MemberFavoriteActivity extends AppCompatActivity {
 
     @Override
     public void onPause() {
+        cancelConnection();
         isProductDisplayAlive = false;
         try {
             adapter.setCanCheckLoop(false);
@@ -196,11 +201,16 @@ public class MemberFavoriteActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-        try {
-            conn.cancel();
-            getBitmap.cancel(true);
-        }catch (NullPointerException e) {}
         System.gc();
         super.onDestroy();
+    }
+
+    private void cancelConnection() {
+        try {
+            conn.cancel();
+        }catch (NullPointerException e) {}
+        try {
+            getBitmap.cancel(true);
+        }catch (NullPointerException e) {}
     }
 }

@@ -51,15 +51,16 @@
     <string name="link_avatar">http://140.131.115.73/avatars/</string>
     <string name="link_image">http://140.131.115.73/images/</string>
 
-    <string name="link_login">http://111.250.5.145:8080/ShareMe/api/login</string>
-    <string name="link_register">http://111.250.5.145:8080/ShareMe/api/register</string>
-    <string name="link_list_product">http://111.250.5.145:8080/ShareMe/api/list_products</string>
-    <string name="link_post_product">http://111.250.5.145:8080/ShareMe/api/post_product</string>
-    <string name="link_product_detail">http://111.250.5.145:8080/ShareMe/api/product_detail</string>
-    <string name="link_add_favorite">http://111.250.5.145:8080/ShareMe/api/add_favorite</string>
-    <string name="link_list_favorite">http://111.250.5.145:8080/ShareMe/api/list_favorite</string>
-    <string name="link_show_stock">http://111.250.5.145:8080/ShareMe/api/show_stock</string>
-    <string name="link_drop_product">http://111.250.5.145:8080/ShareMe/api/drop_product</string>
+    <string name="link_login">http://111.250.23.216:8080/ShareMe/api/login</string>
+    <string name="link_register">http://111.250.23.216:8080/ShareMe/api/register</string>
+    <string name="link_list_product">http://111.250.23.216:8080/ShareMe/api/list_products</string>
+    <string name="link_post_product">http://111.250.23.216:8080/ShareMe/api/post_product</string>
+    <string name="link_product_detail">http://111.250.23.216:8080/ShareMe/api/product_detail</string>
+    <string name="link_add_favorite">http://111.250.23.216:8080/ShareMe/api/add_favorite</string>
+    <string name="link_list_favorite">http://111.250.23.216:8080/ShareMe/api/list_favorite</string>
+    <string name="link_show_stock">http://111.250.23.216:8080/ShareMe/api/show_stock</string>
+    <string name="link_drop_product">http://111.250.23.216:8080/ShareMe/api/drop_product</string>
+    <string name="link_edit_product">http://111.250.23.216:8080/ShareMe/api/edit_product</string>
 
     <string name="link_upload_image">http://140.131.115.73/upload_images</string>
 
@@ -67,6 +68,6 @@
     <string name="hint_search_product">搜尋%1s商品</string>
     <string name="hint_search_result">%1s的搜尋結果</string>
     <string name="hint_drop_product">確定要下架「%1s」嗎？</string>
-
+    <string name="hint_upload_photo" formatted="false">上傳中，長按取消… (%1s/%2s)</string>
 
 </resources>
