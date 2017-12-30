@@ -16,7 +16,7 @@ public class GetBitmap extends AsyncTask<Void, Void, Void> {
     private Context context;
     private List<ImageObj> imageObjs;
     private ImageObj imgObj;
-    private Resources res;
+    private String linkPrefix;
 
     private int type = 0, preLoadAmount = 0;
 
@@ -28,20 +28,19 @@ public class GetBitmap extends AsyncTask<Void, Void, Void> {
     // 接收結果的物件
     private final TaskListener taskListener;
 
-    public GetBitmap(Context context, Resources res, List<ImageObj> imageObjs, TaskListener taskListener){
+    public GetBitmap(Context context, List<ImageObj> imageObjs, String linkPrefix, TaskListener taskListener){
         this.context = context;
-        this.type = 0;
         this.imageObjs = imageObjs;
+        this.linkPrefix = linkPrefix;
         this.taskListener = taskListener;
-        this.res = res;
+        this.type = 0;
     }
 
-    public GetBitmap(Context context, Resources res,ImageObj imgObj, TaskListener taskListener){
+    public GetBitmap(Context context, ImageObj imgObj, TaskListener taskListener){
         this.context = context;
-        this.type = 1;
         this.imgObj = imgObj;
         this.taskListener = taskListener;
-        this.res = res;
+        this.type = 1;
     }
 
     @Override
@@ -62,7 +61,6 @@ public class GetBitmap extends AsyncTask<Void, Void, Void> {
                     type 0: 下載陣列裡的所有圖片，也可同時指定只要下載前幾個
                     type 1: 下載一張圖片
                 */
-        String imageLink = res.getString(R.string.link_image);
         if (type == 0) {
             int count;
             if (preLoadAmount == 0)
@@ -72,10 +70,10 @@ public class GetBitmap extends AsyncTask<Void, Void, Void> {
 
             for(int i=0; i<count; i++){
                 ImageObj imageObj = imageObjs.get(i);
-                imageObj.img = getImage(imageLink + imageObj.getImgURL());
+                imageObj.img = getImage(linkPrefix + imageObj.getImgURL());
             }
         }else if (type == 1) {
-            imgObj.img = getImage(imageLink + imgObj.getImgURL());
+            imgObj.img = getImage(linkPrefix + imgObj.getImgURL());
         }
         return null;
     }

@@ -1,24 +1,25 @@
 package com.xy.shareme_tomcat.Member;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.xy.shareme_tomcat.Product.ProductSearchActivity;
 import com.xy.shareme_tomcat.R;
-import com.xy.shareme_tomcat.adapter.ProductDisplayAdapter;
-import com.xy.shareme_tomcat.data.Book;
+import com.xy.shareme_tomcat.adapter.MailListAdapter;
+import com.xy.shareme_tomcat.data.Chat;
 import com.xy.shareme_tomcat.data.ImageObj;
 import com.xy.shareme_tomcat.network_helper.GetBitmap;
-import com.xy.shareme_tomcat.network_helper.GetBitmapBatch;
 import com.xy.shareme_tomcat.network_helper.MyOkHttp;
 
 import org.json.JSONArray;
@@ -27,25 +28,29 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-import static com.xy.shareme_tomcat.data.DataHelper.KEY_FAVORITE;
-import static com.xy.shareme_tomcat.data.DataHelper.KEY_PHOTO1;
-import static com.xy.shareme_tomcat.data.DataHelper.KEY_PRICE;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_AVATAR;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_DATE;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_MAILS;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_MEMBER_ID;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_MESSAGE;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_NAME;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_PRODUCT_ID;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_SELLER_ID;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_SELLER_NAME;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_STATUS;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_TIME;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_USER_ID;
 import static com.xy.shareme_tomcat.data.DataHelper.getNotFoundImg;
-import static com.xy.shareme_tomcat.data.DataHelper.isProductDisplayAlive;
 import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
 
-public class MemberFavoriteActivity extends AppCompatActivity {
+public class MemberMailboxActivity extends AppCompatActivity {
     private Context context;
+
     private SwipeRefreshLayout swipeRefreshLayout;
     private ProgressBar prgBar;
 
-    private ArrayList<ImageObj> books;
-    private ProductDisplayAdapter adapter;
+    private ArrayList<ImageObj> chats;
 
     private MyOkHttp conn;
     private GetBitmap getBitmap;
@@ -54,16 +59,16 @@ public class MemberFavoriteActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_member_favorite);
+        setContentView(R.layout.activity_member_mailbox);
         context = this;
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("我的最愛");
+        toolbar.setTitle("信箱");
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                onBackPressed();
             }
         });
 
@@ -75,21 +80,15 @@ public class MemberFavoriteActivity extends AppCompatActivity {
                 loadData();
             }
         });
+
         prgBar = (ProgressBar) findViewById(R.id.prgBar);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        isProductDisplayAlive = true;
         if (!isShown)
             loadData();
-        try {
-            adapter.setCanCheckLoop(true);
-            adapter.initCheckThread(true);
-        }catch (NullPointerException e) {
-            //第一次開啟，adapter尚未準備好
-        }
     }
 
     private void loadData() {
@@ -97,8 +96,8 @@ public class MemberFavoriteActivity extends AppCompatActivity {
         swipeRefreshLayout.setEnabled(false);
         prgBar.setVisibility(View.VISIBLE);
 
-        books = new ArrayList<>();
-        conn = new MyOkHttp(MemberFavoriteActivity.this, new MyOkHttp.TaskListener() {
+        chats = new ArrayList<>();
+        conn = new MyOkHttp(MemberMailboxActivity.this, new MyOkHttp.TaskListener() {
             @Override
             public void onFinished(final String result) {
                 runOnUiThread(new Runnable() {
@@ -106,68 +105,77 @@ public class MemberFavoriteActivity extends AppCompatActivity {
                     public void run() {
                         if (result == null) {
                             Toast.makeText(context, "連線失敗", Toast.LENGTH_SHORT).show();
+                            prgBar.setVisibility(View.GONE);
                             return;
                         }
                         try {
                             JSONObject resObj = new JSONObject(result);
                             if (resObj.getBoolean(KEY_STATUS)) {
-                                JSONArray ary = resObj.getJSONArray(KEY_FAVORITE);
+                                JSONArray ary = resObj.getJSONArray(KEY_MAILS);
                                 for (int i=0; i<ary.length(); i++) {
                                     JSONObject obj = ary.getJSONObject(i);
-                                    books.add(new Book(
+                                    chats.add(new Chat(
+                                            obj.getString(KEY_AVATAR),
+                                            obj.getString(KEY_SELLER_NAME),
+                                            obj.getString(KEY_MESSAGE),
+                                            obj.getString(KEY_DATE),
+                                            obj.getString(KEY_TIME),
                                             obj.getString(KEY_PRODUCT_ID),
-                                            obj.getString(KEY_PHOTO1),
-                                            obj.getString(KEY_TITLE),
-                                            obj.getString(KEY_PRICE),
-                                            obj.getString(KEY_SELLER_NAME)
+                                            obj.getString(KEY_SELLER_ID)
                                     ));
                                 }
-                                getBitmap = new GetBitmap(context, books, getString(R.string.link_image),new GetBitmap.TaskListener() {
+                                getBitmap = new GetBitmap(context, chats, getString(R.string.link_avatar), new GetBitmap.TaskListener() {
                                     @Override
                                     public void onFinished() {
                                         showData();
                                     }
                                 });
-                                getBitmap.setPreLoadAmount(12);
                                 getBitmap.execute();
                             }else {
-                                Toast.makeText(context, "沒有最愛的商品", Toast.LENGTH_SHORT).show();
-                                prgBar.setVisibility(View.GONE);
+                                Toast.makeText(context, "沒有您的訊息", Toast.LENGTH_SHORT).show();
                                 showFoundStatus();
+                                prgBar.setVisibility(View.GONE);
                             }
                         }catch (JSONException e) {
                             Toast.makeText(context, "伺服器發生例外", Toast.LENGTH_SHORT).show();
-                            prgBar.setVisibility(View.GONE);
+                            e.printStackTrace();
                         }
                     }
                 });
             }
         });
-        //開始連線
         try {
             JSONObject reqObj = new JSONObject();
             reqObj.put(KEY_USER_ID, loginUserId);
-            conn.execute(getString(R.string.link_list_favorite), reqObj.toString());
+            conn.execute(getString(R.string.link_list_mails), reqObj.toString());
         }catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
     private void showData() {
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
-        recyclerView.setHasFixedSize(true);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
-        recyclerView.setLayoutManager(linearLayoutManager);
-
-        adapter = new ProductDisplayAdapter(context, getResources(), books);
-        adapter.setBackgroundColor(getResources(), R.color.card_favorite);
-        recyclerView.setAdapter(adapter);
+        ListView listView = (ListView) findViewById(R.id.lstMails);
+        final MailListAdapter adapter = new MailListAdapter(context, chats);
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Chat chat = (Chat) adapter.getItem(i);
+                Intent it = new Intent(context, MemberChatActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putString(KEY_MEMBER_ID, chat.getMember());
+                bundle.putString(KEY_NAME, chat.getName());
+                bundle.putString(KEY_AVATAR, chat.getImgURL());
+                bundle.putString(KEY_PRODUCT_ID, chat.getProduct());
+                it.putExtras(bundle);
+                startActivity(it);
+            }
+        });
 
         swipeRefreshLayout.setEnabled(true);
         swipeRefreshLayout.setRefreshing(false);
         prgBar.setVisibility(View.GONE);
-
-        books = null;
+        chats = null;
         isShown = true;
     }
 
@@ -175,8 +183,8 @@ public class MemberFavoriteActivity extends AppCompatActivity {
         //若未找到書，則說明沒有找到
         TextView txtNotFound = (TextView) findViewById(R.id.txtNotFound);
         ImageView imgNotFound = (ImageView) findViewById(R.id.imgNotFound);
-        if (books == null || books.isEmpty()) {
-            txtNotFound.setText("沒有最愛的商品");
+        if (chats == null || chats.isEmpty()) {
+            txtNotFound.setText("此商品已被下架");
             txtNotFound.setVisibility(View.VISIBLE);
             imgNotFound.setImageResource(getNotFoundImg());
             imgNotFound.setVisibility(View.VISIBLE);
@@ -190,13 +198,6 @@ public class MemberFavoriteActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         cancelConnection();
-        isProductDisplayAlive = false;
-        try {
-            adapter.setCanCheckLoop(false);
-            adapter.initCheckThread(false);
-        }catch (NullPointerException e) {
-            //第一次開啟，adapter尚未準備好
-        }
         super.onPause();
     }
 

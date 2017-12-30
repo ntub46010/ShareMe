@@ -181,6 +181,7 @@ public class MemberStockActivity extends AppCompatActivity {
     }
 
     private void loadData() {
+        isShown = false;
         swipeRefreshLayout.setEnabled(false);
         prgBar.setVisibility(View.VISIBLE);
         lstProduct.setVisibility(View.GONE);
@@ -209,7 +210,7 @@ public class MemberStockActivity extends AppCompatActivity {
                                             obj.getString(KEY_PRICE)
                                     ));
                                 }
-                                getBitmap = new GetBitmap(context, getResources(), books, new GetBitmap.TaskListener() {
+                                getBitmap = new GetBitmap(context, books, getString(R.string.link_image), new GetBitmap.TaskListener() {
                                     @Override
                                     public void onFinished() {
                                         showData();
@@ -241,7 +242,7 @@ public class MemberStockActivity extends AppCompatActivity {
 
     private void showData() {
         stockAdapter = new StockListAdapter(context, getResources(), books, R.layout.spn_chat_product);
-        stockAdapter.setBackgroundColor(getResources(), R.color.lst_stock);
+        stockAdapter.setBackgroundColor(R.color.lst_stock);
         lstProduct.setAdapter(stockAdapter);
 
         books = null;

@@ -137,7 +137,7 @@ public class ProductDisplayAdapter extends RecyclerView.Adapter<ProductDisplayAd
         for (int i = 0; i < books.size(); i++) {
             final int i2 = i;
             bitTasks.add(
-                    new GetBitmap(context, res, books.get(i), new GetBitmap.TaskListener() {
+                    new GetBitmap(context, books.get(i), new GetBitmap.TaskListener() {
                         @Override
                         public void onFinished() {
                             loadLock[i2] = true;

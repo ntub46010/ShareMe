@@ -75,7 +75,7 @@ public class MemberHomeFrag extends Fragment {
                 startActivity(new Intent(context, MemberFavoriteActivity.class));
                 break;
             case "信箱":
-                //startActivity(new Intent(context, MemberMailboxActivity.class));
+                startActivity(new Intent(context, MemberMailboxActivity.class));
                 break;
             case "商品管理":
                 startActivity(new Intent(context, MemberStockActivity.class));

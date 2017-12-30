@@ -52,7 +52,9 @@
         <activity android:name=".Product.ProductSearchActivity" />
         <activity android:name=".Member.MemberFavoriteActivity" />
         <activity android:name=".Member.MemberStockActivity" />
-        <activity android:name=".Member.ProductEditActivity"></activity>
+        <activity android:name=".Member.ProductEditActivity" />
+        <activity android:name=".Member.MemberMailboxActivity" />
+        <activity android:name=".Member.MemberChatActivity"></activity>
     </application>
 
 </manifest>

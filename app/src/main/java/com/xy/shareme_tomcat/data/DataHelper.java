@@ -15,9 +15,9 @@ import static com.xy.shareme_tomcat.MainActivity.txtBarTitle;
 
 public class DataHelper {
     public static boolean conFlag = false; //表示OKHttp的取資料工作結束，將流程交還原Activity進行後續操作
-    public static String loginUserId = "10346010";
+    public static String loginUserId = "10346011";
     public static String myName = ""; //用於發送推播
-    public static int myGender = -1; //用於發送icon，包含從信箱退出時的狀況
+    public static int myGender = -1; //用於個人檔案icon，包含從信箱退出時的狀況
     public static String myAvatarUrl = ""; //用於發送推播
     public static String tmpToken = "token"; //登入時接收自己token(確認Firebase註冊成功)，或進交談室時接收對方token(確認可推播)。空字串代表無該帳號，token字串代表尚未取得
 
@@ -55,10 +55,15 @@ public class DataHelper {
     public static final String KEY_IS_ADD = "IsAdd";
     //
     public static final String KEY_AVATAR = "Avatar";
+    public static final String KEY_MESSAGE = "Message";
+    public static final String KEY_DATE = "Date";
+    public static final String KEY_TIME = "Time";
+    public static final String KEY_MEMBER_ID = "MemberId";
     //---
     public static final String KEY_PROFILE = "Profile";
     public static final String KEY_PRODUCT = "Product";
     public static final String KEY_PRODUCTS = "Products";
+    public static final String KEY_MAILS = "Mails";
     public static final String KEY_STOCK = "Stock";
 
 

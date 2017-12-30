@@ -29,9 +29,7 @@ public class StockListAdapter extends BaseAdapter {
     private ArrayList<ImageObj> products;
     private ArrayList<GetBitmap> bitTasks;
     private boolean isFirstToHead = true, canCheckLoop = true;
-    private Thread trdCheckImg = null;
     private int head = 0, tail = 9, section = 8;
-    private int lastPosition = 0, lastDirection = 1;
     private boolean[] loadLock = null;
 
     public StockListAdapter(Context context, Resources res, ArrayList<ImageObj> products, int layout) {
@@ -125,7 +123,7 @@ public class StockListAdapter extends BaseAdapter {
     }
 
     public void initCheckThread (boolean restart) {
-        trdCheckImg = new Thread(new Runnable() {
+        Thread trdCheckImg = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -158,7 +156,7 @@ public class StockListAdapter extends BaseAdapter {
         for (int i = 0; i < products.size(); i++) {
             final int i2 = i;
             bitTasks.add(
-                    new GetBitmap(context, res, products.get(i), new GetBitmap.TaskListener() {
+                    new GetBitmap(context, products.get(i), new GetBitmap.TaskListener() {
                         @Override
                         public void onFinished() {
                             loadLock[i2] = true;
@@ -173,8 +171,7 @@ public class StockListAdapter extends BaseAdapter {
         this.canCheckLoop = loop;
     }
 
-    public void setBackgroundColor(Resources r, int color) {
-        this.res = r;
+    public void setBackgroundColor(int color) {
         this.backgroundColor = color;
     }
 }

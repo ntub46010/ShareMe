@@ -90,6 +90,7 @@ public class ProductSearchActivity extends AppCompatActivity {
     }
 
     private void loadData(String keyword) {
+        isShown = false;
         /*try {
             adapter.setCanCheckLoop(false);
             adapter.setAllImagesNull();
@@ -123,13 +124,13 @@ public class ProductSearchActivity extends AppCompatActivity {
                                     obj.getString(KEY_SELLER_NAME)
                             ));
                         }
-                        getBitmap = new GetBitmap(context, getResources(), books, new GetBitmap.TaskListener() {
+                        getBitmap = new GetBitmap(context, books, getString(R.string.link_image), new GetBitmap.TaskListener() {
                             @Override
                             public void onFinished() {
                                 showData();
                             }
                         });
-                        getBitmap.setPreLoadAmount(4);
+                        getBitmap.setPreLoadAmount(8);
                         getBitmap.execute();
                     }else {
                         runOnUiThread(new Runnable() {

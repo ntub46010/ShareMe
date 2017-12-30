@@ -77,8 +77,6 @@ public class ProductHomeFrag extends Fragment {
         });
 
         setFab();
-
-        loadData("");
     }
 
     @Override
@@ -128,6 +126,7 @@ public class ProductHomeFrag extends Fragment {
     }
 
     private void loadData(String keyword) {
+        isShown = false;
         swipeRefreshLayout.setEnabled(false);
         prgBar.setVisibility(View.VISIBLE);
 
@@ -155,7 +154,7 @@ public class ProductHomeFrag extends Fragment {
                             ));
                         }
 
-                        gbmProductHome = new GetBitmap(context, getResources(), books, new GetBitmap.TaskListener() {
+                        gbmProductHome = new GetBitmap(context, books, getString(R.string.link_image), new GetBitmap.TaskListener() {
                             @Override
                             public void onFinished() {
                                 showData();
@@ -199,7 +198,7 @@ public class ProductHomeFrag extends Fragment {
         prgBar.setVisibility(View.GONE);
         recyProduct.setVisibility(View.VISIBLE);
 
-        //books = null;
+        books = null;
         isShown = true;
     }
 

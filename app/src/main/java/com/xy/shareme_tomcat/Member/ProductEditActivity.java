@@ -73,7 +73,7 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
     private ArrayList<ImageObj> books;
     private ImageQueueAdapter adapter;
     private RecyclerView recyclerView;
-    private int itemIndex, itemAmount;
+    private int itemIndex, itemAmount, count; //index是走訪整個CardView的指標；amount是新上傳圖片的數量；count是正在上傳第幾張圖
 
     private String bookId, title, condition, price, ps, note;
     private StringBuffer sbDep;
@@ -84,7 +84,6 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
 
     private Dialog dialog = null;
     private TextView txtUploadHint;
-    private int count;
     private boolean isShown = false;
 
     @Override
@@ -238,6 +237,8 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void loadData() {
+        System.gc();
+        isShown = false;
         btnPost.setVisibility(View.GONE);
 
         books = new ArrayList<>();
@@ -286,8 +287,7 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
                                 showFoundStatus();
                             }
                         }catch (JSONException e) {
-                            //Toast.makeText(context, "伺服器發生例外", Toast.LENGTH_SHORT).show();
-                            Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, "伺服器發生例外", Toast.LENGTH_SHORT).show();
                             prgBar.setVisibility(View.GONE);
                         }
                     }
@@ -356,33 +356,34 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void showImages(Book book) {
+        //設置CardView上的圖片；網路下載回來的圖是不會有Bitmap的值，只會有檔名
         ArrayList<ImageObject> images = new ArrayList<>();
         if (!book.getImgURL().equals("")) {
             Bitmap bitmap = book.getImg();
-            ImageObject image = new ImageObject(bitmap, false); //此圖片來自網路，並非從手機追加的實體圖片
+            ImageObject image = new ImageObject(bitmap, false); //isEntity = false代表此圖片來自網路，並非從手機追加的實體圖片
             image.setFileName(book.getImgURL());
             images.add(image);
         }
         if (!book.getImgURL2().equals("")) {
-            Bitmap bitmap = book.getImg();
+            Bitmap bitmap = book.getImg2();
             ImageObject image = new ImageObject(bitmap, false);
             image.setFileName(book.getImgURL2());
             images.add(image);
         }
         if (!book.getImgURL3().equals("")) {
-            Bitmap bitmap = book.getImg();
+            Bitmap bitmap = book.getImg3();
             ImageObject image = new ImageObject(bitmap, false);
             image.setFileName(book.getImgURL3());
             images.add(image);
         }
         if (!book.getImgURL4().equals("")) {
-            Bitmap bitmap = book.getImg();
+            Bitmap bitmap = book.getImg4();
             ImageObject image = new ImageObject(bitmap, false);
             image.setFileName(book.getImgURL4());
             images.add(image);
         }
         if (!book.getImgURL5().equals("")) {
-            Bitmap bitmap = book.getImg();
+            Bitmap bitmap = book.getImg5();
             ImageObject image = new ImageObject(bitmap, false);
             image.setFileName(book.getImgURL5());
             images.add(image);
@@ -488,7 +489,7 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
                 initTrdWaitPhoto(true); //還沒收到檔名，繼續監聽
             }else {
                 initTrdWaitPhoto(false);
-                //寫入檔名
+                //將剛剛新上傳的檔名寫入
                 ImageObject image = adapter.getItem(itemIndex);
                 image.setFileName(fileName);
                 adapter.setItem(itemIndex, image);
@@ -500,9 +501,9 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
                     postProduct();
                     return;
                 }
-                for (int i = itemIndex; i< adapter.getItemCount(); i++) { //新增的圖片可能穿插，需要逐一確認
+                for (int i=itemIndex; i<adapter.getItemCount(); i++) { //新增的圖片可能穿插，需要逐一確認
                     final ImageObject newImage = adapter.getItem(i);
-                    if (newImage.getBitmap() != null) {
+                    if (newImage.getBitmap() != null) { //只有剛剛從手機附加上去的圖，才會有Bitmap的值
                         new Thread(new Runnable() {
                             public void run() {
                                 imageTask = new ImageUploadTask(context, getString(R.string.link_upload_image));
@@ -520,6 +521,8 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
     };
 
     private void postProduct() {
+        prgBar.setVisibility(View.VISIBLE);
+        layDetail.setVisibility(View.GONE);
         conEditProduct = new MyOkHttp(ProductEditActivity.this, new MyOkHttp.TaskListener() {
             @Override
             public void onFinished(final String result) {
@@ -536,8 +539,10 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
                             if (resObj.getBoolean(KEY_STATUS)) {
                                 Toast.makeText(context, "編輯成功", Toast.LENGTH_SHORT).show();
                                 finish();
-                            }else
+                            }else {
                                 Toast.makeText(context, "伺服器發生例外", Toast.LENGTH_SHORT).show();
+                                dialog.dismiss();
+                            }
                         }catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -568,8 +573,7 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
             reqObj.put(KEY_PHOTO3, fileName[2]);
             reqObj.put(KEY_PHOTO4, fileName[3]);
             reqObj.put(KEY_PHOTO5, fileName[4]);
-            Toast.makeText(context, reqObj.toString(), Toast.LENGTH_LONG).show();
-            //conEditProduct.execute(getString(R.string.link_edit_product), reqObj.toString());
+            conEditProduct.execute(getString(R.string.link_edit_product), reqObj.toString());
         }catch (JSONException e) {
             e.printStackTrace();
         }
@@ -602,7 +606,7 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
                     return;
                 }
 
-                for (int i = 0; i< adapter.getItemCount(); i++) { //尋找第一張新圖片在陣列的索引
+                for (int i=0; i<adapter.getItemCount(); i++) { //尋找第一張新圖片在陣列的索引
                     final ImageObject newImage = adapter.getItem(i);
                     if (newImage.isEntity()) {
                         itemIndex = i;
@@ -613,7 +617,7 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
                                 imageTask.uploadFile(newImage.getBitmap());
                             }
                         }).start();
-                        //initTrdWaitPhoto(true);
+                        initTrdWaitPhoto(true);
                         count++;
                         txtUploadHint.setText(getString(R.string.hint_upload_photo, String.valueOf(count), String.valueOf(itemAmount)));
                         dialog.show();

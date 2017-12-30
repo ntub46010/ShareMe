@@ -133,6 +133,7 @@ public class ProductDetailActivity extends AppCompatActivity {
     }
 
     private void loadData() {
+        isShown = false;
         books = new ArrayList<>();
         conn = new MyOkHttp(ProductDetailActivity.this, new MyOkHttp.TaskListener() {
             @Override
