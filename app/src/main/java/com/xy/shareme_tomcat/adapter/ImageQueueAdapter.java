@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -27,20 +28,20 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import static com.xy.shareme_tomcat.data.DataHelper.getSimpleAdapter;
-
 import com.xy.shareme_tomcat.R;
+import com.xy.shareme_tomcat.data.DataHelper;
 import com.xy.shareme_tomcat.data.ImageObject;
+import com.xy.shareme_tomcat.structure.ImageUploadQueue;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 
 public class ImageQueueAdapter extends RecyclerView.Adapter<ImageQueueAdapter.DataViewHolder> {
+    private Resources res;
     private Context context;
     private Activity activity;
-    private ArrayList<ImageObject> pictures;
+    private ImageUploadQueue queue;
     private int pressedPosition = 0;
 
     public static final int REQUEST_CAMERA = 1;
@@ -108,34 +109,33 @@ public class ImageQueueAdapter extends RecyclerView.Adapter<ImageQueueAdapter.Da
     }
 
     // 將連結的資料
-    public ImageQueueAdapter(Context context, ArrayList<ImageObject> pictures, Activity activity) {
-        this.context = context;
-        this.pictures = pictures;
+    public ImageQueueAdapter(Resources res, Activity activity, Context context) {
         this.activity = activity;
+        this.context = context;
+        queue = new ImageUploadQueue(res, context);
     }
 
     @Override
     public int getItemCount() {
-        return pictures.size();
+        return queue.size();
     }
 
     @Override
-    public ImageQueueAdapter.DataViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+    public DataViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.card_book_img, viewGroup, false);
-        ImageQueueAdapter.DataViewHolder dataViewHolder = new ImageQueueAdapter.DataViewHolder(view);
+        DataViewHolder dataViewHolder = new DataViewHolder(view);
         return dataViewHolder;
     }
 
     @Override
-    public void onBindViewHolder(ImageQueueAdapter.DataViewHolder dataViewHolder, int i) {
+    public void onBindViewHolder(DataViewHolder dataViewHolder, int i) {
         // 顯示資料物件及資料項目 的對應
-        ImageObject picture =  pictures.get(i);
         dataViewHolder.position = i;
 
-        if (picture.getBitmap() != null || picture.getFileName() != null) {
+        if (((ImageObject) queue.get(i)).getBitmap() != null || ((ImageObject) queue.get(i)).getFileName() != null) {
             dataViewHolder.layBookPic.setBackgroundColor(Color.parseColor("#FAFAFA"));
             dataViewHolder.imgBookPic.setScaleType(ImageView.ScaleType.FIT_CENTER);//
-            dataViewHolder.imgBookPic.setImageBitmap(picture.getBitmap());
+            dataViewHolder.imgBookPic.setImageBitmap(((ImageObject) queue.get(i)).getBitmap());
         }else { //加號圖片
             dataViewHolder.layBookPic.setBackgroundColor(Color.parseColor("#DDDDDD"));
             dataViewHolder.imgBookPic.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
@@ -162,12 +162,6 @@ public class ImageQueueAdapter extends RecyclerView.Adapter<ImageQueueAdapter.Da
         intent.putExtra("aspectY", 4);
         intent.putExtra("outputX", 900);
         intent.putExtra("outputY", 1200);
-        /*
-        intent.putExtra("aspectX", 9);
-        intent.putExtra("aspectY", 16);
-        intent.putExtra("outputX", 720);
-        intent.putExtra("outputY", 1280);
-        */
         intent.putExtra("outputFormat", "JPEG");
         intent.putExtra("return-date", false);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(mImageFile));
@@ -179,9 +173,8 @@ public class ImageQueueAdapter extends RecyclerView.Adapter<ImageQueueAdapter.Da
         try {
             mImageFile.createNewFile();
             return mImageFile.exists();
-        } catch (IOException e) {
+        }catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(context, "出錯啦", Toast.LENGTH_SHORT).show();
             return false;
         }
     }
@@ -221,7 +214,7 @@ public class ImageQueueAdapter extends RecyclerView.Adapter<ImageQueueAdapter.Da
         };
 
         ListView listView = (ListView) dialog.findViewById(R.id.lstGalleryOptions);
-        listView.setAdapter(getSimpleAdapter(
+        listView.setAdapter(DataHelper.getSimpleAdapter(
                 context,
                 R.layout.lst_text_with_icon_black,
                 R.id.imgIcon,
@@ -253,39 +246,37 @@ public class ImageQueueAdapter extends RecyclerView.Adapter<ImageQueueAdapter.Da
     }
 
     public ImageObject getItem(int position) {
-        return pictures.get(position);
+        return (ImageObject) queue.get(position);
     }
 
     public void setItem(int position, ImageObject item) {
-        pictures.set(position, item);
+        queue.dequeueFromRear();
+        queue.enqueueFromRear(item);
         //notifyDataSetChanged(); //會出錯
         notifyItemChanged(position);
     }
 
     public void addItem(ImageObject image) {
-        pictures.add(image);
+        queue.enqueueFromRear(image);
         notifyDataSetChanged();
     }
 
-    private boolean removeItem(int position) {
+    private void removeItem(int position) {
         int bmpAmount = 0;
         //第一條件，至少有兩張圖片(可能含一張空白)；第二條件，點選的不是空白圖
-        if (getItemCount() > 1 && (getItem(position).getBitmap() != null /*|| getItem(position).getFileName() != null*/)) {
-            for (int i=0; i<pictures.size(); i++) {
+        if (getItemCount() > 1 && (getItem(position).getBitmap() != null)) {
+            for (int i=0; i<queue.size(); i++) {
                 if (getItem(i).getBitmap() != null)
                     bmpAmount++;
             }
-            if (bmpAmount == 5/* && (getItem(getItemCount() - 1).isEntity() || getItem(getEntityAmount() - 1).getFileName() != null)*/) {
+            if (bmpAmount == 5) {
                 //若移除前原先有5張真圖，要補一張空白圖
-                Bitmap bitmap = null;
-                addItem(new ImageObject(bitmap, false));
+                addItem(new ImageObject(null, false));
             }
-            pictures.remove(position);
+            queue.remove(position);
             notifyDataSetChanged();
-            return true;
-        }
-        Toast.makeText(context, "移除失敗", Toast.LENGTH_SHORT).show();
-        return false;
+        }else
+            Toast.makeText(context, "移除失敗", Toast.LENGTH_SHORT).show();
     }
 
     private void moveItem(int position, int distance) {
@@ -296,17 +287,48 @@ public class ImageQueueAdapter extends RecyclerView.Adapter<ImageQueueAdapter.Da
             destination = (position + distance < 0) ? 0 : position + distance;
 
         if (getItem(destination).getBitmap() != null) {
-            Collections.swap(pictures, position, destination);
+            Collections.swap(queue, position, destination);
             notifyDataSetChanged();
         }
     }
 
     public int getEntityAmount() {
-        int count = 0;
-        for (ImageObject image : pictures) {
-            if (image.isEntity())
-                count++;
+        return queue.getEntityAmount();
+    }
+
+    public void startUpload(Dialog dlgUpload, TextView txtUploadHint, ImageUploadQueue.TaskListener taskListener) {
+        queue.startUpload(dlgUpload, txtUploadHint, taskListener);
+    }
+
+    public void cancelUpload() {
+        queue.cancelUpload();
+    }
+
+    public void destroy(boolean isFully) {
+        queue.destroy();
+        if (isFully)
+            queue = null;
+    }
+
+    public String getImageStatus() {
+        StringBuffer sb = new StringBuffer();
+/*
+        sb.append("imagePath:\n");
+        for (int i = 0; i<pictures.size(); i++)
+            sb.append(pictures.get(i).getImagePath()).append("、\n");
+
+        sb.append("fileName:\n");
+        for (int i = 0; i<pictures.size(); i++)
+            sb.append(pictures.get(i).getFileName()).append("、\n");
+*/
+        sb.append("bitmap:\n");
+        for (int i = 0; i<queue.size(); i++) {
+            if (((ImageObject) queue.get(i)).isEntity())
+                sb.append("O");
+            else
+                sb.append("X");
         }
-        return count;
+
+        return sb.toString();
     }
 }

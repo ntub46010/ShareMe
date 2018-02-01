@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -14,31 +12,27 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.xy.shareme_tomcat.Product.ProductDetailActivity;
 import com.xy.shareme_tomcat.R;
 import com.xy.shareme_tomcat.data.Book;
 import com.xy.shareme_tomcat.data.ImageObj;
-import com.xy.shareme_tomcat.network_helper.GetBitmap;
+import com.xy.shareme_tomcat.network_helper.GetBitmapTask;
+import com.xy.shareme_tomcat.structure.ProductDisplayQueue;
 
 import java.util.ArrayList;
 
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_PRODUCT_ID;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
-import static com.xy.shareme_tomcat.data.DataHelper.isProductDisplayAlive;
 
 public class ProductDisplayAdapter extends RecyclerView.Adapter<ProductDisplayAdapter.DataViewHolder> {
     private Context context;
     private Resources res = null;
 
     private ArrayList<ImageObj> books;
-    private ArrayList<GetBitmap> bitTasks;
+    private ProductDisplayQueue queue;
     private int backgroundColor;
-    private boolean isFirstToHead = true, canCheckLoop = true;
-    private Thread trdCheckImg = null;
-    private int head = 0, tail = 9, section = 8;
-    private boolean[] loadLock = null;
+    private int lastPosition = -1;
 
     public class DataViewHolder extends RecyclerView.ViewHolder {
         // 連結資料的顯示物件宣告
@@ -59,15 +53,13 @@ public class ProductDisplayAdapter extends RecyclerView.Adapter<ProductDisplayAd
             txtGoodsPrice = (TextView) itemView.findViewById(R.id.txtBookSummaryPrice);
             txtBookSeller = (TextView) itemView.findViewById(R.id.txtSeller);
 
-            // 當卡片被點擊時
             cardView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Intent it = new Intent(context, ProductDetailActivity.class);
                     Bundle bundle = new Bundle();
-                    Book book = (Book) books.get(position);
-                    bundle.putString(KEY_PRODUCT_ID, book.getId());
-                    bundle.putString(KEY_TITLE, book.getTitle());
+                    bundle.putString(KEY_PRODUCT_ID, ((Book) books.get(position)).getId());
+                    bundle.putString(KEY_TITLE, ((Book) books.get(position)).getTitle());
                     it.putExtras(bundle);
                     context.startActivity(it);
                 }
@@ -76,16 +68,11 @@ public class ProductDisplayAdapter extends RecyclerView.Adapter<ProductDisplayAd
     }
 
     // 將連結的資料
-    public ProductDisplayAdapter(Context context, Resources res, ArrayList<ImageObj> books){
-        this.context = context;
+    public ProductDisplayAdapter(Resources res, Context context, ArrayList<ImageObj> books){
         this.res = res;
+        this.context = context;
         this.books = books;
-
-        loadLock = new boolean[this.books.size()];
-        for (int i=0; i<loadLock.length; i++)
-            loadLock[i] = true;
-
-        initTask();
+        this.queue = new ProductDisplayQueue(10);
     }
 
     @Override
@@ -101,20 +88,31 @@ public class ProductDisplayAdapter extends RecyclerView.Adapter<ProductDisplayAd
         return dataViewHolder;
     }
 
-    @Override
     public void onBindViewHolder(ProductDisplayAdapter.DataViewHolder dataViewHolder, int i) {
-        // 顯示資料物件及資料項目 的對應
-        setContent(i);
+        // 顯示資料物件及資料項目的對應
         try {
             dataViewHolder.layProductCard.setBackgroundColor(res.getColor(backgroundColor));
-        }catch (NullPointerException e) {}
+        }catch (Exception e) {} //顏色資源未找到，因為未用set方法設定
 
-        Book book = (Book) books.get(i);
+        //依滑動方向檢查圖片
+        if (i > lastPosition) { //往下滑
+            if (books.get(i).getImg() == null) { //若發現沒圖片
+                setGetBitmapTask(i, dataViewHolder); //指派下載器給該項目，放入佇列自動下載
+                queue.enqueueFromRear(books.get(i));
+            }
+        }else { //往上滑
+            if (books.get(i).getImg() == null) { //若發現沒圖片
+                setGetBitmapTask(i, dataViewHolder); //指派下載器給該項目，放入佇列自動下載
+                queue.enqueueFromFront(books.get(i));
+            }
+        }
+
         dataViewHolder.position = i;
-        dataViewHolder.imgGoodsPic.setImageBitmap(book.getImg());
-        dataViewHolder.txtGoodsTitle.setText(book.getTitle());
-        dataViewHolder.txtGoodsPrice.setText("$ " + book.getPrice());
-        dataViewHolder.txtBookSeller.setText(book.getSeller());
+        dataViewHolder.imgGoodsPic.setImageBitmap((books.get(i)).getImg()); //不用加Book，因為是父類別的方法
+        dataViewHolder.txtGoodsTitle.setText(((Book) books.get(i)).getTitle());
+        dataViewHolder.txtGoodsPrice.setText("$ " + ((Book) books.get(i)).getPrice());
+        dataViewHolder.txtBookSeller.setText(((Book) books.get(i)).getSeller());
+        lastPosition = i;
     }
 
     @Override
@@ -122,102 +120,27 @@ public class ProductDisplayAdapter extends RecyclerView.Adapter<ProductDisplayAd
         super.onAttachedToRecyclerView(recyclerView);
     }
 
-    private void setContent(int position) {
-        head = (position - section >= 0) ? position - section : 0;
-        tail = (position + section <= books.size() - 1) ? position + section : books.size() - 1;
-        initTask();
-        if (isFirstToHead && position == 0) {
-            isFirstToHead = false; //避免重新回到第一個項目，又啟動第二個執行緒
-            initCheckThread(true);
-        }
-    }
-
-    private void initTask() {
-        bitTasks = new ArrayList<>();
-        for (int i = 0; i < books.size(); i++) {
-            final int i2 = i;
-            bitTasks.add(
-                    new GetBitmap(context, books.get(i), new GetBitmap.TaskListener() {
-                        @Override
-                        public void onFinished() {
-                            loadLock[i2] = true;
-                            //notifyItemChanged(i2); //有動畫效果
-                            notifyDataSetChanged();
-                        }
-                    })
-            );
-        }
-    }
-
-    private void prepareImgs() {
-        //下載應出現的照片
-        try {
-            for (int i = head; i <= tail; i++) {
-                if (loadLock[i] && books.get(i).getImg() == null) {
-                    loadLock[i] = false;
-                    bitTasks.get(i).execute();
-                }
-            }
-        }catch (ArrayIndexOutOfBoundsException e) {}
-
-        //清除應消失的照片
-        for (int i = 0; i < head; i++) {
-            if (!loadLock[i] || books.get(i).getImgURL() != null) {
-                bitTasks.get(i).cancel(true);
-                books.get(i).setImg(null);
-            }
-        }
-        for (int i = tail+1; i<books.size(); i++) {
-            if (!loadLock[i] || books.get(i).getImg() != null) {
-                bitTasks.get(i).cancel(true);
-                books.get(i).setImg(null);
-            }
-        }
-    }
-
-    public void initCheckThread (boolean restart) {
-        trdCheckImg = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(200);
-                    hdrCheckImg.sendMessage(hdrCheckImg.obtainMessage());
-                }catch (Exception e) {}
-            }
-        });
-
-        if (restart) {
-            trdCheckImg.start();
-        }
-    }
-
-    private Handler hdrCheckImg = new Handler() {
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            if (canCheckLoop && isProductDisplayAlive) {
-                //Toast.makeText(context, "prepareImgs1", Toast.LENGTH_SHORT).show();
-                prepareImgs();
-                initCheckThread(true);
-            }else {
-                //Toast.makeText(context, "prepareImgs2", Toast.LENGTH_SHORT).show();
-                canCheckLoop = true; //false ？
-                initCheckThread(false);
-            }
-        }
-    };
-
-    public void setAllImagesNull () {
-        for (int i=0; i<books.size(); i++) {
-            books.get(i).setImg(null);
-        }
-    }
-
     public void setBackgroundColor(Resources r, int color) {
         this.backgroundColor = color;
     }
 
-    public void setCanCheckLoop(boolean loop) {
-        this.canCheckLoop = loop;
+    private void setGetBitmapTask(final int i, final DataViewHolder dataViewHolder) {
+        books.get(i).setGetBitmap(new GetBitmapTask(res.getString(R.string.link_image), new GetBitmapTask.TaskListener() {
+            @Override
+            public void onFinished() {
+                dataViewHolder.imgGoodsPic.setImageBitmap(books.get(i).getImg());
+                //notifyDataSetChanged(); //不可
+            }
+        }));
     }
+
+    public void destroy(boolean isFully) {
+        queue.destroy();
+        if (isFully)
+            queue = null;
+        else
+            queue = new ProductDisplayQueue(10);
+    }
+
 
 }

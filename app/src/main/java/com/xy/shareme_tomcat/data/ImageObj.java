@@ -2,11 +2,27 @@ package com.xy.shareme_tomcat.data;
 
 import android.graphics.Bitmap;
 
+import com.xy.shareme_tomcat.network_helper.GetBitmapTask;
+
+
 public class ImageObj {
     public String imgURL, imgURL2, imgURL3, imgURL4, imgURL5;   //圖片網址
     public Bitmap img, img2, img3, img4, img5;      //圖片
+    public GetBitmapTask getBitmap;
 
     public ImageObj() {}
+
+    public void setGetBitmap(GetBitmapTask getBitmap) {
+        this.getBitmap = getBitmap;
+    }
+
+    public void startDownloadImage() {
+        getBitmap.execute(this);
+    }
+
+    public void cancelDownloadImage() {
+        getBitmap.cancel(true);
+    }
 
     public String getImgURL() {
         return imgURL;
@@ -58,11 +74,6 @@ public class ImageObj {
 
     public void setImg(Bitmap bitmap) {
         this.img = bitmap;
-    }
-
-    public void recycleImg() {
-        img.recycle();
-        img = null;
     }
 
 }

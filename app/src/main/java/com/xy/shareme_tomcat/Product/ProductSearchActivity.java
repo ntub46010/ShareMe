@@ -35,9 +35,7 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_SELLER_NAME;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_STATUS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TYPE;
-import static com.xy.shareme_tomcat.data.DataHelper.getBoardNickname;
 import static com.xy.shareme_tomcat.data.DataHelper.getNotFoundImg;
-import static com.xy.shareme_tomcat.data.DataHelper.isProductDisplayAlive;
 
 public class ProductSearchActivity extends AppCompatActivity {
     private Context context;
@@ -77,74 +75,64 @@ public class ProductSearchActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        isProductDisplayAlive = true;
         if (!isShown)
             loadData(keyword);
-
-        try {
-            adapter.setCanCheckLoop(true);
-            adapter.initCheckThread(true);
-        }catch (NullPointerException e) {
-            //第一次開啟，adapter尚未準備好
-        }
     }
 
     private void loadData(String keyword) {
         isShown = false;
-        /*try {
-            adapter.setCanCheckLoop(false);
-            adapter.setAllImagesNull();
-            conn.cancel();
-            getBitmap.cancel(true);
-        }catch (NullPointerException e) {}*/
-
         prgBar.setVisibility(View.VISIBLE);
         recyProduct.setVisibility(View.GONE);
 
         books = new ArrayList<>();
         conn = new MyOkHttp(ProductSearchActivity.this, new MyOkHttp.TaskListener() {
             @Override
-            public void onFinished(String result) {
-                if (result == null) {
-                    Toast.makeText(context, "連線失敗", Toast.LENGTH_SHORT).show();
-                    prgBar.setVisibility(View.GONE);
-                    return;
-                }
-                try {
-                    JSONObject resObj = new JSONObject(result);
-                    if (resObj.getBoolean(KEY_STATUS)) {
-                        JSONArray ary = resObj.getJSONArray(KEY_PRODUCTS);
-                        for (int i=0; i<ary.length(); i++) {
-                            JSONObject obj = ary.getJSONObject(i);
-                            books.add(new Book(
-                                    obj.getString(KEY_PRODUCT_ID),
-                                    obj.getString(KEY_PHOTO1),
-                                    obj.getString(KEY_TITLE),
-                                    obj.getString(KEY_PRICE),
-                                    obj.getString(KEY_SELLER_NAME)
-                            ));
+            public void onFinished(final String result) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (result == null) {
+                            Toast.makeText(context, "連線失敗", Toast.LENGTH_SHORT).show();
+                            prgBar.setVisibility(View.GONE);
+                            return;
                         }
-                        getBitmap = new GetBitmap(context, books, getString(R.string.link_image), new GetBitmap.TaskListener() {
-                            @Override
-                            public void onFinished() {
-                                showData();
+                        try {
+                            JSONObject resObj = new JSONObject(result);
+                            if (resObj.getBoolean(KEY_STATUS)) {
+                                JSONArray ary = resObj.getJSONArray(KEY_PRODUCTS);
+                                for (int i=0; i<ary.length(); i++) {
+                                    JSONObject obj = ary.getJSONObject(i);
+                                    books.add(new Book(
+                                            obj.getString(KEY_PRODUCT_ID),
+                                            obj.getString(KEY_PHOTO1),
+                                            obj.getString(KEY_TITLE),
+                                            obj.getString(KEY_PRICE),
+                                            obj.getString(KEY_SELLER_NAME)
+                                    ));
+                                }
+                                getBitmap = new GetBitmap(context, books, getString(R.string.link_image), new GetBitmap.TaskListener() {
+                                    @Override
+                                    public void onFinished() {
+                                        showData();
+                                    }
+                                });
+                                getBitmap.setPreLoadAmount(-1);
+                                getBitmap.execute();
+                            }else {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(context, "沒有找到商品", Toast.LENGTH_SHORT).show();
+                                        showFoundStatus();
+                                        prgBar.setVisibility(View.GONE);
+                                    }
+                                });
                             }
-                        });
-                        getBitmap.setPreLoadAmount(8);
-                        getBitmap.execute();
-                    }else {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(context, "沒有找到商品", Toast.LENGTH_SHORT).show();
-                                showFoundStatus();
-                                prgBar.setVisibility(View.GONE);
-                            }
-                        });
+                        }catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
-                }catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                });
             }
         });
         //開始連線
@@ -163,25 +151,13 @@ public class ProductSearchActivity extends AppCompatActivity {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
         recyProduct.setLayoutManager(linearLayoutManager);
 
-        adapter = new ProductDisplayAdapter(context, getResources(), books);
+        adapter = new ProductDisplayAdapter(getResources(), context, books);
         adapter.setBackgroundColor(getResources(), R.color.card_product);
         recyProduct.setAdapter(adapter);
         books = null;
 
         prgBar.setVisibility(View.GONE);
         recyProduct.setVisibility(View.VISIBLE);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    adapter.setCanCheckLoop(true);
-                    adapter.initCheckThread(true);
-                }catch (NullPointerException e) {
-                    //第一次開啟，adapter尚未準備好
-                }
-            }
-        }).start();
-
         isShown = true;
     }
 
@@ -204,23 +180,12 @@ public class ProductSearchActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         cancelConnection();
-        isProductDisplayAlive = false;
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    adapter.setCanCheckLoop(false);
-                    adapter.initCheckThread(false);
-                }catch (NullPointerException e) {
-                    //第一次開啟，adapter尚未準備好
-                }
-            }
-        }).start();
         super.onPause();
     }
 
     @Override
     public void onDestroy() {
+        adapter.destroy(true);
         System.gc();
         super.onDestroy();
     }

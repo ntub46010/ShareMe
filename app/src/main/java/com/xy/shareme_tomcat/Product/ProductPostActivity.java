@@ -30,6 +30,7 @@ import com.xy.shareme_tomcat.adapter.ImageQueueAdapter;
 import com.xy.shareme_tomcat.data.ImageObject;
 import com.xy.shareme_tomcat.network_helper.ImageUploadTask;
 import com.xy.shareme_tomcat.network_helper.MyOkHttp;
+import com.xy.shareme_tomcat.structure.ImageUploadQueue;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -57,21 +58,18 @@ import static com.xy.shareme_tomcat.adapter.ImageQueueAdapter.REQUEST_CROP;
 public class ProductPostActivity extends AppCompatActivity implements View.OnClickListener {
     private Context context;
 
-    private RecyclerView recyclerView;
-    private ArrayList<ImageObject> images = new ArrayList<>();
-    private ImageQueueAdapter queueAdapter;
-    private int itemIndex, itemAmount;
-
     private EditText edtTitle, edtStatus, edtPrice, edtPS;
     private CheckBox chkAI, chkFN, chkFT, chkIB, chkBM, chkIM, chkAF, chkCD, chkCC, chkDM, chkGN;
 
     private String title, condition, note, price, ps;
     private StringBuffer sbDep;
 
-    private ImageUploadTask imageTask;
     private TextView txtUploadHint;
     private Dialog dlgUpload;
     private MyOkHttp conn;
+
+    private RecyclerView recyclerView;
+    private ImageQueueAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,20 +89,6 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
         });
         ImageView btnPost = (ImageView) toolbar.findViewById(R.id.btnPost);
         btnPost.setOnClickListener(this);
-
-        //添加一張空白圖到佇列
-        Bitmap bitmap = null;
-        images.add(new ImageObject(bitmap)); //此為空白圖
-
-        recyclerView = (RecyclerView) findViewById(R.id.recy_books);
-        recyclerView.setHasFixedSize(true);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
-        linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
-        recyclerView.setLayoutManager(linearLayoutManager);
-
-        queueAdapter = new ImageQueueAdapter(context, images, this);
-        recyclerView.setAdapter(queueAdapter); //顯示recyclerView
-        images = null;
 
         //商品資訊元件
         edtTitle = (EditText) findViewById(R.id.edtTitle);
@@ -136,6 +120,17 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
 
         //上傳進度的Dialog
         prepareDialog();
+
+        //顯示圖片列表
+        recyclerView = (RecyclerView) findViewById(R.id.recy_books);
+        recyclerView.setHasFixedSize(true);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
+        linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+        recyclerView.setLayoutManager(linearLayoutManager);
+
+        adapter = new ImageQueueAdapter(getResources(), this, context);
+        adapter.addItem(new ImageObject(null, false)); //添加一張空白圖
+        recyclerView.setAdapter(adapter);
     }
 
     @Override
@@ -145,7 +140,7 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
             case 0:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     //取得權限，進行檔案存取
-                    queueAdapter.pickImageDialog();
+                    adapter.pickImageDialog();
                 }else {
                     //使用者拒絕權限，停用檔案存取功能，並顯示訊息
                     Toast.makeText(context, "未給予權限，無法選擇圖片", Toast.LENGTH_SHORT).show();
@@ -162,29 +157,28 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
         Uri selectedImageUri = data.getData();
         switch (requestCode) {
             case REQUEST_ALBUM:
-                if (!queueAdapter.createImageFile())
+                if (!adapter.createImageFile())
                     return;
                 if (selectedImageUri != null)
-                    queueAdapter.cropImage(selectedImageUri);
+                    adapter.cropImage(selectedImageUri);
                 break;
             case REQUEST_CROP:
-                final int position = queueAdapter.getPressedPosition();
+                final int position = adapter.getPressedPosition();
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        ImageObject image = queueAdapter.getItem(position);
+                        ImageObject image = adapter.getItem(position);
                         boolean isEmptyCard = image.getBitmap() == null; //退出選圖畫面後，若為null代表剛剛沒選圖
                         boolean bitmapIsNull = true;
                         do {
-                            bitmapIsNull = queueAdapter.mImageFileToBitmap(image);
+                            bitmapIsNull = adapter.mImageFileToBitmap(image);
                         } while (bitmapIsNull);
 
                         image.setEntity(true);
-                        queueAdapter.setItem(position, image);
+                        adapter.setItem(position, image);
 
-                        if (isEmptyCard && queueAdapter.getItemCount() < 5) { //isEmptyCard意義不明
-                            Bitmap bitmap = null;
-                            queueAdapter.addItem(new ImageObject(bitmap, false)); //再新增一張空白圖
+                        if (isEmptyCard && adapter.getItemCount() < 5) { //isEmptyCard意義不明，但拿掉的話，在該處選第二次圖時，會複製一個到旁邊去
+                            adapter.addItem(new ImageObject(null, false)); //再新增一張空白圖
                         }
                     }
                 }).start();
@@ -259,7 +253,7 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 try {
-                                    imageTask = null;
+                                    adapter.cancelUpload();
                                     conn.cancel();
                                     dlgUpload.dismiss();
                                     Toast.makeText(context, "上傳已取消", Toast.LENGTH_SHORT).show();
@@ -273,98 +267,43 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
         });
     }
 
-    private void initTrdWaitPhoto(boolean restart) {
-        Thread trdWaitPhoto = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                hdrWaitPhoto.sendMessage(hdrWaitPhoto.obtainMessage());
-            }
-        });
-        if (restart)
-            trdWaitPhoto.start();
-    }
-
-    private Handler hdrWaitPhoto = new Handler() {
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            if (imageTask == null)
-                return;
-
-            String fileName = imageTask.getPhotoName();
-            if (fileName == null) {
-                initTrdWaitPhoto(true); //還沒收到檔名，繼續監聽
-            }else {
-                initTrdWaitPhoto(false);
-                //寫入檔名
-                ImageObject image = queueAdapter.getItem(itemIndex);
-                image.setFileName(fileName);
-                queueAdapter.setItem(itemIndex, image);
-
-                //上傳下一張
-                itemIndex++;
-                if (itemIndex >= itemAmount) { //圖片都上傳完
-                    postProduct();
-                    return;
-                }
-                final ImageObject newImage = queueAdapter.getItem(itemIndex);
-                new Thread(new Runnable() {
-                    public void run() {
-                        imageTask = new ImageUploadTask(context, getString(R.string.link_upload_image));
-                        imageTask.uploadFile(newImage.getBitmap());
-                    }
-                }).start();
-                initTrdWaitPhoto(true);
-                txtUploadHint.setText(getString(R.string.hint_upload_photo, String.valueOf(itemIndex + 1), String.valueOf(itemAmount)));
-            }
-        }
-    };
-
-    private void postProduct() {
+    private void postProduct(String[] fileNames) {
         conn = new MyOkHttp(ProductPostActivity.this, new MyOkHttp.TaskListener() {
             @Override
-            public void onFinished(String result) {
-                if (result == null) {
-                    Toast.makeText(context, "連線失敗", Toast.LENGTH_SHORT).show();
-                    dlgUpload.dismiss();
-                    return;
-                }
-                try {
-                    Toast.makeText(context, "刊登成功", Toast.LENGTH_SHORT).show();
-                    JSONObject resObj = new JSONObject(result);
-                    if (resObj.getBoolean(KEY_STATUS)) {
-                        dlgUpload.dismiss();
-                        //上傳成功
-                        JSONObject obj = resObj.getJSONObject(KEY_PRODUCT);
-                        Intent it = new Intent(context, ProductDetailActivity.class);
-                        Bundle bundle = new Bundle();
-                        bundle.putString(KEY_PRODUCT_ID, obj.getString(KEY_PRODUCT_ID));
-                        bundle.putString(KEY_TITLE, obj.getString(KEY_TITLE));
-                        it.putExtras(bundle);
-                        startActivity(it);
-                        finish();
-                    }else
-                        Toast.makeText(context, "伺服器發生例外", Toast.LENGTH_SHORT).show();
-                }catch (JSONException e) {
-                    e.printStackTrace();
-                }
+            public void onFinished(final String result) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (result == null) {
+                            Toast.makeText(context, "連線失敗", Toast.LENGTH_SHORT).show();
+                            dlgUpload.dismiss();
+                            return;
+                        }
+                        try {
+                            Toast.makeText(context, "刊登成功", Toast.LENGTH_SHORT).show();
+                            JSONObject resObj = new JSONObject(result);
+                            if (resObj.getBoolean(KEY_STATUS)) {
+                                dlgUpload.dismiss();
+                                //上傳成功
+                                JSONObject obj = resObj.getJSONObject(KEY_PRODUCT);
+                                Intent it = new Intent(context, ProductDetailActivity.class);
+                                Bundle bundle = new Bundle();
+                                bundle.putString(KEY_PRODUCT_ID, obj.getString(KEY_PRODUCT_ID));
+                                bundle.putString(KEY_TITLE, obj.getString(KEY_TITLE));
+                                it.putExtras(bundle);
+                                startActivity(it);
+                                finish();
+                            }else
+                                Toast.makeText(context, "伺服器發生例外", Toast.LENGTH_SHORT).show();
+                        }catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
             }
         });
         //開始連線
         try {
-            //修正圖檔名稱
-            String[] fileName = new String[5];
-            for (int i=0; i<itemAmount; i++)
-                fileName[i] = queueAdapter.getItem(i).getFileName();
-            for (int i=0; i<5; i++) {
-                if (fileName[i] == null)
-                    fileName[i] = "";
-            }
-
             JSONObject reqObj = new JSONObject();
             reqObj.put(KEY_TITLE, title);
             reqObj.put(KEY_PRICE, price);
@@ -373,11 +312,11 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
             reqObj.put(KEY_NOTE, note);
             reqObj.put(KEY_PS, ps);
             reqObj.put(KEY_SELLER, "10346011");
-            reqObj.put(KEY_PHOTO1, fileName[0]);
-            reqObj.put(KEY_PHOTO2, fileName[1]);
-            reqObj.put(KEY_PHOTO3, fileName[2]);
-            reqObj.put(KEY_PHOTO4, fileName[3]);
-            reqObj.put(KEY_PHOTO5, fileName[4]);
+            reqObj.put(KEY_PHOTO1, fileNames[0]);
+            reqObj.put(KEY_PHOTO2, fileNames[1]);
+            reqObj.put(KEY_PHOTO3, fileNames[2]);
+            reqObj.put(KEY_PHOTO4, fileNames[3]);
+            reqObj.put(KEY_PHOTO5, fileNames[4]);
             conn.execute(getString(R.string.link_post_product), reqObj.toString());
         }catch (JSONException e) {
             e.printStackTrace();
@@ -391,34 +330,17 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
                 if (!isInfoValid())
                     return;
 
-                //初始化指標、確認圖片總數量
-                itemIndex = 0;
-                itemAmount = queueAdapter.getEntityAmount();
-                if (itemAmount == 0) {
+                if (adapter.getEntityAmount() == 0) {
                     Toast.makeText(context, "未選擇圖片", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                for (int i=itemIndex; i<itemAmount; i++) {
-                    final ImageObject newImage = queueAdapter.getItem(i);
-                    if (newImage.getBitmap() != null) {
-                        //開始上傳
-                        new Thread(new Runnable() {
-                            public void run() {
-                                imageTask = new ImageUploadTask(context, getString(R.string.link_upload_image));
-                                imageTask.uploadFile(newImage.getBitmap());
-                            }
-                        }).start();
-                        initTrdWaitPhoto(true); //監聽正在上傳的圖片檔名
-
-                        txtUploadHint.setText(getString(R.string.hint_upload_photo, String.valueOf(itemIndex + 1), String.valueOf(itemAmount)));
-                        dlgUpload.show();
-                        break;
+                adapter.startUpload(dlgUpload, txtUploadHint, new ImageUploadQueue.TaskListener() {
+                    @Override
+                    public void onFinished(String[] fileNames) {
+                        postProduct(fileNames);
                     }
-
-                    if (itemIndex == itemAmount - 1)
-                        Toast.makeText(context, "未選擇圖片", Toast.LENGTH_SHORT).show();
-                }
+                });
                 break;
         }
     }
@@ -426,6 +348,7 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
     @Override
     public void onDestroy() {
         cancelConnection();
+        adapter = null;
         System.gc();
         super.onDestroy();
     }
@@ -433,6 +356,9 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
     private void cancelConnection() {
         try {
             conn.cancel();
+        }catch (NullPointerException e) {}
+        try {
+            adapter.destroy(true);
         }catch (NullPointerException e) {}
     }
 }

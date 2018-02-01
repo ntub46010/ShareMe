@@ -50,9 +50,8 @@ public class MemberStockActivity extends AppCompatActivity {
     private ListView lstProduct;
     private ProgressBar prgBar;
 
-
     private ArrayList<ImageObj> books;
-    private StockListAdapter stockAdapter;
+    private StockListAdapter adapter;
 
     private Dialog dialog;
     private String bookId, bookTitle;
@@ -90,7 +89,7 @@ public class MemberStockActivity extends AppCompatActivity {
         lstProduct.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                Book book = (Book) stockAdapter.getItem(position);
+                Book book = (Book) adapter.getItem(position);
                 bookId = book.getId();
                 bookTitle = book.getTitle();
                 TextView textView = (TextView) dialog.findViewById(R.id.txtBookTitle);
@@ -109,12 +108,6 @@ public class MemberStockActivity extends AppCompatActivity {
         isStockDisplayAlive = true;
         if (!isShown)
             loadData();
-
-        try {
-            stockAdapter.initCheckThread(true);
-        }catch (NullPointerException e) {
-            //第一次開啟，adapter尚未準備好
-        }
     }
 
     private void prepareDialog() {
@@ -216,7 +209,7 @@ public class MemberStockActivity extends AppCompatActivity {
                                         showData();
                                     }
                                 });
-                                getBitmap.setPreLoadAmount(12);
+                                getBitmap.setPreLoadAmount(-1);
                                 getBitmap.execute();
                             }else {
                                 Toast.makeText(context, "沒有上架的商品", Toast.LENGTH_SHORT).show();
@@ -241,9 +234,9 @@ public class MemberStockActivity extends AppCompatActivity {
     }
 
     private void showData() {
-        stockAdapter = new StockListAdapter(context, getResources(), books, R.layout.spn_chat_product);
-        stockAdapter.setBackgroundColor(R.color.lst_stock);
-        lstProduct.setAdapter(stockAdapter);
+        adapter = new StockListAdapter(getResources(), context, books, R.layout.spn_chat_product);
+        adapter.setBackgroundColor(R.color.lst_stock);
+        lstProduct.setAdapter(adapter);
 
         books = null;
         prgBar.setVisibility(View.GONE);
@@ -252,7 +245,6 @@ public class MemberStockActivity extends AppCompatActivity {
         swipeRefreshLayout.setRefreshing(false);
 
         isShown = true;
-        System.gc();
     }
 
     private void showFoundStatus() {
@@ -289,6 +281,8 @@ public class MemberStockActivity extends AppCompatActivity {
                             JSONObject resObj = new JSONObject(result);
                             if (resObj.getBoolean(KEY_STATUS)) {
                                 Toast.makeText(context, "商品已下架", Toast.LENGTH_SHORT).show();
+                                adapter.destroy(true);
+                                adapter = null;
                                 loadData();
                             }else {
                                 Toast.makeText(context, "伺服器發生例外", Toast.LENGTH_SHORT).show();
@@ -314,17 +308,13 @@ public class MemberStockActivity extends AppCompatActivity {
     public void onPause() {
         cancelConnection();
         isStockDisplayAlive = false;
-        try {
-            stockAdapter.setCanCheckLoop(false);
-            stockAdapter.initCheckThread(false);
-        }catch (NullPointerException e) {
-            //第一次開啟，adapter尚未準備好
-        }
         super.onPause();
     }
 
     @Override
     public void onDestroy() {
+        adapter.destroy(true);
+        adapter = null;
         System.gc();
         super.onDestroy();
     }

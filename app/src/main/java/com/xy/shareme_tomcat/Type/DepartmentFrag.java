@@ -99,11 +99,11 @@ public class DepartmentFrag extends Fragment {
         }
 
         //停止下載任務
-        try {
+        /*try {
             adpProductHome.setCanCheckLoop(false);
             conProductHome.cancel();
             gbmProductHome.cancel(true);
-        }catch (NullPointerException e) {}
+        }catch (NullPointerException e) {}*/
 
         //切換畫面
         isFromDepartment = true;

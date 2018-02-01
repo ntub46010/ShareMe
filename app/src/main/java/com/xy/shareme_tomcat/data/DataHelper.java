@@ -15,14 +15,13 @@ import static com.xy.shareme_tomcat.MainActivity.txtBarTitle;
 
 public class DataHelper {
     public static boolean conFlag = false; //表示OKHttp的取資料工作結束，將流程交還原Activity進行後續操作
-    public static String loginUserId = "10346011";
+    public static String loginUserId = "10346010";
     public static String myName = ""; //用於發送推播
     public static int myGender = -1; //用於個人檔案icon，包含從信箱退出時的狀況
     public static String myAvatarUrl = ""; //用於發送推播
     public static String tmpToken = "token"; //登入時接收自己token(確認Firebase註冊成功)，或進交談室時接收對方token(確認可推播)。空字串代表無該帳號，token字串代表尚未取得
 
     public static boolean isFromDepartment = false; //是否因為按了科系按鈕，而移動到商品首頁
-    public static boolean isProductDisplayAlive = false; //用來控制動態下載圖片的工作是否繼續進行
     public static boolean isStockDisplayAlive = false;
 
     public static final String KEY_STATUS = "Status";

@@ -40,7 +40,6 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TYPE;
 import static com.xy.shareme_tomcat.data.DataHelper.getNotFoundImg;
 import static com.xy.shareme_tomcat.data.DataHelper.isFromDepartment;
-import static com.xy.shareme_tomcat.data.DataHelper.isProductDisplayAlive;
 import static com.xy.shareme_tomcat.data.DataHelper.setBoardTitle;
 import static com.xy.shareme_tomcat.MainActivity.context;
 
@@ -80,26 +79,13 @@ public class ProductHomeFrag extends Fragment {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        isProductDisplayAlive = true;
-        //不寫在onResume是因為切換Fragment後必執行onResume，則循環旗標又會被設為true，無法及時中止舊的執行緒
-        try {
-            adpProductHome.setCanCheckLoop(true);
-            adpProductHome.initCheckThread(true);
-        }catch (NullPointerException e) {
-            //第一次開啟，adapter尚未準備好
-        }
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
         if (isFromDepartment) {
             isFromDepartment = false;
             loadData("");
-        }/*else if (!isShown)
-            loadData("");*/
+        }else if (!isShown)
+            loadData("");
     }
 
     private void setFab () {
@@ -108,6 +94,7 @@ public class ProductHomeFrag extends Fragment {
             @Override
             public void onClick(View view) {
                 try {
+                    adpProductHome.destroy(false);
                     recyProduct.scrollToPosition(0);
                 }catch (Exception e) {
                     e.printStackTrace();
@@ -160,7 +147,7 @@ public class ProductHomeFrag extends Fragment {
                                 showData();
                             }
                         });
-                        gbmProductHome.setPreLoadAmount(12);
+                        gbmProductHome.setPreLoadAmount(-1); //-1代表都不要下載
                         gbmProductHome.execute();
 
                     }else {
@@ -189,7 +176,7 @@ public class ProductHomeFrag extends Fragment {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
         recyProduct.setLayoutManager(linearLayoutManager);
 
-        adpProductHome = new ProductDisplayAdapter(context, getResources(), books);
+        adpProductHome = new ProductDisplayAdapter(getResources(), context, books);
         adpProductHome.setBackgroundColor(getResources(), R.color.card_product);
         recyProduct.setAdapter(adpProductHome);
 
@@ -221,23 +208,13 @@ public class ProductHomeFrag extends Fragment {
     @Override
     public void onPause() {
         cancelConnection();
-        isProductDisplayAlive = false;
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    adpProductHome.setCanCheckLoop(false);
-                    adpProductHome.initCheckThread(false);
-                }catch (NullPointerException e) {
-                    //第一次開啟，adapter尚未準備好
-                }
-            }
-        }).start();
         super.onPause();
     }
 
     @Override
     public void onDestroy() {
+        adpProductHome.destroy(true);
+        adpProductHome = null;
         System.gc();
         super.onDestroy();
     }

@@ -36,7 +36,6 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_STATUS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_USER_ID;
 import static com.xy.shareme_tomcat.data.DataHelper.getNotFoundImg;
-import static com.xy.shareme_tomcat.data.DataHelper.isProductDisplayAlive;
 import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
 
 public class MemberFavoriteActivity extends AppCompatActivity {
@@ -81,15 +80,8 @@ public class MemberFavoriteActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        isProductDisplayAlive = true;
         if (!isShown)
             loadData();
-        try {
-            adapter.setCanCheckLoop(true);
-            adapter.initCheckThread(true);
-        }catch (NullPointerException e) {
-            //第一次開啟，adapter尚未準備好
-        }
     }
 
     private void loadData() {
@@ -128,7 +120,7 @@ public class MemberFavoriteActivity extends AppCompatActivity {
                                         showData();
                                     }
                                 });
-                                getBitmap.setPreLoadAmount(12);
+                                getBitmap.setPreLoadAmount(-1);
                                 getBitmap.execute();
                             }else {
                                 Toast.makeText(context, "沒有最愛的商品", Toast.LENGTH_SHORT).show();
@@ -159,7 +151,7 @@ public class MemberFavoriteActivity extends AppCompatActivity {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
         recyclerView.setLayoutManager(linearLayoutManager);
 
-        adapter = new ProductDisplayAdapter(context, getResources(), books);
+        adapter = new ProductDisplayAdapter(getResources(), context, books);
         adapter.setBackgroundColor(getResources(), R.color.card_favorite);
         recyclerView.setAdapter(adapter);
 
@@ -190,18 +182,13 @@ public class MemberFavoriteActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         cancelConnection();
-        isProductDisplayAlive = false;
-        try {
-            adapter.setCanCheckLoop(false);
-            adapter.initCheckThread(false);
-        }catch (NullPointerException e) {
-            //第一次開啟，adapter尚未準備好
-        }
         super.onPause();
     }
 
     @Override
     public void onDestroy() {
+        adapter.destroy(true);
+        adapter = null;
         System.gc();
         super.onDestroy();
     }

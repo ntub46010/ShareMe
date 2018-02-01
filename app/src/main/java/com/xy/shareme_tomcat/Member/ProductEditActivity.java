@@ -400,7 +400,7 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
         linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
         recyclerView.setLayoutManager(linearLayoutManager);
 
-        adapter = new ImageQueueAdapter(context, images, this);
+        adapter = new ImageQueueAdapter(getResources(), this, context);
         recyclerView.setAdapter(adapter);
         images = null;
     }
@@ -636,6 +636,8 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     public void onDestroy() {
+        adapter.destroy(true);
+        adapter = null;
         System.gc();
         super.onDestroy();
     }

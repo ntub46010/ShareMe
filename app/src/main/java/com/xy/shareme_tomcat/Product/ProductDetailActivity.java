@@ -61,6 +61,7 @@ public class ProductDetailActivity extends AppCompatActivity {
 
     private ArrayList<ImageObj> books;
     public static ArrayList<Bitmap> images;
+    private ImageGroupAdapter adapter;
     public static int indexSelectedImage;
     private String productId;
 
@@ -272,7 +273,7 @@ public class ProductDetailActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(linearLayoutManager);
 
         // 產生一個Adapter物件，連結圖片資料
-        ImageGroupAdapter adapter = new ImageGroupAdapter(context, images, true);
+        adapter = new ImageGroupAdapter(context, images, true);
         recyclerView.setAdapter(adapter);
     }
 
@@ -342,6 +343,7 @@ public class ProductDetailActivity extends AppCompatActivity {
     @Override
     public void onDestroy() {
         images = null;
+        adapter = null;
         System.gc();
         super.onDestroy();
     }
