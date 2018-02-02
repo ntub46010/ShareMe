@@ -18,7 +18,7 @@ import com.xy.shareme_tomcat.R;
 import com.xy.shareme_tomcat.data.Book;
 import com.xy.shareme_tomcat.data.ImageObj;
 import com.xy.shareme_tomcat.network_helper.GetBitmapTask;
-import com.xy.shareme_tomcat.structure.ProductDisplayQueue;
+import com.xy.shareme_tomcat.structure.ImageDownloadQueue;
 
 import java.util.ArrayList;
 
@@ -30,9 +30,8 @@ public class ProductDisplayAdapter extends RecyclerView.Adapter<ProductDisplayAd
     private Resources res = null;
 
     private ArrayList<ImageObj> books;
-    private ProductDisplayQueue queue;
-    private int backgroundColor;
-    private int lastPosition = -1;
+    private ImageDownloadQueue queue;
+    private int lastPosition = -1, backgroundColor, queueVolume;
 
     public class DataViewHolder extends RecyclerView.ViewHolder {
         // 連結資料的顯示物件宣告
@@ -68,11 +67,12 @@ public class ProductDisplayAdapter extends RecyclerView.Adapter<ProductDisplayAd
     }
 
     // 將連結的資料
-    public ProductDisplayAdapter(Resources res, Context context, ArrayList<ImageObj> books){
+    public ProductDisplayAdapter(Resources res, Context context, ArrayList<ImageObj> books, int queueVolume){
         this.res = res;
         this.context = context;
         this.books = books;
-        this.queue = new ProductDisplayQueue(10);
+        this.queueVolume = queueVolume;
+        this.queue = new ImageDownloadQueue(queueVolume);
     }
 
     @Override
@@ -135,11 +135,13 @@ public class ProductDisplayAdapter extends RecyclerView.Adapter<ProductDisplayAd
     }
 
     public void destroy(boolean isFully) {
-        queue.destroy();
-        if (isFully)
-            queue = null;
-        else
-            queue = new ProductDisplayQueue(10);
+        if (queue != null) {
+            queue.destroy();
+            if (isFully)
+                queue = null;
+            else
+                queue = new ImageDownloadQueue(queueVolume);
+        }
     }
 
 

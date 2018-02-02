@@ -19,7 +19,6 @@ import com.xy.shareme_tomcat.R;
 import com.xy.shareme_tomcat.adapter.ProductDisplayAdapter;
 import com.xy.shareme_tomcat.data.Book;
 import com.xy.shareme_tomcat.data.ImageObj;
-import com.xy.shareme_tomcat.network_helper.GetBitmap;
 import com.xy.shareme_tomcat.network_helper.MyOkHttp;
 
 import org.json.JSONArray;
@@ -29,6 +28,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 import static com.xy.shareme_tomcat.MainActivity.board;
+import static com.xy.shareme_tomcat.MainActivity.searchView;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_KEYWORD;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_PHOTO1;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_PRICE;
@@ -38,6 +38,7 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_SELLER_NAME;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_STATUS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TYPE;
+import static com.xy.shareme_tomcat.data.DataHelper.getBoardNickname;
 import static com.xy.shareme_tomcat.data.DataHelper.getNotFoundImg;
 import static com.xy.shareme_tomcat.data.DataHelper.isFromDepartment;
 import static com.xy.shareme_tomcat.data.DataHelper.setBoardTitle;
@@ -51,7 +52,6 @@ public class ProductHomeFrag extends Fragment {
     private ArrayList<ImageObj> books;
     public static ProductDisplayAdapter adpProductHome;
     public static MyOkHttp conProductHome;
-    public static GetBitmap gbmProductHome;
     private boolean isShown = false;
 
     @Override
@@ -83,9 +83,12 @@ public class ProductHomeFrag extends Fragment {
         super.onResume();
         if (isFromDepartment) {
             isFromDepartment = false;
+            searchView.setQueryHint(getString(R.string.hint_search_product, getBoardNickname()));
             loadData("");
-        }else if (!isShown)
+        }else if (!isShown) {
+            searchView.setQueryHint(getString(R.string.hint_search_product, getBoardNickname()));
             loadData("");
+        }
     }
 
     private void setFab () {
@@ -120,44 +123,40 @@ public class ProductHomeFrag extends Fragment {
         books = new ArrayList<>();
         conProductHome = new MyOkHttp(getActivity(), new MyOkHttp.TaskListener() {
             @Override
-            public void onFinished(String result) {
-                if (result == null) {
-                    Toast.makeText(context, "連線失敗", Toast.LENGTH_SHORT).show();
-                    prgBar.setVisibility(View.GONE);
-                    return;
-                }
-                try {
-                    JSONObject resObj = new JSONObject(result);
-                    if (resObj.getBoolean(KEY_STATUS)) {
-                        JSONArray ary = resObj.getJSONArray(KEY_PRODUCTS);
-                        for (int i=0; i<ary.length(); i++) {
-                            JSONObject obj = ary.getJSONObject(i);
-                            books.add(new Book(
-                                    obj.getString(KEY_PRODUCT_ID),
-                                    obj.getString(KEY_PHOTO1),
-                                    obj.getString(KEY_TITLE),
-                                    obj.getString(KEY_PRICE),
-                                    obj.getString(KEY_SELLER_NAME)
-                            ));
+            public void onFinished(final String result) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (result == null) {
+                            Toast.makeText(context, "連線失敗", Toast.LENGTH_SHORT).show();
+                            prgBar.setVisibility(View.GONE);
+                            return;
                         }
-
-                        gbmProductHome = new GetBitmap(context, books, getString(R.string.link_image), new GetBitmap.TaskListener() {
-                            @Override
-                            public void onFinished() {
+                        try {
+                            JSONObject resObj = new JSONObject(result);
+                            if (resObj.getBoolean(KEY_STATUS)) {
+                                JSONArray ary = resObj.getJSONArray(KEY_PRODUCTS);
+                                for (int i=0; i<ary.length(); i++) {
+                                    JSONObject obj = ary.getJSONObject(i);
+                                    books.add(new Book(
+                                            obj.getString(KEY_PRODUCT_ID),
+                                            obj.getString(KEY_PHOTO1),
+                                            obj.getString(KEY_TITLE),
+                                            obj.getString(KEY_PRICE),
+                                            obj.getString(KEY_SELLER_NAME)
+                                    ));
+                                }
                                 showData();
+                            }else {
+                                Toast.makeText(context, "沒有找到商品", Toast.LENGTH_SHORT).show();
+                                showFoundStatus();
+                                prgBar.setVisibility(View.GONE);
                             }
-                        });
-                        gbmProductHome.setPreLoadAmount(-1); //-1代表都不要下載
-                        gbmProductHome.execute();
-
-                    }else {
-                        Toast.makeText(context, "沒有找到商品", Toast.LENGTH_SHORT).show();
-                        showFoundStatus();
-                        prgBar.setVisibility(View.GONE);
+                        }catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
-                }catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                });
             }
         });
         //開始連線
@@ -176,7 +175,7 @@ public class ProductHomeFrag extends Fragment {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
         recyProduct.setLayoutManager(linearLayoutManager);
 
-        adpProductHome = new ProductDisplayAdapter(getResources(), context, books);
+        adpProductHome = new ProductDisplayAdapter(getResources(), context, books, 10);
         adpProductHome.setBackgroundColor(getResources(), R.color.card_product);
         recyProduct.setAdapter(adpProductHome);
 
@@ -222,9 +221,6 @@ public class ProductHomeFrag extends Fragment {
     private void cancelConnection() {
         try {
             conProductHome.cancel();
-        }catch (NullPointerException e) {}
-        try {
-            gbmProductHome.cancel(true);
         }catch (NullPointerException e) {}
     }
 }

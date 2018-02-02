@@ -6,9 +6,9 @@ import com.xy.shareme_tomcat.network_helper.GetBitmapTask;
 
 
 public class ImageObj {
-    public String imgURL, imgURL2, imgURL3, imgURL4, imgURL5;   //圖片網址
+    private String imgURL, imgURL2, imgURL3, imgURL4, imgURL5;   //圖片網址
     public Bitmap img, img2, img3, img4, img5;      //圖片
-    public GetBitmapTask getBitmap;
+    private GetBitmapTask getBitmap;
 
     public ImageObj() {}
 
@@ -21,7 +21,9 @@ public class ImageObj {
     }
 
     public void cancelDownloadImage() {
-        getBitmap.cancel(true);
+        try {
+            getBitmap.cancel(true);
+        }catch (NullPointerException e) {}
     }
 
     public String getImgURL() {

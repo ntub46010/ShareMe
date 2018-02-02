@@ -23,7 +23,6 @@ import com.xy.shareme_tomcat.R;
 import com.xy.shareme_tomcat.adapter.StockListAdapter;
 import com.xy.shareme_tomcat.data.Book;
 import com.xy.shareme_tomcat.data.ImageObj;
-import com.xy.shareme_tomcat.network_helper.GetBitmap;
 import com.xy.shareme_tomcat.network_helper.MyOkHttp;
 
 import org.json.JSONArray;
@@ -42,7 +41,6 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_USER_ID;
 import static com.xy.shareme_tomcat.data.DataHelper.getNotFoundImg;
 import static com.xy.shareme_tomcat.data.DataHelper.getSimpleAdapter;
 import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
-import static com.xy.shareme_tomcat.data.DataHelper.isStockDisplayAlive;
 
 public class MemberStockActivity extends AppCompatActivity {
     private Context context;
@@ -57,7 +55,6 @@ public class MemberStockActivity extends AppCompatActivity {
     private String bookId, bookTitle;
 
     private MyOkHttp conLoadStock, conDropProduct;
-    private GetBitmap getBitmap;
     private boolean isShown = false;
 
     @Override
@@ -105,7 +102,6 @@ public class MemberStockActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        isStockDisplayAlive = true;
         if (!isShown)
             loadData();
     }
@@ -203,14 +199,7 @@ public class MemberStockActivity extends AppCompatActivity {
                                             obj.getString(KEY_PRICE)
                                     ));
                                 }
-                                getBitmap = new GetBitmap(context, books, getString(R.string.link_image), new GetBitmap.TaskListener() {
-                                    @Override
-                                    public void onFinished() {
-                                        showData();
-                                    }
-                                });
-                                getBitmap.setPreLoadAmount(-1);
-                                getBitmap.execute();
+                                showData();
                             }else {
                                 Toast.makeText(context, "沒有上架的商品", Toast.LENGTH_SHORT).show();
                                 prgBar.setVisibility(View.GONE);
@@ -234,7 +223,7 @@ public class MemberStockActivity extends AppCompatActivity {
     }
 
     private void showData() {
-        adapter = new StockListAdapter(getResources(), context, books, R.layout.spn_chat_product);
+        adapter = new StockListAdapter(getResources(), context, books, R.layout.spn_chat_product, 10);
         adapter.setBackgroundColor(R.color.lst_stock);
         lstProduct.setAdapter(adapter);
 
@@ -307,7 +296,6 @@ public class MemberStockActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         cancelConnection();
-        isStockDisplayAlive = false;
         super.onPause();
     }
 
@@ -325,9 +313,6 @@ public class MemberStockActivity extends AppCompatActivity {
         }catch (NullPointerException e) {}
         try {
             conDropProduct.cancel();
-        }catch (NullPointerException e) {}
-        try {
-            getBitmap.cancel(true);
         }catch (NullPointerException e) {}
     }
 }

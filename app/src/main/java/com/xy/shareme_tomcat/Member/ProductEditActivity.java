@@ -6,10 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -27,13 +24,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.xy.shareme_tomcat.R;
-import com.xy.shareme_tomcat.adapter.ImageQueueAdapter;
+import com.xy.shareme_tomcat.adapter.ImageUploadAdapter;
 import com.xy.shareme_tomcat.data.Book;
 import com.xy.shareme_tomcat.data.ImageObj;
-import com.xy.shareme_tomcat.data.ImageObject;
+import com.xy.shareme_tomcat.data.ImageChild;
 import com.xy.shareme_tomcat.network_helper.GetBitmapBatch;
-import com.xy.shareme_tomcat.network_helper.ImageUploadTask;
 import com.xy.shareme_tomcat.network_helper.MyOkHttp;
+import com.xy.shareme_tomcat.structure.ImageUploadQueue;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -71,18 +68,16 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
     private TextView txtId;
 
     private ArrayList<ImageObj> books;
-    private ImageQueueAdapter adapter;
+    private ImageUploadAdapter adapter;
     private RecyclerView recyclerView;
-    private int itemIndex, itemAmount, count; //index是走訪整個CardView的指標；amount是新上傳圖片的數量；count是正在上傳第幾張圖
 
     private String bookId, title, condition, price, ps, note;
     private StringBuffer sbDep;
 
     private MyOkHttp conLoadDetail, conEditProduct;
     private GetBitmapBatch getBitmap;
-    private ImageUploadTask imageTask = null;
 
-    private Dialog dialog = null;
+    private Dialog dlgUpload;
     private TextView txtUploadHint;
     private boolean isShown = false;
 
@@ -139,10 +134,10 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
             }
         });
 
+        prepareDialog();
+
         btnPost = (ImageView) toolbar.findViewById(R.id.btnPost);
         btnPost.setOnClickListener(this);
-
-        prepareDialog();
     }
 
     @Override
@@ -174,19 +169,18 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
 
         Uri selectedImageUri = data.getData();
         switch (requestCode) {
-            case ImageQueueAdapter.REQUEST_ALBUM:
+            case ImageUploadAdapter.REQUEST_ALBUM:
                 if (!adapter.createImageFile())
                     return;
                 if (selectedImageUri != null)
                     adapter.cropImage(selectedImageUri);
-
                 break;
-            case ImageQueueAdapter.REQUEST_CROP:
+            case ImageUploadAdapter.REQUEST_CROP:
                 final int position = adapter.getPressedPosition();
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        ImageObject image = adapter.getItem(position);
+                        ImageChild image = adapter.getItem(position);
                         boolean isEmptyCard = image.getBitmap() == null;
                         boolean bitmapIsNull = true;
                         do {
@@ -197,8 +191,7 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
                         adapter.setItem(position, image);
 
                         if (isEmptyCard && adapter.getItemCount() < 5) {
-                            Bitmap bitmap = null;
-                            adapter.addItem(new ImageObject(bitmap, false)); //再新增一張空白圖
+                            adapter.addItem(new ImageChild(null, false)); //再新增一張空白圖
                         }
                     }
                 }).start();
@@ -208,11 +201,11 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void prepareDialog() {
-        dialog = new Dialog(context);
-        dialog.setContentView(R.layout.dlg_uploading);
-        dialog.setCancelable(false);
-        txtUploadHint = (TextView) dialog.findViewById(R.id.txtHint);
-        LinearLayout layUpload = (LinearLayout) dialog.findViewById(R.id.layUpload);
+        dlgUpload = new Dialog(context);
+        dlgUpload.setContentView(R.layout.dlg_uploading);
+        dlgUpload.setCancelable(false);
+        txtUploadHint = (TextView) dlgUpload.findViewById(R.id.txtHint);
+        LinearLayout layUpload = (LinearLayout) dlgUpload.findViewById(R.id.layUpload);
         layUpload.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
@@ -224,9 +217,8 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 try {
-                                    imageTask = null;
+                                    adapter.cancelUpload();
                                     conEditProduct.cancel();
-                                    dialog.dismiss();
                                     Toast.makeText(context, "上傳已取消", Toast.LENGTH_SHORT).show();
                                 }catch (NullPointerException e) {}
                             }
@@ -237,7 +229,6 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void loadData() {
-        System.gc();
         isShown = false;
         btnPost.setVisibility(View.GONE);
 
@@ -356,42 +347,37 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void showImages(Book book) {
-        //設置CardView上的圖片；網路下載回來的圖是不會有Bitmap的值，只會有檔名
-        ArrayList<ImageObject> images = new ArrayList<>();
+        adapter = new ImageUploadAdapter(getResources(), this, context);
+
+        //設置CardView上的圖片；網路下載回來的圖會有檔名(FileName)
+        ImageChild image;
         if (!book.getImgURL().equals("")) {
-            Bitmap bitmap = book.getImg();
-            ImageObject image = new ImageObject(bitmap, false); //isEntity = false代表此圖片來自網路，並非從手機追加的實體圖片
-            image.setFileName(book.getImgURL());
-            images.add(image);
+            image = new ImageChild(book.getImg(), false); //isEntity = false代表此圖片來自網路，並非從手機追加的實體圖片
+            image.setFileName(book.getImgURL()); //將伺服器圖檔名稱設定給物件
+            adapter.addItem(image); //加入佇列
         }
         if (!book.getImgURL2().equals("")) {
-            Bitmap bitmap = book.getImg2();
-            ImageObject image = new ImageObject(bitmap, false);
+            image = new ImageChild(book.getImg2(), false);
             image.setFileName(book.getImgURL2());
-            images.add(image);
+            adapter.addItem(image);
         }
         if (!book.getImgURL3().equals("")) {
-            Bitmap bitmap = book.getImg3();
-            ImageObject image = new ImageObject(bitmap, false);
+            image = new ImageChild(book.getImg3(), false);
             image.setFileName(book.getImgURL3());
-            images.add(image);
+            adapter.addItem(image);
         }
         if (!book.getImgURL4().equals("")) {
-            Bitmap bitmap = book.getImg4();
-            ImageObject image = new ImageObject(bitmap, false);
+            image = new ImageChild(book.getImg4(), false);
             image.setFileName(book.getImgURL4());
-            images.add(image);
+            adapter.addItem(image);
         }
         if (!book.getImgURL5().equals("")) {
-            Bitmap bitmap = book.getImg5();
-            ImageObject image = new ImageObject(bitmap, false);
+            image = new ImageChild(book.getImg5(), false);
             image.setFileName(book.getImgURL5());
-            images.add(image);
+            adapter.addItem(image);
         }
-        if (images.size() < 5) { //圖片不足5張時，添加一張空白圖
-            Bitmap bitmap = null;
-            images.add(new ImageObject(bitmap, false));
-        }
+        if (adapter.getItemCount() < 5) //圖片不足5張時，添加一張空白圖
+            adapter.addItem(new ImageChild(null, false));
 
         // 產生 RecyclerView
         recyclerView = (RecyclerView) findViewById(R.id.recy_books);
@@ -399,10 +385,7 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
         linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
         recyclerView.setLayoutManager(linearLayoutManager);
-
-        adapter = new ImageQueueAdapter(getResources(), this, context);
         recyclerView.setAdapter(adapter);
-        images = null;
     }
 
     private void showFoundStatus() {
@@ -467,60 +450,7 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
             return true;
     }
 
-    private void initTrdWaitPhoto(boolean restart) {
-        Thread trdWaitPhoto = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                hdrWaitPhoto.sendMessage(hdrWaitPhoto.obtainMessage());
-            }
-        });
-        if (restart)
-            trdWaitPhoto.start();
-    }
-
-    private Handler hdrWaitPhoto = new Handler() {
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            if (imageTask == null)
-                return;
-
-            String fileName = imageTask.getPhotoName();
-            if (fileName == null) {
-                initTrdWaitPhoto(true); //還沒收到檔名，繼續監聽
-            }else {
-                initTrdWaitPhoto(false);
-                //將剛剛新上傳的檔名寫入
-                ImageObject image = adapter.getItem(itemIndex);
-                image.setFileName(fileName);
-                adapter.setItem(itemIndex, image);
-
-                //上傳下一張
-                itemIndex++;
-                if (count >= itemAmount) { //圖片都上傳了
-                    dialog.dismiss();
-                    postProduct();
-                    return;
-                }
-                for (int i=itemIndex; i<adapter.getItemCount(); i++) { //新增的圖片可能穿插，需要逐一確認
-                    final ImageObject newImage = adapter.getItem(i);
-                    if (newImage.getBitmap() != null) { //只有剛剛從手機附加上去的圖，才會有Bitmap的值
-                        new Thread(new Runnable() {
-                            public void run() {
-                                imageTask = new ImageUploadTask(context, getString(R.string.link_upload_image));
-                                imageTask.uploadFile(newImage.getBitmap());
-                            }
-                        }).start();
-                        initTrdWaitPhoto(true);
-                        count++;
-                        txtUploadHint.setText(getString(R.string.hint_upload_photo, String.valueOf(count), String.valueOf(itemAmount)));
-                        break;
-                    }
-                }
-            }
-        }
-    };
-
-    private void postProduct() {
+    private void postProduct(String[] fileNames) {
         prgBar.setVisibility(View.VISIBLE);
         layDetail.setVisibility(View.GONE);
         conEditProduct = new MyOkHttp(ProductEditActivity.this, new MyOkHttp.TaskListener() {
@@ -531,7 +461,7 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
                     public void run() {
                         if (result == null) {
                             Toast.makeText(context, "連線失敗", Toast.LENGTH_SHORT).show();
-                            dialog.dismiss();
+                            dlgUpload.dismiss();
                             return;
                         }
                         try {
@@ -541,7 +471,7 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
                                 finish();
                             }else {
                                 Toast.makeText(context, "伺服器發生例外", Toast.LENGTH_SHORT).show();
-                                dialog.dismiss();
+                                dlgUpload.dismiss();
                             }
                         }catch (JSONException e) {
                             e.printStackTrace();
@@ -551,15 +481,6 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
             }
         });
         try {
-            //修正圖檔名稱
-            String[] fileName = new String[5];
-            for (int i=0; i<adapter.getItemCount(); i++)
-                fileName[i] = adapter.getItem(i).getFileName();
-            for (int i=0; i<5; i++) {
-                if (fileName[i] == null)
-                    fileName[i] = "";
-            }
-
             JSONObject reqObj = new JSONObject();
             reqObj.put(KEY_PRODUCT_ID, bookId);
             reqObj.put(KEY_TITLE, title);
@@ -568,11 +489,11 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
             reqObj.put(KEY_CONDITION, condition);
             reqObj.put(KEY_NOTE, note);
             reqObj.put(KEY_PS, ps);
-            reqObj.put(KEY_PHOTO1, fileName[0]);
-            reqObj.put(KEY_PHOTO2, fileName[1]);
-            reqObj.put(KEY_PHOTO3, fileName[2]);
-            reqObj.put(KEY_PHOTO4, fileName[3]);
-            reqObj.put(KEY_PHOTO5, fileName[4]);
+            reqObj.put(KEY_PHOTO1, fileNames[0]);
+            reqObj.put(KEY_PHOTO2, fileNames[1]);
+            reqObj.put(KEY_PHOTO3, fileNames[2]);
+            reqObj.put(KEY_PHOTO4, fileNames[3]);
+            reqObj.put(KEY_PHOTO5, fileNames[4]);
             conEditProduct.execute(getString(R.string.link_edit_product), reqObj.toString());
         }catch (JSONException e) {
             e.printStackTrace();
@@ -586,44 +507,30 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
                 if (!isInfoValid())
                     return;
 
-                itemIndex = 0; //卡片陣列索引
-                itemAmount = 0; //新圖片數量
-                count = 0; //新圖片上傳計數
-                ImageObject image;
+                //準備檔名，舊的圖會有自己的FileName，新的圖沒有，但上傳完後會被更新
+                String[] fileNames = new String[5];
+                for (int i = 0; i < 5; i++)
+                    fileNames[i] = "";
+                for (int i = 0; i < adapter.getItemCount(); i++) {
+                    if (!adapter.getItem(i).isEntity())
+                        fileNames[i] = adapter.getItem(i).getFileName();
+                }
 
-                image = adapter.getItem(0);
-                if (image.getBitmap() == null) { //檢查是否至少有一張圖片
-                    Toast.makeText(context, "未選擇圖片", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                for (int i = 0; i< adapter.getItemCount(); i++) { //計算新圖片數量
-                    image = adapter.getItem(i);
-                    if (image.isEntity())
-                        itemAmount++;
-                }
-                if (itemAmount == 0) { //若無新圖片，直接上傳文字即可
-                    postProduct();
+                if (adapter.getEntityAmount() == 0) { //queue中的圖片數量此時也計算好
+                    if (adapter.getItemCount() == 1) //沒有任何圖片，只剩一張空白圖
+                        Toast.makeText(context, "未選擇圖片", Toast.LENGTH_SHORT).show();
+                    else //沒有新圖片，上傳文字資料即可
+                        postProduct(fileNames);
                     return;
                 }
 
-                for (int i=0; i<adapter.getItemCount(); i++) { //尋找第一張新圖片在陣列的索引
-                    final ImageObject newImage = adapter.getItem(i);
-                    if (newImage.isEntity()) {
-                        itemIndex = i;
-                        //開始上傳
-                        new Thread(new Runnable() {
-                            public void run() {
-                                imageTask = new ImageUploadTask(context, getString(R.string.link_upload_image));
-                                imageTask.uploadFile(newImage.getBitmap());
-                            }
-                        }).start();
-                        initTrdWaitPhoto(true);
-                        count++;
-                        txtUploadHint.setText(getString(R.string.hint_upload_photo, String.valueOf(count), String.valueOf(itemAmount)));
-                        dialog.show();
-                        break;
+                //有追加新圖片，開始上傳
+                adapter.startUpload(fileNames, dlgUpload, txtUploadHint, new ImageUploadQueue.TaskListener() {
+                    @Override
+                    public void onFinished(String[] fileNames) {
+                        postProduct(fileNames);
                     }
-                }
+                });
                 break;
         }
     }
@@ -636,7 +543,7 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     public void onDestroy() {
-        adapter.destroy(true);
+        adapter.destroyQueue(true);
         adapter = null;
         System.gc();
         super.onDestroy();

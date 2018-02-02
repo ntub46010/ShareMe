@@ -16,7 +16,6 @@ import com.xy.shareme_tomcat.R;
 import com.xy.shareme_tomcat.adapter.ProductDisplayAdapter;
 import com.xy.shareme_tomcat.data.Book;
 import com.xy.shareme_tomcat.data.ImageObj;
-import com.xy.shareme_tomcat.network_helper.GetBitmap;
 import com.xy.shareme_tomcat.network_helper.MyOkHttp;
 
 import org.json.JSONArray;
@@ -47,7 +46,6 @@ public class ProductSearchActivity extends AppCompatActivity {
     private ProductDisplayAdapter adapter;
 
     private MyOkHttp conn;
-    private GetBitmap getBitmap;
     private boolean isShown = false;
 
     @Override
@@ -110,14 +108,7 @@ public class ProductSearchActivity extends AppCompatActivity {
                                             obj.getString(KEY_SELLER_NAME)
                                     ));
                                 }
-                                getBitmap = new GetBitmap(context, books, getString(R.string.link_image), new GetBitmap.TaskListener() {
-                                    @Override
-                                    public void onFinished() {
-                                        showData();
-                                    }
-                                });
-                                getBitmap.setPreLoadAmount(-1);
-                                getBitmap.execute();
+                                showData();
                             }else {
                                 runOnUiThread(new Runnable() {
                                     @Override
@@ -151,7 +142,7 @@ public class ProductSearchActivity extends AppCompatActivity {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
         recyProduct.setLayoutManager(linearLayoutManager);
 
-        adapter = new ProductDisplayAdapter(getResources(), context, books);
+        adapter = new ProductDisplayAdapter(getResources(), context, books, 10);
         adapter.setBackgroundColor(getResources(), R.color.card_product);
         recyProduct.setAdapter(adapter);
         books = null;
@@ -193,9 +184,6 @@ public class ProductSearchActivity extends AppCompatActivity {
     private void cancelConnection() {
         try {
             conn.cancel();
-        }catch (NullPointerException e) {}
-        try {
-            getBitmap.cancel(true);
         }catch (NullPointerException e) {}
     }
 }

@@ -14,7 +14,7 @@ import com.xy.shareme_tomcat.R;
 import com.xy.shareme_tomcat.data.Book;
 import com.xy.shareme_tomcat.data.ImageObj;
 import com.xy.shareme_tomcat.network_helper.GetBitmapTask;
-import com.xy.shareme_tomcat.structure.ProductDisplayQueue;
+import com.xy.shareme_tomcat.structure.ImageDownloadQueue;
 
 import java.util.ArrayList;
 
@@ -23,18 +23,19 @@ public class StockListAdapter extends BaseAdapter {
     private Resources res = null;
 
     private LayoutInflater layoutInflater;
-    private int layout, backgroundColor, lastPosition;
+    private int layout, lastPosition, backgroundColor, queueVolume;
 
     private ArrayList<ImageObj> books;
-    private ProductDisplayQueue queue;
+    private ImageDownloadQueue queue;
 
-    public StockListAdapter(Resources res, Context context, ArrayList<ImageObj> books, int layout) {
+    public StockListAdapter(Resources res, Context context, ArrayList<ImageObj> books, int layout, int queueVolume) {
         this.res = res;
         this.context = context;
         this.books = books;
         this.layout = layout;
         layoutInflater = LayoutInflater.from(context);
-        this.queue = new ProductDisplayQueue(10);
+        this.queueVolume = queueVolume;
+        this.queue = new ImageDownloadQueue(queueVolume);
     }
 
     @Override
@@ -73,7 +74,6 @@ public class StockListAdapter extends BaseAdapter {
             }
         }
 
-
         imgBookPic.setImageBitmap(books.get(i).getImg());
         txtTitle.setText(((Book) books.get(i)).getTitle());
 
@@ -95,7 +95,6 @@ public class StockListAdapter extends BaseAdapter {
             @Override
             public void onFinished() {
                 imageView.setImageBitmap(books.get(i).getImg());
-                //dataViewHolder.imgGoodsPic.setImageBitmap(books.get(i).getImg());
                 //notifyDataSetChanged(); //不可
             }
         }));
@@ -106,10 +105,12 @@ public class StockListAdapter extends BaseAdapter {
     }
 
     public void destroy(boolean isFully) {
-        queue.destroy();
-        if (isFully)
-            queue = null;
-        else
-            queue = new ProductDisplayQueue(10);
+        if (queue != null) {
+            queue.destroy();
+            if (isFully)
+                queue = null;
+            else
+                queue = new ImageDownloadQueue(queueVolume);
+        }
     }
 }
