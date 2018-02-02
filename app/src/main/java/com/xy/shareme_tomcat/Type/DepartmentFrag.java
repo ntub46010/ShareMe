@@ -10,11 +10,11 @@ import android.widget.Button;
 import com.xy.shareme_tomcat.MainActivity;
 import com.xy.shareme_tomcat.R;
 
+import static com.xy.shareme_tomcat.MainActivity.searchView;
 import static com.xy.shareme_tomcat.MainActivity.vpgHome;
 import static com.xy.shareme_tomcat.Product.ProductHomeFrag.conProductHome;
-import static com.xy.shareme_tomcat.Product.ProductHomeFrag.gbmProductHome;
-import static com.xy.shareme_tomcat.Product.ProductHomeFrag.adpProductHome;
 import static com.xy.shareme_tomcat.Product.ProductHomeFrag.recyProduct;
+import static com.xy.shareme_tomcat.data.DataHelper.getBoardNickname;
 import static com.xy.shareme_tomcat.data.DataHelper.isFromDepartment;
 import static com.xy.shareme_tomcat.data.DataHelper.setBoardTitle;
 
@@ -99,11 +99,9 @@ public class DepartmentFrag extends Fragment {
         }
 
         //停止下載任務
-        /*try {
-            adpProductHome.setCanCheckLoop(false);
+        try {
             conProductHome.cancel();
-            gbmProductHome.cancel(true);
-        }catch (NullPointerException e) {}*/
+        }catch (NullPointerException e) {}
 
         //切換畫面
         isFromDepartment = true;

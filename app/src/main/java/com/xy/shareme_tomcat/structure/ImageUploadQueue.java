@@ -6,10 +6,9 @@ import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Message;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.xy.shareme_tomcat.R;
-import com.xy.shareme_tomcat.data.ImageObject;
+import com.xy.shareme_tomcat.data.ImageChild;
 import com.xy.shareme_tomcat.network_helper.ImageUploadTask;
 
 public class ImageUploadQueue extends Queue {
@@ -21,6 +20,8 @@ public class ImageUploadQueue extends Queue {
 
     private Dialog dlgUpload;
     private TextView txtUploadHint;
+
+    private String[] fileNames;
 
     // 宣告一個接收回傳結果的程式必須實作的介面
     public interface TaskListener { void onFinished(String[] fileNames); }
@@ -44,13 +45,14 @@ public class ImageUploadQueue extends Queue {
     public int getEntityAmount () {
         entityAmount = 0;
         for (int i = 0; i<size(); i++) {
-            if (((ImageObject) get(i)).isEntity())
+            if (((ImageChild) get(i)).isEntity())
                 entityAmount++;
         }
         return entityAmount;
     }
 
-    public void startUpload(Dialog dlgUpload, TextView txtUploadHint, TaskListener taskListener) {
+    public void startUpload(String[] fileNames, Dialog dlgUpload, TextView txtUploadHint, TaskListener taskListener) {
+        this.fileNames = fileNames;
         this.dlgUpload = dlgUpload;
         this.txtUploadHint = txtUploadHint;
         this.taskListener = taskListener;
@@ -59,7 +61,7 @@ public class ImageUploadQueue extends Queue {
         itemIndex = 0;
         itemCount = 0;
 
-        createUploadTask(itemIndex);
+        createUploadTask();
     }
 
     private void initTrdWaitPhoto(boolean restart) {
@@ -90,33 +92,34 @@ public class ImageUploadQueue extends Queue {
             }else {
                 initTrdWaitPhoto(false);
                 //寫入檔名
-                ((ImageObject) get(itemIndex)).setFileName(fileName);
+                fileNames[itemIndex] = fileName;
 
                 //準備上傳下一張
                 itemIndex++;
-                if (itemIndex >= size() || ((ImageObject) get(itemIndex)).getBitmap() == null) { //圖片都上傳完，程式即將結束
+                if (itemIndex >= size() || ((ImageChild) get(itemIndex)).getBitmap() == null) { //圖片都上傳完，程式即將結束
                     onUploadFinished();
                     return;
                 }
-                createUploadTask(itemIndex);
+                createUploadTask();
             }
         }
     };
 
-    private void createUploadTask(final int i) {
+    private void createUploadTask(/*final int i*/) {
         while (itemIndex < size()) {
-            if (((ImageObject) get(itemIndex)).isEntity()) { //只有剛剛從手機選取的實體圖片才會被上傳
+            if (((ImageChild) get(itemIndex)).isEntity()) { //只有剛剛從手機選取的實體圖片才會被上傳
                 //開始上傳
                 itemCount++;
                 txtUploadHint.setText(res.getString(R.string.hint_upload_photo, String.valueOf(itemCount), String.valueOf(entityAmount)));
                 new Thread(new Runnable() {
                     public void run() {
                         imageTask = new ImageUploadTask(context, res.getString(R.string.link_upload_image));
-                        imageTask.uploadFile(((ImageObject) get(i)).getBitmap());
+                        imageTask.uploadFile(((ImageChild) get(itemIndex)).getBitmap());
                     }
                 }).start();
                 initTrdWaitPhoto(true); //監聽正在上傳的圖片檔名
-                return;
+                //上傳完一張後，itemIndex才會遞增
+                break;
             }else
                 itemIndex++;
         }
@@ -126,27 +129,19 @@ public class ImageUploadQueue extends Queue {
     private void onUploadFinished() {
         //程式結束
         this.dlgUpload.dismiss();
-
-        //統整伺服器上的檔名
-        String[] fileNames = new String[5];
-        for (int i = 0; i < 5; i++)
-            fileNames[i] = "";
-        for (int i = 0; i < size(); i++) {
-            if (((ImageObject) get(i)).getBitmap() != null)
-                fileNames[i] = ((ImageObject) get(i)).getFileName();
-        }
         taskListener.onFinished(fileNames); //回傳給原Activity
     }
 
     public void cancelUpload() {
         imageTask = null;
+        dlgUpload.dismiss();
     }
 
 
     @Override
     public void destroy() {
         for (int i = 0; i < size(); i++)
-            ((ImageObject) get(i)).setBitmap(null);
+            ((ImageChild) get(i)).setBitmap(null);
 
         clear();
     }

@@ -2,7 +2,6 @@ package com.xy.shareme_tomcat.adapter;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,20 +13,26 @@ import android.widget.TextView;
 import com.xy.shareme_tomcat.R;
 import com.xy.shareme_tomcat.data.Chat;
 import com.xy.shareme_tomcat.data.ImageObj;
+import com.xy.shareme_tomcat.network_helper.GetBitmapTask;
+import com.xy.shareme_tomcat.structure.ImageDownloadQueue;
 
 import java.util.ArrayList;
 
 public class MailListAdapter extends BaseAdapter{
     private Context context;
-    private Resources resources = null;
+    private Resources res;
     private LayoutInflater layoutInflater;
     private ArrayList<ImageObj> mails;
-    private int backgroundColor;
+    private ImageDownloadQueue queue;
+    private int lastPosition, backgroundColor, queueVolume;
 
-    public MailListAdapter(Context context, ArrayList<ImageObj> mails) {
+    public MailListAdapter(Resources res, Context context, ArrayList<ImageObj> mails, int queueVolume) {
+        this.res = res;
         this.context = context;
         layoutInflater = LayoutInflater.from(context);
         this.mails = mails;
+        this.queueVolume = queueVolume;
+        this.queue = new ImageDownloadQueue(queueVolume);
     }
 
     @Override
@@ -50,25 +55,51 @@ public class MailListAdapter extends BaseAdapter{
         if (view == null)
             view = layoutInflater.inflate(R.layout.lst_mail, viewGroup, false);
 
-        //LinearLayout layMailCard = (LinearLayout) view.findViewById(R.id.layMail);
         ImageView imgAvatar = (ImageView) view.findViewById(R.id.imgAvatar);
         TextView txtName = (TextView) view.findViewById(R.id.txtName);
         TextView txtMsg = (TextView) view.findViewById(R.id.txtPreviewMsg);
         TextView txtDatetime = (TextView) view.findViewById(R.id.txtDatetime);
 
-        Chat chat = (Chat) mails.get(i);
-        txtName.setText(chat.getName());
-        txtMsg.setText(chat.getMsg());
-        txtDatetime.setText(chat.getDate() + "  " + chat.getTime());
+        //依滑動方向檢查圖片
+        if (i > lastPosition) { //往下滑
+            if (mails.get(i).getImg() == null) { //若發現沒圖片
+                setGetBitmapTask(i, imgAvatar); //指派下載器給該項目，放入佇列自動下載
+                queue.enqueueFromRear(mails.get(i));
+            }
+        }else { //往上滑
+            if (mails.get(i).getImg() == null) { //若發現沒圖片
+                setGetBitmapTask(i, imgAvatar); //指派下載器給該項目，放入佇列自動下載
+                queue.enqueueFromFront(mails.get(i));
+            }
+        }
 
-        Bitmap bitmap = chat.getImg();
-        if (bitmap != null)
-            imgAvatar.setImageBitmap(bitmap);
-        /*
-        try {
-            layMailCard.setBackgroundColor(resources.getColor(backgroundColor));
-        }catch (NullPointerException e) {}
-        */
+        txtName.setText(((Chat) mails.get(i)).getName());
+        txtMsg.setText(((Chat) mails.get(i)).getMsg());
+        txtDatetime.setText(((Chat) mails.get(i)).getDate() + "  " + ((Chat) mails.get(i)).getTime());
+        if ((mails.get(i)).getImg() != null)
+            imgAvatar.setImageBitmap((mails.get(i)).getImg());
+
+        lastPosition = i;
         return view;
+    }
+
+    private void setGetBitmapTask(final int i, final ImageView imageView) {
+        mails.get(i).setGetBitmap(new GetBitmapTask(res.getString(R.string.link_avatar), new GetBitmapTask.TaskListener() {
+            @Override
+            public void onFinished() {
+                if (mails.get(i).getImg() != null)
+                    imageView.setImageBitmap(mails.get(i).getImg());
+            }
+        }));
+    }
+
+    public void destroy(boolean isFully) {
+        if (queue != null) {
+            queue.destroy();
+            if (isFully)
+                queue = null;
+            else
+                queue = new ImageDownloadQueue(queueVolume);
+        }
     }
 }

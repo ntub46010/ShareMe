@@ -15,6 +15,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.xy.shareme_tomcat.Member.MemberHomeFrag;
 import com.xy.shareme_tomcat.Product.ProductHomeFrag;
@@ -147,7 +148,6 @@ public class MainActivity extends FragmentActivity {
                 return true;
             }
         });
-        searchView.setQueryHint(getString(R.string.hint_search_product, getBoardNickname()));
 
         //搜尋框提示字體顏色
         try {

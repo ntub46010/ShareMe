@@ -8,7 +8,7 @@ import com.xy.shareme_tomcat.data.ImageObj;
 
 import java.net.URL;
 
-public class GetBitmapTask extends AsyncTask<ImageObj, Void, Void> {
+public class GetBitmapTask extends AsyncTask<ImageObj, Void, Void> { //用來下載一個ImageObj的一張圖片
     private String linkPrefix;
     private TaskListener taskListener;
 

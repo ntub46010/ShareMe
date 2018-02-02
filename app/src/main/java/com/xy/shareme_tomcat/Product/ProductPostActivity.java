@@ -6,10 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -26,16 +23,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.xy.shareme_tomcat.R;
-import com.xy.shareme_tomcat.adapter.ImageQueueAdapter;
-import com.xy.shareme_tomcat.data.ImageObject;
-import com.xy.shareme_tomcat.network_helper.ImageUploadTask;
+import com.xy.shareme_tomcat.adapter.ImageUploadAdapter;
+import com.xy.shareme_tomcat.data.ImageChild;
 import com.xy.shareme_tomcat.network_helper.MyOkHttp;
 import com.xy.shareme_tomcat.structure.ImageUploadQueue;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
 
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_CONDITION;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_NOTE;
@@ -52,8 +46,8 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_SELLER;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_STATUS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TYPE;
-import static com.xy.shareme_tomcat.adapter.ImageQueueAdapter.REQUEST_ALBUM;
-import static com.xy.shareme_tomcat.adapter.ImageQueueAdapter.REQUEST_CROP;
+import static com.xy.shareme_tomcat.adapter.ImageUploadAdapter.REQUEST_ALBUM;
+import static com.xy.shareme_tomcat.adapter.ImageUploadAdapter.REQUEST_CROP;
 
 public class ProductPostActivity extends AppCompatActivity implements View.OnClickListener {
     private Context context;
@@ -69,7 +63,7 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
     private MyOkHttp conn;
 
     private RecyclerView recyclerView;
-    private ImageQueueAdapter adapter;
+    private ImageUploadAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,8 +122,8 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
         linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
         recyclerView.setLayoutManager(linearLayoutManager);
 
-        adapter = new ImageQueueAdapter(getResources(), this, context);
-        adapter.addItem(new ImageObject(null, false)); //添加一張空白圖
+        adapter = new ImageUploadAdapter(getResources(), this, context);
+        adapter.addItem(new ImageChild(null, false)); //添加一張空白圖
         recyclerView.setAdapter(adapter);
     }
 
@@ -167,19 +161,18 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        ImageObject image = adapter.getItem(position);
+                        ImageChild image = adapter.getItem(position);
                         boolean isEmptyCard = image.getBitmap() == null; //退出選圖畫面後，若為null代表剛剛沒選圖
                         boolean bitmapIsNull = true;
                         do {
                             bitmapIsNull = adapter.mImageFileToBitmap(image);
                         } while (bitmapIsNull);
 
-                        image.setEntity(true);
+                        image.setEntity(true); //r將選好的圖片標記為實體
                         adapter.setItem(position, image);
 
-                        if (isEmptyCard && adapter.getItemCount() < 5) { //isEmptyCard意義不明，但拿掉的話，在該處選第二次圖時，會複製一個到旁邊去
-                            adapter.addItem(new ImageObject(null, false)); //再新增一張空白圖
-                        }
+                        if (isEmptyCard && adapter.getItemCount() < 5) //isEmptyCard意義不明，但拿掉的話，在該處選第二次圖時，會複製一個到旁邊去
+                            adapter.addItem(new ImageChild(null, false)); //再新增一張空白圖
                     }
                 }).start();
                 recyclerView.scrollToPosition(position);
@@ -255,7 +248,6 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
                                 try {
                                     adapter.cancelUpload();
                                     conn.cancel();
-                                    dlgUpload.dismiss();
                                     Toast.makeText(context, "上傳已取消", Toast.LENGTH_SHORT).show();
                                 }catch (NullPointerException e) {
                                     e.printStackTrace();
@@ -330,12 +322,17 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
                 if (!isInfoValid())
                     return;
 
-                if (adapter.getEntityAmount() == 0) {
+                if (adapter.getEntityAmount() == 0) { //沒有從手機選擇圖片
                     Toast.makeText(context, "未選擇圖片", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                adapter.startUpload(dlgUpload, txtUploadHint, new ImageUploadQueue.TaskListener() {
+                //初始化圖片檔名，上傳完成後會取回新的檔名陣列
+                String[] fileNames = new String[5];
+                for (int i = 0; i < 5; i++)
+                    fileNames[i] = "";
+
+                adapter.startUpload(fileNames, dlgUpload, txtUploadHint, new ImageUploadQueue.TaskListener() {
                     @Override
                     public void onFinished(String[] fileNames) {
                         postProduct(fileNames);
@@ -348,6 +345,7 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
     @Override
     public void onDestroy() {
         cancelConnection();
+        adapter.destroyQueue(true);
         adapter = null;
         System.gc();
         super.onDestroy();
@@ -358,7 +356,7 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
             conn.cancel();
         }catch (NullPointerException e) {}
         try {
-            adapter.destroy(true);
+            adapter.destroyQueue(true);
         }catch (NullPointerException e) {}
     }
 }

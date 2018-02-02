@@ -14,12 +14,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.xy.shareme_tomcat.Product.ProductSearchActivity;
 import com.xy.shareme_tomcat.R;
 import com.xy.shareme_tomcat.adapter.MailListAdapter;
 import com.xy.shareme_tomcat.data.Chat;
 import com.xy.shareme_tomcat.data.ImageObj;
-import com.xy.shareme_tomcat.network_helper.GetBitmap;
 import com.xy.shareme_tomcat.network_helper.MyOkHttp;
 
 import org.json.JSONArray;
@@ -51,9 +49,9 @@ public class MemberMailboxActivity extends AppCompatActivity {
     private ProgressBar prgBar;
 
     private ArrayList<ImageObj> chats;
+    private MailListAdapter adapter;
 
     private MyOkHttp conn;
-    private GetBitmap getBitmap;
     private boolean isShown = false;
 
     @Override
@@ -124,13 +122,14 @@ public class MemberMailboxActivity extends AppCompatActivity {
                                             obj.getString(KEY_SELLER_ID)
                                     ));
                                 }
-                                getBitmap = new GetBitmap(context, chats, getString(R.string.link_avatar), new GetBitmap.TaskListener() {
+                                showData();
+                                /*getBitmap = new GetBitmap(context, chats, getString(R.string.link_avatar), new GetBitmap.TaskListener() {
                                     @Override
                                     public void onFinished() {
                                         showData();
                                     }
                                 });
-                                getBitmap.execute();
+                                getBitmap.execute();*/
                             }else {
                                 Toast.makeText(context, "沒有您的訊息", Toast.LENGTH_SHORT).show();
                                 showFoundStatus();
@@ -154,8 +153,8 @@ public class MemberMailboxActivity extends AppCompatActivity {
     }
 
     private void showData() {
+        adapter = new MailListAdapter(getResources(), context, chats, 10);
         ListView listView = (ListView) findViewById(R.id.lstMails);
-        final MailListAdapter adapter = new MailListAdapter(context, chats);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -203,6 +202,8 @@ public class MemberMailboxActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
+        adapter.destroy(true);
+        adapter = null;
         System.gc();
         super.onDestroy();
     }
@@ -210,9 +211,6 @@ public class MemberMailboxActivity extends AppCompatActivity {
     private void cancelConnection() {
         try {
             conn.cancel();
-        }catch (NullPointerException e) {}
-        try {
-            getBitmap.cancel(true);
         }catch (NullPointerException e) {}
     }
 }

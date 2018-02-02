@@ -2,17 +2,12 @@ package com.xy.shareme_tomcat.data;
 
 import android.graphics.Bitmap;
 
-public class ImageObject {
+public class ImageChild {
     private Bitmap bitmap;
-    private String imagePath = null;
-    private String fileName = null; //伺服器上的圖檔名稱
-    private boolean isEntity = true; //是否為剛剛從手機選取的圖，而非透過下載或空白圖
+    private String fileName = ""; //伺服器上的圖檔名稱
+    private boolean isEntity = false; //是否為剛剛從手機選取的圖，而非透過下載或空白圖
 
-    public ImageObject(Bitmap bitmap) {
-        this.bitmap = bitmap;
-    }
-
-    public ImageObject(Bitmap bitmap, boolean isEntity) {
+    public ImageChild(Bitmap bitmap, boolean isEntity) {
         this.bitmap = bitmap;
         this.isEntity = isEntity;
     }
@@ -23,14 +18,6 @@ public class ImageObject {
 
     public void setBitmap(Bitmap bitmap) {
         this.bitmap = bitmap;
-    }
-
-    public String getImagePath() {
-        return imagePath;
-    }
-
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
     }
 
     public String getFileName() {
