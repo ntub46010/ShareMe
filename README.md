@@ -3,7 +3,7 @@
 標註「開發中」的部份代表尚未完成，圖片為示意圖。
 
 ## 登入畫面
-主程式：LoginActivity<br>
+主程式：<a href="https://github.com/ntub46010/ShareMe_Tomcat/blob/Tomcat/app/src/main/java/com/xy/shareme_tomcat/LoginActivity.java">LoginActivity</a><br>
 說明：輸入帳密才可登入，或者前往註冊帳號。
 <table><tr><td>
 <img src="https://github.com/ntub46010/Photos/blob/master/BookStore%E6%93%8D%E4%BD%9C%E7%95%AB%E9%9D%A2/%E7%99%BB%E5%85%A5%E7%95%AB%E9%9D%A2.png" height="24%" width="24%" />
@@ -12,7 +12,13 @@
 </td></tr></table>
 
 ## 首頁
-主程式：MainActivity、DepartmentFrag、ProductHomeFrag、MemberHomeFrag、SettingHomeFrag<br>
+主程式：
+<a href="https://github.com/ntub46010/ShareMe_Tomcat/blob/Tomcat/app/src/main/java/com/xy/shareme_tomcat/MainActivity.java">MainActivity</a>、
+<a href="https://github.com/ntub46010/ShareMe_Tomcat/blob/Tomcat/app/src/main/java/com/xy/shareme_tomcat/Type/DepartmentFrag.java">DepartmentFrag</a>、
+<a href="https://github.com/ntub46010/ShareMe_Tomcat/blob/Tomcat/app/src/main/java/com/xy/shareme_tomcat/Product/ProductHomeFrag.java">ProductHomeFrag</a>、
+<a href="https://github.com/ntub46010/ShareMe_Tomcat/blob/Tomcat/app/src/main/java/com/xy/shareme_tomcat/Member/MemberHomeFrag.java">MemberHomeFrag</a>、
+<a href="https://github.com/ntub46010/ShareMe_Tomcat/blob/Tomcat/app/src/main/java/com/xy/shareme_tomcat/Settings/SettingHomeFrag.java">SettingHomeFrag</a>
+<br>
 說明：由4個Fragment呈現主要功能，可左右滑動切換。點選各個科系能查看該分類的商品。商品首頁上方的放大鏡圖案是搜尋功能。設定的通知開關是控制推播通知的顯示。
 <table><tr><td>
 <img src="https://github.com/ntub46010/Photos/blob/master/BookStore%E6%93%8D%E4%BD%9C%E7%95%AB%E9%9D%A2/%E7%A7%91%E7%B3%BB.png" height="24%" width="24%" />
@@ -22,7 +28,7 @@
 </td></tr></table>
 
 ## 搜尋商品
-主程式：ProductSearchActivity<br>
+主程式：<a href="https://github.com/ntub46010/ShareMe_Tomcat/blob/Tomcat/app/src/main/java/com/xy/shareme_tomcat/Product/ProductSearchActivity.java">ProductSearchActivity</a><br>
 說明：輸入關鍵字，以找出當前所在分類下，書名包含該字眼的商品。
 <table><tr><td>
 <img src="https://github.com/ntub46010/Photos/blob/master/BookStore%E6%93%8D%E4%BD%9C%E7%95%AB%E9%9D%A2/%E6%9C%83%E8%B3%87%E7%B3%BB%E5%95%86%E5%93%81.png" height="24%" width="24%" />
@@ -31,7 +37,7 @@
 </td></tr></table>
 
 ## 刊登商品
-主程式：ProductPostActivity<br>
+主程式：<a href="https://github.com/ntub46010/ShareMe_Tomcat/blob/Tomcat/app/src/main/java/com/xy/shareme_tomcat/Product/ProductPostActivity.java">ProductPostActivity</a><br>
 說明：從手機圖庫中選取照片，依固定長寬比例裁切，最多選5張。並填寫書名、價格、筆記等資料，以及所要刊登在的分類(可複選)。
 <table><tr><td>
 <img src="https://github.com/ntub46010/Photos/blob/master/ShareMe%E6%93%8D%E4%BD%9C%E7%95%AB%E9%9D%A2/%E5%88%8A%E7%99%BB%E5%95%86%E5%93%81(%E7%A9%BA%E7%99%BD).png" height="24%" width="24%" />
@@ -41,7 +47,7 @@
 </td></tr></table>
 
 ## 商品詳情
-主程式：ProductDetailActivity<br>
+主程式：<a href="https://github.com/ntub46010/ShareMe_Tomcat/blob/Tomcat/app/src/main/java/com/xy/shareme_tomcat/Product/ProductDetailActivity.java">ProductDetailActivity</a><br>
 說明：顯示商品詳細資料，可放大圖片。點擊愛心圖案會加入最愛，供日後查看。點擊信封圖案會開啟交談室，以聯絡賣家。
 <table><tr><td>
 <img src="https://github.com/ntub46010/Photos/blob/master/ShareMe%E6%93%8D%E4%BD%9C%E7%95%AB%E9%9D%A2/%E5%95%86%E5%93%81%E8%A9%B3%E6%83%851.png" height="24%" width="24%" />
@@ -49,7 +55,7 @@
 <img src="https://github.com/ntub46010/Photos/blob/master/BookStore%E6%93%8D%E4%BD%9C%E7%95%AB%E9%9D%A2/%E5%95%86%E5%93%81%E8%A9%B3%E6%83%85(%E5%9C%96%E7%89%87%E7%B8%AE%E6%94%BE).png" height="24%" width="24%" />
 </td></tr></table>
 
-## 個人檔案
+## 個人檔案(開發中)
 主程式：MemberProfileActivity<br>
 說明：顯示個人基本資料，如大頭照、姓名、科系與上架商品。點擊信封圖案可開啟Email軟體，寄信給對方。點擊評價圖案可給予對方正評或負評，或者撤回。
 <table><tr><td>
@@ -60,7 +66,7 @@
 </td></tr></table>
 
 ## 我的最愛
-主程式：MemberFavoriteActivity<br>
+主程式：<a href="https://github.com/ntub46010/ShareMe_Tomcat/blob/Tomcat/app/src/main/java/com/xy/shareme_tomcat/Member/MemberFavoriteActivity.java">MemberFavoriteActivity</a><br>
 說明：先前在商品詳情中按過愛心圖案的商品，可在此查看。
 <table><tr><td>
 <img src="https://github.com/ntub46010/Photos/blob/master/BookStore%E6%93%8D%E4%BD%9C%E7%95%AB%E9%9D%A2/%E6%88%91%E7%9A%84%E6%9C%80%E6%84%9B.png" height="24%" width="24%" />
@@ -77,7 +83,7 @@
 </td></tr></table>
 
 ## 信箱(開發中)
-主程式：MemberMailboxActivity<br>
+主程式：<a href="https://github.com/ntub46010/ShareMe_Tomcat/blob/Tomcat/app/src/main/java/com/xy/shareme_tomcat/Member/MemberMailboxActivity.java">MemberMailboxActivity</a><br>
 說明：顯示與各個會員的對話紀錄，點擊可開啟交談室。另外接收到他人的訊息時將會收到推播通知，在交談室以外的地方，包含關閉本App後都可收到推播。
 <table><tr><td>
 <img src="https://github.com/ntub46010/Photos/blob/master/BookStore%E6%93%8D%E4%BD%9C%E7%95%AB%E9%9D%A2/%E4%BF%A1%E7%AE%B1.png" height="24%" width="24%" />
@@ -85,7 +91,9 @@
 </td></tr></table>
 
 ## 商品管理
-主程式：MemberStockActivity<br>
+主程式：<a href="https://github.com/ntub46010/ShareMe_Tomcat/blob/Tomcat/app/src/main/java/com/xy/shareme_tomcat/Member/MemberStockActivity.java">MemberStockActivity</a>、
+<a href="https://github.com/ntub46010/ShareMe_Tomcat/blob/Tomcat/app/src/main/java/com/xy/shareme_tomcat/Member/ProductEditActivity.java">ProductEditActivity</a>
+<br>
 說明：對自己刊登的商品進行查看、編輯與下架的操作。其中編輯功能可追加、移動或移除圖片。下架功能使該商品不會再被搜尋到，但仍可在交談室中被檢視。
 
 ### 選項
