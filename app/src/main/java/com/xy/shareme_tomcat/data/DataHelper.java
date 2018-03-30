@@ -1,7 +1,10 @@
 package com.xy.shareme_tomcat.data;
 
 import android.content.Context;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 
 import com.xy.shareme_tomcat.R;
 
@@ -14,8 +17,8 @@ import static com.xy.shareme_tomcat.MainActivity.board;
 import static com.xy.shareme_tomcat.MainActivity.txtBarTitle;
 
 public class DataHelper {
-    public static boolean conFlag = false; //表示OKHttp的取資料工作結束，將流程交還原Activity進行後續操作
-    public static String loginUserId = "10346010";
+    //public static boolean conFlag = false; //表示OKHttp的取資料工作結束，將流程交還原Activity進行後續操作
+    public static String loginUserId = "10246010";
     public static String myName = ""; //用於發送推播
     public static int myGender = -1; //用於個人檔案icon，包含從信箱退出時的狀況
     public static String myAvatarUrl = ""; //用於發送推播
@@ -63,8 +66,6 @@ public class DataHelper {
     public static final String KEY_PRODUCTS = "Products";
     public static final String KEY_MAILS = "Mails";
     public static final String KEY_STOCK = "Stock";
-
-
 
     public static String getSpnDepCode (int position) {
         String depCode = "";
@@ -258,7 +259,19 @@ public class DataHelper {
         return  adapter;
     }
 
-    public static int getNotFoundImg() {
+    public static void showFoundStatus(ArrayList arrayList, ImageView imageView, TextView textView, String msg) {
+        if (arrayList.isEmpty()) {
+            imageView.setImageResource(getNotFoundImg());
+            textView.setText(msg);
+            imageView.setVisibility(View.VISIBLE);
+            textView.setVisibility(View.VISIBLE);
+        }else {
+            imageView.setVisibility(View.GONE);
+            textView.setVisibility(View.GONE);
+        }
+    }
+
+    private static int getNotFoundImg() {
         int imgId;
         switch ((int) (Math.random()* 5) + 1) {
             case 1:

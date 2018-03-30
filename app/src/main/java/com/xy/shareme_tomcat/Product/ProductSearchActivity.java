@@ -34,7 +34,7 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_SELLER_NAME;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_STATUS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TYPE;
-import static com.xy.shareme_tomcat.data.DataHelper.getNotFoundImg;
+import static com.xy.shareme_tomcat.data.DataHelper.showFoundStatus;
 
 public class ProductSearchActivity extends AppCompatActivity {
     private Context context;
@@ -94,6 +94,8 @@ public class ProductSearchActivity extends AppCompatActivity {
                             prgBar.setVisibility(View.GONE);
                             return;
                         }
+                        final ImageView imageView = (ImageView) findViewById(R.id.imgNotFound);
+                        final TextView textView = (TextView) findViewById(R.id.txtNotFound);
                         try {
                             JSONObject resObj = new JSONObject(result);
                             if (resObj.getBoolean(KEY_STATUS)) {
@@ -108,20 +110,20 @@ public class ProductSearchActivity extends AppCompatActivity {
                                             obj.getString(KEY_SELLER_NAME)
                                     ));
                                 }
+                                showFoundStatus(books, imageView, textView, "");
                                 showData();
                             }else {
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Toast.makeText(context, "沒有找到商品", Toast.LENGTH_SHORT).show();
-                                        showFoundStatus();
-                                        prgBar.setVisibility(View.GONE);
+                                        showFoundStatus(books, imageView, textView, "沒有找到商品");
                                     }
                                 });
                             }
                         }catch (JSONException e) {
-                            e.printStackTrace();
+                            showFoundStatus(books, imageView, textView, "伺服器發生例外");
                         }
+                        prgBar.setVisibility(View.GONE);
                     }
                 });
             }
@@ -147,25 +149,8 @@ public class ProductSearchActivity extends AppCompatActivity {
         recyProduct.setAdapter(adapter);
         books = null;
 
-        prgBar.setVisibility(View.GONE);
         recyProduct.setVisibility(View.VISIBLE);
         isShown = true;
-    }
-
-    private void showFoundStatus() {
-        //若未找到最愛的書，則說明沒有找到
-        TextView txtNotFound = (TextView) findViewById(R.id.txtNotFound);
-        ImageView imgNotFound = (ImageView) findViewById(R.id.imgNotFound);
-        if (books == null || books.isEmpty()) {
-            txtNotFound.setText("沒有找到商品");
-            txtNotFound.setVisibility(View.VISIBLE);
-            imgNotFound.setImageResource(getNotFoundImg());
-            imgNotFound.setVisibility(View.VISIBLE);
-        }else {
-            txtNotFound.setText("");
-            txtNotFound.setVisibility(View.GONE);
-            imgNotFound.setVisibility(View.GONE);
-        }
     }
 
     @Override

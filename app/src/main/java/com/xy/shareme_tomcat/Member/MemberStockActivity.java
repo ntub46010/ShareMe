@@ -38,9 +38,9 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_STATUS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_STOCK;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_USER_ID;
-import static com.xy.shareme_tomcat.data.DataHelper.getNotFoundImg;
 import static com.xy.shareme_tomcat.data.DataHelper.getSimpleAdapter;
 import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
+import static com.xy.shareme_tomcat.data.DataHelper.showFoundStatus;
 
 public class MemberStockActivity extends AppCompatActivity {
     private Context context;
@@ -186,6 +186,8 @@ public class MemberStockActivity extends AppCompatActivity {
                             Toast.makeText(context, "連線失敗", Toast.LENGTH_SHORT).show();
                             return;
                         }
+                        ImageView imageView = (ImageView) findViewById(R.id.imgNotFound);
+                        TextView textView = (TextView) findViewById(R.id.txtNotFound);
                         try {
                             JSONObject resObj = new JSONObject(result);
                             if (resObj.getBoolean(KEY_STATUS)) {
@@ -199,15 +201,17 @@ public class MemberStockActivity extends AppCompatActivity {
                                             obj.getString(KEY_PRICE)
                                     ));
                                 }
+                                showFoundStatus(books, imageView, textView, "");
                                 showData();
-                            }else {
-                                Toast.makeText(context, "沒有上架的商品", Toast.LENGTH_SHORT).show();
                                 prgBar.setVisibility(View.GONE);
-                                showFoundStatus();
+                            }else {
+                                prgBar.setVisibility(View.GONE);
+                                showFoundStatus(books, imageView, textView, "沒有上架的商品");
                             }
                         }catch (JSONException e) {
-                            Toast.makeText(context, "伺服器發生例外", Toast.LENGTH_SHORT).show();
                             prgBar.setVisibility(View.GONE);
+                            showFoundStatus(books, imageView, textView, "處理JSON發生錯誤");
+                            e.printStackTrace();
                         }
                     }
                 });
@@ -228,28 +232,11 @@ public class MemberStockActivity extends AppCompatActivity {
         lstProduct.setAdapter(adapter);
 
         books = null;
-        prgBar.setVisibility(View.GONE);
         lstProduct.setVisibility(View.VISIBLE);
         swipeRefreshLayout.setEnabled(true);
         swipeRefreshLayout.setRefreshing(false);
 
         isShown = true;
-    }
-
-    private void showFoundStatus() {
-        //若未找到書，則說明沒有找到
-        TextView txtNotFound = (TextView) findViewById(R.id.txtNotFound);
-        ImageView imgNotFound = (ImageView) findViewById(R.id.imgNotFound);
-        if (books == null || books.isEmpty()) {
-            txtNotFound.setText("此商品已被下架");
-            txtNotFound.setVisibility(View.VISIBLE);
-            imgNotFound.setImageResource(getNotFoundImg());
-            imgNotFound.setVisibility(View.VISIBLE);
-        }else {
-            txtNotFound.setText("");
-            txtNotFound.setVisibility(View.GONE);
-            imgNotFound.setVisibility(View.GONE);
-        }
     }
 
     private void dropProduct(String bookId) {
@@ -269,15 +256,16 @@ public class MemberStockActivity extends AppCompatActivity {
                         try {
                             JSONObject resObj = new JSONObject(result);
                             if (resObj.getBoolean(KEY_STATUS)) {
-                                Toast.makeText(context, "商品已下架", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, "商品成功下架", Toast.LENGTH_SHORT).show();
                                 adapter.destroy(true);
                                 adapter = null;
                                 loadData();
                             }else {
-                                Toast.makeText(context, "伺服器發生例外", Toast.LENGTH_SHORT).show();
                                 prgBar.setVisibility(View.GONE);
+                                Toast.makeText(context, "伺服器發生例外", Toast.LENGTH_SHORT).show();
                             }
                         }catch (JSONException e) {
+                            prgBar.setVisibility(View.GONE);
                             e.printStackTrace();
                         }
                     }
@@ -301,8 +289,10 @@ public class MemberStockActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-        adapter.destroy(true);
-        adapter = null;
+        if (adapter != null) {
+            adapter.destroy(true);
+            adapter = null;
+        }
         System.gc();
         super.onDestroy();
     }

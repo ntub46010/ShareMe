@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/ShareMeTomcat.iml" filepath="$PROJECT_DIR$/ShareMeTomcat.iml" />
       <module fileurl="file://$PROJECT_DIR$/ShareMe_Tomcat.iml" filepath="$PROJECT_DIR$/ShareMe_Tomcat.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

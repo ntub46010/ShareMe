@@ -49,8 +49,8 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_STATUS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TYPE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_USER_ID;
-import static com.xy.shareme_tomcat.data.DataHelper.getNotFoundImg;
 import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
+import static com.xy.shareme_tomcat.data.DataHelper.showFoundStatus;
 
 public class ProductDetailActivity extends AppCompatActivity {
     private Context context;
@@ -92,8 +92,7 @@ public class ProductDetailActivity extends AppCompatActivity {
         //隱藏原畫面、顯示轉圈
         layDetail = (LinearLayout) findViewById(R.id.layDetail);
         layDetail.setVisibility(View.INVISIBLE);
-        prgBar = (ProgressBar) findViewById(R.id.prgDetail);
-        prgBar.setVisibility(View.VISIBLE);
+        prgBar = (ProgressBar) findViewById(R.id.prgBar);
 
         //詳情元件
         txtId = (TextView) findViewById(R.id.txtDetailId);
@@ -135,6 +134,7 @@ public class ProductDetailActivity extends AppCompatActivity {
 
     private void loadData() {
         isShown = false;
+        prgBar.setVisibility(View.VISIBLE);
         books = new ArrayList<>();
         conn = new MyOkHttp(ProductDetailActivity.this, new MyOkHttp.TaskListener() {
             @Override
@@ -146,6 +146,8 @@ public class ProductDetailActivity extends AppCompatActivity {
                             Toast.makeText(context, "連線失敗", Toast.LENGTH_SHORT).show();
                             return;
                         }
+                        final ImageView imageView = (ImageView) findViewById(R.id.imgNotFound);
+                        final TextView textView = (TextView) findViewById(R.id.txtNotFound);
                         try {
                             JSONObject resObj = new JSONObject(result);
                             if (resObj.getBoolean(KEY_STATUS)) {
@@ -178,18 +180,19 @@ public class ProductDetailActivity extends AppCompatActivity {
                                     // 下載圖片完成後執行的方法
                                     @Override
                                     public void onFinished() {
+                                        showFoundStatus(books, imageView, textView, "");
                                         showData();
+                                        prgBar.setVisibility(View.GONE);
                                     }
                                 });
                                 // 執行圖片下載
                                 getBitmap.execute();
                             }else {
-                                Toast.makeText(context, "商品不存在", Toast.LENGTH_SHORT).show();
+                                showFoundStatus(books, imageView, textView, "此商品不存在");
                                 prgBar.setVisibility(View.GONE);
-                                showFoundStatus();
                             }
                         }catch (JSONException e) {
-                            Toast.makeText(context, "伺服器發生例外", Toast.LENGTH_SHORT).show();
+                            showFoundStatus(books, imageView, textView, "處理JSON發生錯誤");
                             prgBar.setVisibility(View.GONE);
                         }
                     }
@@ -250,7 +253,6 @@ public class ProductDetailActivity extends AppCompatActivity {
         }
 
         layDetail.setVisibility(View.VISIBLE);
-        prgBar.setVisibility(View.GONE);
 
         showImages(book);
         isShown = true;
@@ -315,22 +317,6 @@ public class ProductDetailActivity extends AppCompatActivity {
             conn.execute(getString(R.string.link_add_favorite), reqObj.toString());
         }catch (JSONException e) {
             e.printStackTrace();
-        }
-    }
-
-    private void showFoundStatus() {
-        //若未找到書，則說明沒有找到
-        TextView txtNotFound = (TextView) findViewById(R.id.txtNotFound);
-        ImageView imgNotFound = (ImageView) findViewById(R.id.imgNotFound);
-        if (books == null || books.isEmpty()) {
-            txtNotFound.setText("此商品已被下架");
-            txtNotFound.setVisibility(View.VISIBLE);
-            imgNotFound.setImageResource(getNotFoundImg());
-            imgNotFound.setVisibility(View.VISIBLE);
-        }else {
-            txtNotFound.setText("");
-            txtNotFound.setVisibility(View.GONE);
-            imgNotFound.setVisibility(View.GONE);
         }
     }
 

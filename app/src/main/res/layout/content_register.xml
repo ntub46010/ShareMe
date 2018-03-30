@@ -18,34 +18,65 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="50dp"
+                android:layout_marginTop="40dp"
                 android:orientation="vertical">
-                <EditText android:text="12345678"
-                    android:id="@+id/edtRegAccount"
-                    style="@style/edt_register"
-                    android:hint="帳號，8~10位英數"/>
-                <EditText android:text="12345678"
-                    android:id="@+id/edtRegPassword"
-                    style="@style/edt_register"
-                    android:layout_marginTop="5dp"
-                    android:hint="密碼，6~15位英數"
-                    android:inputType="textPassword"/>
-                <EditText android:text="12345678"
-                    android:id="@+id/edtRegPasswordAgain"
-                    style="@style/edt_register"
-                    android:layout_marginTop="5dp"
-                    android:hint="確認密碼"
-                    android:inputType="textPassword"/>
-                <EditText android:text="Vincent"
-                    android:id="@+id/edtRegName"
-                    style="@style/edt_register"
-                    android:layout_marginTop="5dp"
-                    android:hint="姓名"/>
-                <EditText android:text="eric61011@gmail.com"
-                    android:id="@+id/edtRegEmail"
-                    style="@style/edt_register"
-                    android:layout_marginTop="5dp"
-                    android:hint="信箱"/>
+
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <EditText
+                        android:id="@+id/edtRegAccount"
+                        style="@style/edt_register"
+                        android:hint="帳號，8~10位英數"
+                        android:text="12345678" />
+                </android.support.design.widget.TextInputLayout>
+
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp">
+                    <EditText
+                        android:id="@+id/edtRegPassword"
+                        style="@style/edt_register"
+                        android:hint="密碼，6~15位英數"
+                        android:inputType="textPassword"
+                        android:text="111111"/>
+                </android.support.design.widget.TextInputLayout>
+
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp">
+                    <EditText
+                        android:id="@+id/edtRegPasswordAgain"
+                        style="@style/edt_register"
+                        android:hint="確認密碼"
+                        android:inputType="textPassword"
+                        android:text="111111"/>
+                </android.support.design.widget.TextInputLayout>
+
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp">
+                    <EditText
+                        android:id="@+id/edtRegName"
+                        style="@style/edt_register"
+                        android:hint="姓名"
+                        android:text="Vincent"/>
+                </android.support.design.widget.TextInputLayout>
+
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp">
+                    <EditText
+                        android:id="@+id/edtRegEmail"
+                        style="@style/edt_register"
+                        android:hint="信箱"
+                        android:text="eric61011@gmail.com"/>
+                </android.support.design.widget.TextInputLayout>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

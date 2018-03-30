@@ -24,6 +24,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_AVATAR;
@@ -37,10 +39,9 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_SELLER_ID;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_SELLER_NAME;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_STATUS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TIME;
-import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_USER_ID;
-import static com.xy.shareme_tomcat.data.DataHelper.getNotFoundImg;
 import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
+import static com.xy.shareme_tomcat.data.DataHelper.showFoundStatus;
 
 public class MemberMailboxActivity extends AppCompatActivity {
     private Context context;
@@ -91,8 +92,8 @@ public class MemberMailboxActivity extends AppCompatActivity {
 
     private void loadData() {
         isShown = false;
-        swipeRefreshLayout.setEnabled(false);
         prgBar.setVisibility(View.VISIBLE);
+        swipeRefreshLayout.setEnabled(false);
 
         chats = new ArrayList<>();
         conn = new MyOkHttp(MemberMailboxActivity.this, new MyOkHttp.TaskListener() {
@@ -106,6 +107,8 @@ public class MemberMailboxActivity extends AppCompatActivity {
                             prgBar.setVisibility(View.GONE);
                             return;
                         }
+                        ImageView imageView = (ImageView) findViewById(R.id.imgNotFound);
+                        TextView textView = (TextView) findViewById(R.id.txtNotFound);
                         try {
                             JSONObject resObj = new JSONObject(result);
                             if (resObj.getBoolean(KEY_STATUS)) {
@@ -115,29 +118,22 @@ public class MemberMailboxActivity extends AppCompatActivity {
                                     chats.add(new Chat(
                                             obj.getString(KEY_AVATAR),
                                             obj.getString(KEY_SELLER_NAME),
-                                            obj.getString(KEY_MESSAGE),
+                                            URLDecoder.decode(obj.getString(KEY_MESSAGE), "UTF-8"),
                                             obj.getString(KEY_DATE),
                                             obj.getString(KEY_TIME),
                                             obj.getString(KEY_PRODUCT_ID),
                                             obj.getString(KEY_SELLER_ID)
                                     ));
                                 }
+                                showFoundStatus(chats, imageView, textView, "");
                                 showData();
-                                /*getBitmap = new GetBitmap(context, chats, getString(R.string.link_avatar), new GetBitmap.TaskListener() {
-                                    @Override
-                                    public void onFinished() {
-                                        showData();
-                                    }
-                                });
-                                getBitmap.execute();*/
                             }else {
-                                Toast.makeText(context, "沒有您的訊息", Toast.LENGTH_SHORT).show();
-                                showFoundStatus();
                                 prgBar.setVisibility(View.GONE);
+                                showFoundStatus(chats, imageView, textView, "沒有您的訊息");
                             }
-                        }catch (JSONException e) {
-                            Toast.makeText(context, "伺服器發生例外", Toast.LENGTH_SHORT).show();
-                            e.printStackTrace();
+                        }catch (JSONException | UnsupportedEncodingException e) {
+                            prgBar.setVisibility(View.GONE);
+                            showFoundStatus(chats, imageView, textView, "伺服器發生例外");
                         }
                     }
                 });
@@ -178,22 +174,6 @@ public class MemberMailboxActivity extends AppCompatActivity {
         isShown = true;
     }
 
-    private void showFoundStatus() {
-        //若未找到書，則說明沒有找到
-        TextView txtNotFound = (TextView) findViewById(R.id.txtNotFound);
-        ImageView imgNotFound = (ImageView) findViewById(R.id.imgNotFound);
-        if (chats == null || chats.isEmpty()) {
-            txtNotFound.setText("此商品已被下架");
-            txtNotFound.setVisibility(View.VISIBLE);
-            imgNotFound.setImageResource(getNotFoundImg());
-            imgNotFound.setVisibility(View.VISIBLE);
-        }else {
-            txtNotFound.setText("");
-            txtNotFound.setVisibility(View.GONE);
-            imgNotFound.setVisibility(View.GONE);
-        }
-    }
-
     @Override
     public void onPause() {
         cancelConnection();
@@ -202,8 +182,10 @@ public class MemberMailboxActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-        adapter.destroy(true);
-        adapter = null;
+        if (adapter != null) {
+            adapter.destroy(true);
+            adapter = null;
+        }
         System.gc();
         super.onDestroy();
     }

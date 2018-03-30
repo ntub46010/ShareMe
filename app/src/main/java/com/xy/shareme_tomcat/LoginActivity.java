@@ -36,7 +36,7 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_PASSWORD;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_PROFILE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_STATUS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_USER_ID;
-import static com.xy.shareme_tomcat.data.DataHelper.conFlag;
+//import static com.xy.shareme_tomcat.data.DataHelper.conFlag;
 import static com.xy.shareme_tomcat.data.DataHelper.getSpnDepCode;
 import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
 import static com.xy.shareme_tomcat.data.DataHelper.myAvatarUrl;
@@ -58,7 +58,6 @@ public class LoginActivity extends Activity {
     private ProgressBar prgBar;
 
     private String userId = "", pwd = "", department = "51", method = "";
-    private Thread trdFlag, trdTimer, trdWaitDelete, trdWaitLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -159,8 +158,8 @@ public class LoginActivity extends Activity {
         layLoginField.setVisibility(View.GONE);
         prgBar.setVisibility(View.VISIBLE);
         method = "registerDevice";
-        initTrdTimer(true); //開始計時，30秒未登入成功將會顯示逾時
-        initTrdFlag(true);
+        initTrdTimer(); //開始計時，30秒未登入成功將會顯示逾時
+        initTrdFlag();
 
         MyOkHttp conn = new MyOkHttp(LoginActivity.this, new MyOkHttp.TaskListener() {
             @Override
@@ -179,12 +178,12 @@ public class LoginActivity extends Activity {
                         myName = obj.getString(KEY_NAME);
                         myGender = obj.getBoolean(KEY_GENDER) ? 1 : 0;
                         myAvatarUrl = getString(R.string.link_avatar) + obj.getString(KEY_AVATAR);
+                        //conFlag = true;
                     }else {
                         Toast.makeText(context, "帳號或密碼錯誤", Toast.LENGTH_SHORT).show();
                         loginUserId = "failed"; //若給予空字串，會出現連線逾時
                         layLoginField.setVisibility(View.VISIBLE);
                         prgBar.setVisibility(View.GONE);
-                        initTrdTimer(false);
                     }
                 }catch (JSONException e) {
                     e.printStackTrace();
@@ -240,7 +239,7 @@ public class LoginActivity extends Activity {
     private void registerMember(final String userId, final String pwd, String name, String email, String gender) {
         layRegisterField.setVisibility(View.GONE);
         prgBar.setVisibility(View.VISIBLE);
-        initTrdFlag(true);
+        initTrdFlag();
         method = "registerMember";
 
         MyOkHttp conn = new MyOkHttp(LoginActivity.this, new MyOkHttp.TaskListener() {
@@ -284,8 +283,8 @@ public class LoginActivity extends Activity {
 
     }
 
-    private void initTrdTimer(boolean restart) {
-        trdTimer = new Thread(new Runnable() {
+    private void initTrdTimer() {
+        new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -295,20 +294,12 @@ public class LoginActivity extends Activity {
                 }
                 hdrTimer.sendMessage(hdrTimer.obtainMessage());
             }
-        });
-        if (restart)
-            trdTimer.start();
+        }).start();
     }
 
     private Handler hdrTimer = new Handler() {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            conFlag = false;
-            initTrdWaitDelete(false);
-            initTrdWaitLogin(false);
-            initTrdTimer(false); //停止計時器
-            initTrdFlag(false);
-
             layLoginField.setVisibility(View.VISIBLE);
             prgBar.setVisibility(View.GONE);
             if (loginUserId.equals(""))
@@ -316,8 +307,8 @@ public class LoginActivity extends Activity {
         }
     };
 
-    private void initTrdFlag(boolean restart) {
-        trdFlag = new Thread(new Runnable() {
+    private void initTrdFlag() {
+        new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -327,17 +318,13 @@ public class LoginActivity extends Activity {
                 }
                 hdrFlag.sendMessage(hdrFlag.obtainMessage());
             }
-        });
-        if (restart)
-            trdFlag.start();
+        }).start();
     }
 
     private Handler hdrFlag = new Handler() { //等待token值從預設文字被改為空
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            if (conFlag) {
-                conFlag = false;
-                initTrdFlag(false);
+            if (!myName.equals("")) {
                 switch (method) {
                     case "registerDevice":
                         deleteOriginalToken(userId);
@@ -350,7 +337,7 @@ public class LoginActivity extends Activity {
                         break;
                 }
             }else
-                initTrdFlag(true);
+                initTrdFlag();
         }
     };
 
@@ -358,42 +345,37 @@ public class LoginActivity extends Activity {
         DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
         mDatabase.child(DATABASE_USERS).child(userId).removeValue(); //刪除原本token
         RequestManager.getInstance().getTokenById(userId); //嘗試取得空字串Token(代表已刪除)，存到DataHelper.tmpToken
-        initTrdWaitDelete(true);
+        initTrdWaitDelete();
     }
 
-    private void initTrdWaitDelete(boolean restart) {
-        trdWaitDelete = new Thread(new Runnable() {
+    private void initTrdWaitDelete() {
+        new Thread(new Runnable() {
             @Override
             public void run() {
                 hdrWaitDelete.sendMessage(hdrWaitDelete.obtainMessage());
             }
-        });
-        if (restart)
-            trdWaitDelete.start();
+        }).start();
     };
 
     private  Handler hdrWaitDelete = new Handler() { //等待token值從預設文字被改為空
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             if (tmpToken.equals("")) { //確定token已刪除，開始註冊新token
-                initTrdWaitDelete(false);
                 RequestManager.getInstance().insertUserPushData(userId);
                 RequestManager.getInstance().getTokenById(userId);
-                initTrdWaitLogin(true); //嘗試取得新token，取得後即可真正的登入
+                initTrdWaitLogin(); //嘗試取得新token，取得後即可真正的登入
             }else
-                initTrdWaitDelete(true); //繼續嘗試取得Token，存到DataHelper.tmpToken
+                initTrdWaitDelete(); //繼續嘗試取得Token，存到DataHelper.tmpToken
         }
     };
 
-    private void initTrdWaitLogin(boolean restart) {
-        trdWaitLogin = new Thread(new Runnable() {
+    private void initTrdWaitLogin() {
+        new Thread(new Runnable() {
             @Override
             public void run() {
                 hdrWaitLogin.sendMessage(hdrWaitLogin.obtainMessage());
             }
-        });
-        if (restart)
-            trdWaitLogin.start();
+        }).start();
     }
 
     private Handler hdrWaitLogin = new Handler() {
@@ -401,19 +383,14 @@ public class LoginActivity extends Activity {
             super.handleMessage(msg);
             if (!tmpToken.equals("token")) { //已取得新token
                 tmpToken = "token"; //恢復至尚未取得之值
-                //trdTimer = null; //可省略？
                 prgBar.setVisibility(View.GONE);
                 loginUserId = userId;
-                //lastPosition = 1;
                 writeLoginRecord();
 
-                initTrdWaitDelete(false);
-                initTrdWaitLogin(false);
-                initTrdTimer(false);
                 startActivity(new Intent(context, MainActivity.class)); //真正登入
-                //finish();
+                finish();
             }else
-                initTrdWaitLogin(true);
+                initTrdWaitLogin();
         }
     };
 

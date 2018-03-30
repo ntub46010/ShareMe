@@ -288,6 +288,7 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
                             }else
                                 Toast.makeText(context, "伺服器發生例外", Toast.LENGTH_SHORT).show();
                         }catch (JSONException e) {
+                            Toast.makeText(context, "處理JSON發生錯誤", Toast.LENGTH_SHORT).show();
                             e.printStackTrace();
                         }
                     }

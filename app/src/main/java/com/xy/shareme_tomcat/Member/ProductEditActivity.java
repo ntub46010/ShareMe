@@ -53,8 +53,8 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_STATUS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TYPE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_USER_ID;
-import static com.xy.shareme_tomcat.data.DataHelper.getNotFoundImg;
 import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
+import static com.xy.shareme_tomcat.data.DataHelper.showFoundStatus;
 
 public class ProductEditActivity extends AppCompatActivity implements View.OnClickListener {
     private Context context;
@@ -231,6 +231,7 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
     private void loadData() {
         isShown = false;
         btnPost.setVisibility(View.GONE);
+        prgBar.setVisibility(View.VISIBLE);
 
         books = new ArrayList<>();
         conLoadDetail = new MyOkHttp(ProductEditActivity.this, new MyOkHttp.TaskListener() {
@@ -243,6 +244,8 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
                             Toast.makeText(context, "連線失敗", Toast.LENGTH_SHORT).show();
                             return;
                         }
+                        final ImageView imageView = (ImageView) findViewById(R.id.imgNotFound);
+                        final TextView textView = (TextView) findViewById(R.id.txtNotFound);
                         try {
                             JSONObject resObj = new JSONObject(result);
                             if (resObj.getBoolean(KEY_STATUS)) {
@@ -267,20 +270,19 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
                                     // 下載圖片完成後執行的方法
                                     @Override
                                     public void onFinished() {
+                                        showFoundStatus(books, imageView, textView, "");
                                         showData();
                                     }
                                 });
                                 // 執行圖片下載
                                 getBitmap.execute();
                             }else {
-                                Toast.makeText(context, "商品不存在", Toast.LENGTH_SHORT).show();
-                                prgBar.setVisibility(View.GONE);
-                                showFoundStatus();
+                                showFoundStatus(books, imageView, textView, "此商品不存在");
                             }
                         }catch (JSONException e) {
-                            Toast.makeText(context, "伺服器發生例外", Toast.LENGTH_SHORT).show();
-                            prgBar.setVisibility(View.GONE);
+                            showFoundStatus(books, imageView, textView, "伺服器發生例外");
                         }
+                        prgBar.setVisibility(View.GONE);
                     }
                 });
             }
@@ -340,7 +342,6 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
         showImages(book);
 
         books = null;
-        prgBar.setVisibility(View.GONE);
         layDetail.setVisibility(View.VISIBLE);
         btnPost.setVisibility(View.VISIBLE);
         isShown = true;
@@ -386,21 +387,6 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
         linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(adapter);
-    }
-
-    private void showFoundStatus() {
-        TextView txtNotFound = (TextView) findViewById(R.id.txtNotFound);
-        ImageView imgNotFound = (ImageView) findViewById(R.id.imgNotFound);
-        if (books == null || books.isEmpty()) {
-            txtNotFound.setText("此商品不存在");
-            txtNotFound.setVisibility(View.VISIBLE);
-            imgNotFound.setImageResource(getNotFoundImg());
-            imgNotFound.setVisibility(View.VISIBLE);
-        }else {
-            txtNotFound.setText("");
-            txtNotFound.setVisibility(View.GONE);
-            imgNotFound.setVisibility(View.GONE);
-        }
     }
 
     private boolean isInfoValid() {
@@ -474,6 +460,7 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
                                 dlgUpload.dismiss();
                             }
                         }catch (JSONException e) {
+                            Toast.makeText(context, "處理JSON發生錯誤", Toast.LENGTH_SHORT).show();
                             e.printStackTrace();
                         }
                     }

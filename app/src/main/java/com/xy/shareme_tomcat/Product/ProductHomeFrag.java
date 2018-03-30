@@ -39,10 +39,10 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_STATUS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TYPE;
 import static com.xy.shareme_tomcat.data.DataHelper.getBoardNickname;
-import static com.xy.shareme_tomcat.data.DataHelper.getNotFoundImg;
 import static com.xy.shareme_tomcat.data.DataHelper.isFromDepartment;
 import static com.xy.shareme_tomcat.data.DataHelper.setBoardTitle;
 import static com.xy.shareme_tomcat.MainActivity.context;
+import static com.xy.shareme_tomcat.data.DataHelper.showFoundStatus;
 
 public class ProductHomeFrag extends Fragment {
     public static RecyclerView recyProduct;
@@ -132,6 +132,8 @@ public class ProductHomeFrag extends Fragment {
                             prgBar.setVisibility(View.GONE);
                             return;
                         }
+                        ImageView imageView = (ImageView) getView().findViewById(R.id.imgNotFound);
+                        TextView textView = (TextView) getView().findViewById(R.id.txtNotFound);
                         try {
                             JSONObject resObj = new JSONObject(result);
                             if (resObj.getBoolean(KEY_STATUS)) {
@@ -146,15 +148,15 @@ public class ProductHomeFrag extends Fragment {
                                             obj.getString(KEY_SELLER_NAME)
                                     ));
                                 }
+                                showFoundStatus(books, imageView, textView, "");
                                 showData();
                             }else {
-                                Toast.makeText(context, "沒有找到商品", Toast.LENGTH_SHORT).show();
-                                showFoundStatus();
-                                prgBar.setVisibility(View.GONE);
+                                showFoundStatus(books, imageView, textView, "沒有找到商品");
                             }
                         }catch (JSONException e) {
-                            e.printStackTrace();
+                            showFoundStatus(books, imageView, textView, "發生例外");
                         }
+                        prgBar.setVisibility(View.GONE);
                     }
                 });
             }
@@ -181,27 +183,10 @@ public class ProductHomeFrag extends Fragment {
 
         swipeRefreshLayout.setEnabled(true);
         swipeRefreshLayout.setRefreshing(false);
-        prgBar.setVisibility(View.GONE);
         recyProduct.setVisibility(View.VISIBLE);
 
         books = null;
         isShown = true;
-    }
-
-    private void showFoundStatus() {
-        //若未找到書，則說明沒有找到
-        TextView txtNotFound = (TextView) getView().findViewById(R.id.txtNotFound);
-        ImageView imgNotFound = (ImageView) getView().findViewById(R.id.imgNotFound);
-        if (books == null || books.isEmpty()) {
-            txtNotFound.setText("沒有找到商品");
-            txtNotFound.setVisibility(View.VISIBLE);
-            imgNotFound.setImageResource(getNotFoundImg());
-            imgNotFound.setVisibility(View.VISIBLE);
-        }else {
-            txtNotFound.setText("");
-            txtNotFound.setVisibility(View.GONE);
-            imgNotFound.setVisibility(View.GONE);
-        }
     }
 
     @Override

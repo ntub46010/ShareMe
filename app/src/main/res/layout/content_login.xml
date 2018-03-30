@@ -34,7 +34,7 @@
             android:drawableLeft="@drawable/locked"
             android:hint="Password"
             android:inputType="textPassword"
-            android:text="qwert"/>
+            android:text="111111"/>
     </LinearLayout>
 
     <Button

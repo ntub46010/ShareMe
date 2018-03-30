@@ -1,6 +1,7 @@
 package com.xy.shareme_tomcat.Member;
 
 import android.content.Context;
+import android.media.Image;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -28,13 +29,14 @@ import java.util.ArrayList;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_FAVORITE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_PHOTO1;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_PRICE;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_PRODUCTS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_PRODUCT_ID;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_SELLER_NAME;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_STATUS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_USER_ID;
-import static com.xy.shareme_tomcat.data.DataHelper.getNotFoundImg;
 import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
+import static com.xy.shareme_tomcat.data.DataHelper.showFoundStatus;
 
 public class MemberFavoriteActivity extends AppCompatActivity {
     private Context context;
@@ -97,10 +99,12 @@ public class MemberFavoriteActivity extends AppCompatActivity {
                             Toast.makeText(context, "連線失敗", Toast.LENGTH_SHORT).show();
                             return;
                         }
+                        ImageView imageView = (ImageView) findViewById(R.id.imgNotFound);
+                        TextView textView = (TextView) findViewById(R.id.txtNotFound);
                         try {
                             JSONObject resObj = new JSONObject(result);
                             if (resObj.getBoolean(KEY_STATUS)) {
-                                JSONArray ary = resObj.getJSONArray(KEY_FAVORITE);
+                                JSONArray ary = resObj.getJSONArray(KEY_PRODUCTS);
                                 for (int i=0; i<ary.length(); i++) {
                                     JSONObject obj = ary.getJSONObject(i);
                                     books.add(new Book(
@@ -111,15 +115,16 @@ public class MemberFavoriteActivity extends AppCompatActivity {
                                             obj.getString(KEY_SELLER_NAME)
                                     ));
                                 }
+                                showFoundStatus(books, imageView, textView, "");
                                 showData();
-                            }else {
-                                Toast.makeText(context, "沒有最愛的商品", Toast.LENGTH_SHORT).show();
                                 prgBar.setVisibility(View.GONE);
-                                showFoundStatus();
+                            }else {
+                                prgBar.setVisibility(View.GONE);
+                                showFoundStatus(books, imageView, textView, "沒有最愛的商品");
                             }
                         }catch (JSONException e) {
-                            Toast.makeText(context, "伺服器發生例外", Toast.LENGTH_SHORT).show();
                             prgBar.setVisibility(View.GONE);
+                            showFoundStatus(books, imageView, textView, "伺服器發生例外");
                         }
                     }
                 });
@@ -147,26 +152,9 @@ public class MemberFavoriteActivity extends AppCompatActivity {
 
         swipeRefreshLayout.setEnabled(true);
         swipeRefreshLayout.setRefreshing(false);
-        prgBar.setVisibility(View.GONE);
 
         books = null;
         isShown = true;
-    }
-
-    private void showFoundStatus() {
-        //若未找到書，則說明沒有找到
-        TextView txtNotFound = (TextView) findViewById(R.id.txtNotFound);
-        ImageView imgNotFound = (ImageView) findViewById(R.id.imgNotFound);
-        if (books == null || books.isEmpty()) {
-            txtNotFound.setText("沒有最愛的商品");
-            txtNotFound.setVisibility(View.VISIBLE);
-            imgNotFound.setImageResource(getNotFoundImg());
-            imgNotFound.setVisibility(View.VISIBLE);
-        }else {
-            txtNotFound.setText("");
-            txtNotFound.setVisibility(View.GONE);
-            imgNotFound.setVisibility(View.GONE);
-        }
     }
 
     @Override
@@ -177,8 +165,10 @@ public class MemberFavoriteActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-        adapter.destroy(true);
-        adapter = null;
+        if (adapter != null) {
+            adapter.destroy(true);
+            adapter = null;
+        }
         System.gc();
         super.onDestroy();
     }
