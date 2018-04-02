@@ -18,7 +18,7 @@
             android:layout_marginTop="5dp"
             android:layout_marginStart="5dp"
             android:scaleType="fitXY"
-            android:src="@drawable/no_image"
+            android:src="@drawable/no_avatar"
             android:background="#ffffff"/>
 
         <LinearLayout

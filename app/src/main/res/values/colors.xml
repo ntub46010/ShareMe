@@ -20,4 +20,5 @@
 
     <color name="red1">#ff7751</color> <!--科系按鈕-->
     <color name="red2">#C0EDBCB6</color>
+    <color name="red3">#ED7A70</color> <!--個人檔案上架商品-->
 </resources>

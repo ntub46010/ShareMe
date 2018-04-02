@@ -27,9 +27,7 @@
         </activity>
         <activity
             android:name=".MainActivity"
-            android:screenOrientation="portrait">
-
-        </activity>
+            android:screenOrientation="portrait"></activity>
 
         <service android:name=".broadcast_helper.services.PSNInstanceIdService">
             <intent-filter>
@@ -56,7 +54,8 @@
         <activity android:name=".Member.MemberStockActivity" />
         <activity android:name=".Member.ProductEditActivity" />
         <activity android:name=".Member.MemberMailboxActivity" />
-        <activity android:name=".Member.MemberChatActivity"></activity>
+        <activity android:name=".Member.MemberChatActivity" />
+        <activity android:name=".Member.MemberProfileActivity"></activity>
     </application>
 
 </manifest>
