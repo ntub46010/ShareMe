@@ -64,8 +64,7 @@
                                     android:text="姓名："/>
                                 <TextView
                                     android:id="@+id/txtName"
-                                    style="@style/txt_profile_title"
-                                    android:text="x"/>
+                                    style="@style/txt_profile_title"/>
                             </TableRow>
                             <TableRow
                                 android:layout_marginBottom="0dp">
@@ -77,8 +76,7 @@
                                     style="@style/txt_profile_title"
                                     android:layout_weight="1"
                                     android:layout_height="52dp"
-                                    android:paddingEnd="2.2dp"
-                                    android:text="x"/>
+                                    android:paddingEnd="2.2dp"/>
                             </TableRow>
                         </TableLayout>
 
@@ -114,15 +112,15 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="0.5"
                                 android:orientation="horizontal"
-                                android:layout_marginEnd="5dp">
+                                android:layout_marginEnd="5dp"
+                                android:onClick="onClick">
                                 <ImageButton
                                     android:id="@+id/btnPositive"
                                     style="@style/btn_profile_evaluate"
                                     android:background="@drawable/value_positive"/>
                                 <TextView
                                     android:id="@+id/txtPositive"
-                                    style="@style/txt_profile_evaluate"
-                                    android:text="x"/>
+                                    style="@style/txt_profile_evaluate"/>
                             </LinearLayout>
                             <LinearLayout
                                 android:id="@+id/layNegative"
@@ -130,15 +128,15 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="0.5"
                                 android:orientation="horizontal"
-                                android:layout_marginEnd="5dp">
+                                android:layout_marginEnd="5dp"
+                                android:onClick="onClick">
                                 <ImageButton
                                     android:id="@+id/btnNegative"
                                     style="@style/btn_profile_evaluate"
                                     android:background="@drawable/value_negative"/>
                                 <TextView
                                     android:id="@+id/txtNegative"
-                                    style="@style/txt_profile_evaluate"
-                                    android:text="x"/>
+                                    style="@style/txt_profile_evaluate"/>
                             </LinearLayout>
                         </LinearLayout>
 

@@ -11,6 +11,9 @@ import android.widget.ListView;
 
 import com.xy.shareme_tomcat.R;
 
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_MEMBER_ID;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_USER_ID;
+import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
 import static com.xy.shareme_tomcat.data.DataHelper.myGender;
 import static com.xy.shareme_tomcat.data.DataHelper.getSimpleAdapter;
 import static com.xy.shareme_tomcat.MainActivity.context;
@@ -63,13 +66,11 @@ public class MemberHomeFrag extends Fragment {
     private void showActivity(String itemName) {
         switch (itemName) {
             case "個人檔案":
-                /*
                 Intent it = new Intent(context, MemberProfileActivity.class);
                 Bundle bundle = new Bundle();
-                bundle.putString("memberId", loginUserId);
+                bundle.putString(KEY_MEMBER_ID, loginUserId);
                 it.putExtras(bundle);
                 startActivity(it);
-                */
                 break;
             case "我的最愛":
                 startActivity(new Intent(context, MemberFavoriteActivity.class));

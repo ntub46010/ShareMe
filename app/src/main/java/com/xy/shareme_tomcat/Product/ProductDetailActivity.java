@@ -1,7 +1,9 @@
 package com.xy.shareme_tomcat.Product;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,6 +17,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.xy.shareme_tomcat.Member.MemberProfileActivity;
 import com.xy.shareme_tomcat.R;
 import com.xy.shareme_tomcat.adapter.ImageGroupAdapter;
 import com.xy.shareme_tomcat.data.Book;
@@ -32,6 +35,7 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_CONDITION;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_EDIT_TIME;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_FAVORITE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_IS_ADD;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_MEMBER_ID;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_NOTE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_PHOTO1;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_PHOTO2;
@@ -49,6 +53,7 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_STATUS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TYPE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_USER_ID;
+import static com.xy.shareme_tomcat.data.DataHelper.isProfileAlive;
 import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
 import static com.xy.shareme_tomcat.data.DataHelper.showFoundStatus;
 
@@ -224,9 +229,23 @@ public class ProductDetailActivity extends AppCompatActivity {
         if (book.getEditDate().equals(""))
             txtEdit.setVisibility(View.GONE);
 
-        String sellerId = book.getSeller();
+        final String sellerId = book.getSeller();
         String sellerName = book.getSellerName();
         txtSeller.setText(sellerName + " (" + sellerId + ")");
+
+        if (!sellerId.equals(loginUserId) && !isProfileAlive) {
+            txtSeller.setTextColor(Color.parseColor("#0000FF"));
+            txtSeller.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent it = new Intent(context, MemberProfileActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putString(KEY_MEMBER_ID, sellerId);
+                    it.putExtras(bundle);
+                    startActivity(it);
+                }
+            });
+        }
 
         //顯示科系
         StringBuffer sbDep = new StringBuffer();

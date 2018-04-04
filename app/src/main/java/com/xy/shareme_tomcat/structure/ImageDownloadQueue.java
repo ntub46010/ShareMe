@@ -35,6 +35,7 @@ public class ImageDownloadQueue extends Queue {
 
     @Override
     public void destroy() {
+        //取消所有下載，並清除圖片
         for (int i = 0; i < size(); i++) {
             ((ImageObj) get(i)).cancelDownloadImage();
             ((ImageObj) get(i)).setGetBitmap(null);

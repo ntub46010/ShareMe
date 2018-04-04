@@ -197,8 +197,10 @@ public class ProductHomeFrag extends Fragment {
 
     @Override
     public void onDestroy() {
-        adpProductHome.destroy(true);
-        adpProductHome = null;
+        if (adpProductHome != null) {
+            adpProductHome.destroy(true);
+            adpProductHome = null;
+        }
         System.gc();
         super.onDestroy();
     }

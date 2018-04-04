@@ -141,7 +141,7 @@
                         android:id="@+id/txtDetailSeller"
                         style="@style/txt_goods_detail_content"
                         android:text="x"
-                        android:textColor="#0000ff"/>
+                        android:textColor="#555555"/>
                 </TableRow>
 
             </TableLayout>

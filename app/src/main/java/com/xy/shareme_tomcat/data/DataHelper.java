@@ -55,6 +55,12 @@ public class DataHelper {
     public static final String KEY_EDIT_TIME = "EditTime";
     public static final String KEY_FAVORITE = "Favorite";
     public static final String KEY_IS_ADD = "IsAdd";
+
+    public static final String KEY_POSITIVE = "Positive";
+    public static final String KEY_NEGATIVE = "Negative";
+    public static final String KEY_GIVER_ID = "GiverId";
+    public static final String KEY_RECEIVER_ID = "ReceiverId";
+    public static final String KEY_VALUE = "Value";
     //
     public static final String KEY_AVATAR = "Avatar";
     public static final String KEY_MESSAGE = "Message";
@@ -64,10 +70,11 @@ public class DataHelper {
     //---
     public static final String KEY_PROFILE = "Profile";
     public static final String KEY_PRODUCT = "Product";
-    public static final String KEY_PRODUCT_NAME = "ProductNAME";
+    //public static final String KEY_PRODUCT_NAME = "ProductNAME";
     public static final String KEY_PRODUCTS = "Products";
     public static final String KEY_MAILS = "Mails";
     public static final String KEY_STOCK = "Stock";
+    public static final String KEY_IS_SETTING = "IsSetting";
 
     public static String getSpnDepCode (int position) {
         String depCode = "";

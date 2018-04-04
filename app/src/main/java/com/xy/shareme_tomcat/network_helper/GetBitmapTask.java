@@ -17,7 +17,7 @@ public class GetBitmapTask extends AsyncTask<ImageObj, Void, Void> { //用來下
         void onFinished();
     }
 
-    public GetBitmapTask(String linkPrefix, TaskListener taskListener) {
+    public GetBitmapTask(String linkPrefix, TaskListener taskListener) { //這個物件會被指定給父類別ImageObj，由它啟動startDownloadImage()
         this.linkPrefix = linkPrefix;
         this.taskListener = taskListener;
     }

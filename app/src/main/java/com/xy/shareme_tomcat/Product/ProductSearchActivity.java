@@ -113,17 +113,18 @@ public class ProductSearchActivity extends AppCompatActivity {
                                 showFoundStatus(books, imageView, textView, "");
                                 showData();
                             }else {
-                                runOnUiThread(new Runnable() {
+                                prgBar.setVisibility(View.GONE);
+                                /*runOnUiThread(new Runnable() {
                                     @Override
-                                    public void run() {
+                                    public void run() {*/
                                         showFoundStatus(books, imageView, textView, "沒有找到商品");
-                                    }
-                                });
+                                    /*}
+                                });*/
                             }
                         }catch (JSONException e) {
+                            prgBar.setVisibility(View.GONE);
                             showFoundStatus(books, imageView, textView, "伺服器發生例外");
                         }
-                        prgBar.setVisibility(View.GONE);
                     }
                 });
             }
