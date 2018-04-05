@@ -163,31 +163,35 @@ public class LoginActivity extends Activity {
 
         MyOkHttp conn = new MyOkHttp(LoginActivity.this, new MyOkHttp.TaskListener() {
             @Override
-            public void onFinished(String result) {
-                if (result == null) {
-                    Toast.makeText(context, "連線失敗", Toast.LENGTH_SHORT).show();
-                    layLoginField.setVisibility(View.VISIBLE);
-                    prgBar.setVisibility(View.GONE);
-                    return;
-                }
-                try {
-                    JSONObject resObj = new JSONObject(result);
-                    if (resObj.getBoolean(KEY_STATUS)) {
-                        //帳密正確，存取所需資料
-                        JSONObject obj = resObj.getJSONObject(KEY_PROFILE);
-                        myName = obj.getString(KEY_NAME);
-                        myGender = obj.getBoolean(KEY_GENDER) ? 1 : 0;
-                        myAvatarUrl = getString(R.string.link_avatar) + obj.getString(KEY_AVATAR);
-                        //conFlag = true;
-                    }else {
-                        Toast.makeText(context, "帳號或密碼錯誤", Toast.LENGTH_SHORT).show();
-                        loginUserId = "failed"; //若給予空字串，會出現連線逾時
-                        layLoginField.setVisibility(View.VISIBLE);
-                        prgBar.setVisibility(View.GONE);
+            public void onFinished(final String result) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (result == null) {
+                            Toast.makeText(context, "連線失敗", Toast.LENGTH_SHORT).show();
+                            layLoginField.setVisibility(View.VISIBLE);
+                            prgBar.setVisibility(View.GONE);
+                            return;
+                        }
+                        try {
+                            JSONObject resObj = new JSONObject(result);
+                            if (resObj.getBoolean(KEY_STATUS)) {
+                                //帳密正確，存取所需資料
+                                JSONObject obj = resObj.getJSONObject(KEY_PROFILE);
+                                myName = obj.getString(KEY_NAME);
+                                myGender = obj.getBoolean(KEY_GENDER) ? 1 : 0;
+                                myAvatarUrl = getString(R.string.link_avatar) + obj.getString(KEY_AVATAR);
+                            }else { //BUG，登入失敗後，之後若登入成功，會出現兩個MainActivity
+                                Toast.makeText(context, "帳號或密碼錯誤", Toast.LENGTH_SHORT).show();
+                                loginUserId = "failed"; //若給予空字串，會出現連線逾時
+                                layLoginField.setVisibility(View.VISIBLE);
+                                prgBar.setVisibility(View.GONE);
+                            }
+                        }catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
-                }catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                });
             }
         });
         //開始連線

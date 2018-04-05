@@ -37,12 +37,9 @@
                         android:layout_gravity="center_vertical">
                         <ImageView
                             android:id="@+id/imgAvatar"
+                            style="@style/img_avatar"
                             android:layout_width="140dp"
-                            android:layout_height="168dp"
-                            android:padding="1dp"
-                            android:scaleType="fitXY"
-                            android:src="@drawable/no_avatar"
-                            android:background="@drawable/bg_square_white"/>
+                            android:layout_height="168dp"/>
                     </FrameLayout>
 
                     <LinearLayout

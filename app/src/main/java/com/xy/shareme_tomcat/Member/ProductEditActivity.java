@@ -136,7 +136,7 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
 
         prepareDialog();
 
-        btnPost = (ImageView) toolbar.findViewById(R.id.btnPost);
+        btnPost = (ImageView) toolbar.findViewById(R.id.btnSubmit);
         btnPost.setOnClickListener(this);
     }
 
@@ -490,7 +490,7 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.btnPost:
+            case R.id.btnSubmit:
                 if (!isInfoValid())
                     return;
 

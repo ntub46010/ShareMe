@@ -73,6 +73,8 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
 
         //設置Toolbar相關元件
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        TextView txtBarTitle = (TextView) toolbar.findViewById(R.id.txtToolbarTitle);
+        txtBarTitle.setText("刊登商品");
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -81,7 +83,7 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
                 finish();
             }
         });
-        ImageView btnPost = (ImageView) toolbar.findViewById(R.id.btnPost);
+        ImageView btnPost = (ImageView) toolbar.findViewById(R.id.btnSubmit);
         btnPost.setOnClickListener(this);
 
         //商品資訊元件
@@ -319,7 +321,7 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.btnPost:
+            case R.id.btnSubmit:
                 if (!isInfoValid())
                     return;
 

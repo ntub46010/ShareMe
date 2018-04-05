@@ -8,4 +8,6 @@
     <dimen name="card_book_img_height">180dp</dimen>
 
     <dimen name="spaceVertical">6dp</dimen>
+
+    <dimen name="setting_section_line_padding">15dp</dimen>
 </resources>

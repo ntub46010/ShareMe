@@ -121,18 +121,19 @@ public class MemberProfileActivity extends AppCompatActivity implements View.OnC
             @Override
             public void onClick(View view) {
                 try{
-                    //BUG，若不選擇使用的電子郵件軟體，會重載頁面
-                    Intent intent = new Intent (Intent.ACTION_VIEW , Uri.parse("mailto:" + email));
-                    //intent.putExtra(Intent.EXTRA_SUBJECT, "主旨");
-                    //intent.putExtra(Intent.EXTRA_TEXT, "內文");
-                    Toast.makeText(context, email, Toast.LENGTH_SHORT).show();
-                    startActivity(intent);
+                    if (memberId.equals(loginUserId))
+                        Toast.makeText(context, "你的電子郵件是：" + email, Toast.LENGTH_SHORT).show();
+                    else {
+                        Intent it = new Intent (Intent.ACTION_VIEW , Uri.parse("mailto:" + email));
+                        it.putExtra(Intent.EXTRA_SUBJECT, "主旨");
+                        it.putExtra(Intent.EXTRA_TEXT, "內文");
+                        startActivity(it);
+                    }
                 }catch (ActivityNotFoundException e) {
                     e.printStackTrace();
                 }
             }
         });
-
         isProfileAlive = true;
     }
 
@@ -211,7 +212,7 @@ public class MemberProfileActivity extends AppCompatActivity implements View.OnC
             reqObj.put(KEY_USER_ID, loginUserId);
             reqObj.put(KEY_MEMBER_ID, memberId);
             reqObj.put(KEY_IS_SETTING, false);
-            conn.execute(getString(R.string.link_profile), reqObj.toString());
+            conn.execute(getString(R.string.link_show_profile), reqObj.toString());
         }catch (JSONException e) {
             e.printStackTrace();
         }

@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.xy.shareme_tomcat.Settings.SettingProfileActivity">
+
+    <include layout="@layout/content_checking_toolbar" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <LinearLayout
+                android:id="@+id/layInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="@dimen/setting_section_line_padding"
+                android:paddingEnd="@dimen/setting_section_line_padding">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="10dp"
+                    android:gravity="center">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="個人照片"
+                        android:textSize="16sp"
+                        android:textColor="@color/colorAccent"/>
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#555555"/>
+                </LinearLayout>
+                <ImageButton
+                    android:id="@+id/btnSelectAvatar"
+                    style="@style/img_avatar"
+                    android:layout_width="150dp"
+                    android:layout_height="180dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_gravity="center"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="10dp"
+                    android:gravity="center">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="基本資料修改"
+                        android:textSize="16sp"
+                        android:textColor="@color/colorAccent"/>
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#555555"/>
+                </LinearLayout>
+                <TableLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp">
+
+                    <TableRow
+                        android:layout_marginBottom="8dp"
+                        android:gravity="center">
+                        <TextView
+                            style="@style/txt_profile_title"
+                            android:text="姓名：　　　" />
+
+                        <EditText
+                            android:id="@+id/edtName"
+                            style="@style/edt_set_profile"
+                            android:layout_height="wrap_content" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_marginBottom="8dp"
+                        android:gravity="center">
+                        <TextView
+                            style="@style/txt_profile_title"
+                            android:text="系所：" />
+                        <Spinner
+                            android:id="@+id/spnDepartment"
+                            android:layout_width="match_parent"
+                            android:layout_height="32dp"
+                            android:layout_marginBottom="5dp"
+                            android:entries="@array/department" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_marginBottom="8dp"
+                        android:gravity="center">
+                        <TextView
+                            style="@style/txt_profile_title"
+                            android:text="電子郵件：" />
+                        <EditText
+                            android:id="@+id/edtEmail"
+                            style="@style/edt_set_profile"
+                            android:layout_height="wrap_content"
+                            android:inputType="textEmailAddress"/>
+                    </TableRow>
+                </TableLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="0dp"
+                    android:gravity="center">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="密碼修改"
+                        android:textSize="16sp"
+                        android:textColor="@color/colorAccent"/>
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#555555"/>
+                </LinearLayout>
+                <TableLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="10dp">
+
+                    <TableRow
+                        android:layout_marginBottom="8dp"
+                        android:gravity="center">
+                        <TextView
+                            style="@style/txt_profile_title"
+                            android:text="原密碼：" />
+
+                        <EditText
+                            android:id="@+id/edtOldPwd"
+                            style="@style/edt_set_profile"
+                            android:layout_height="wrap_content"
+                            android:inputType="textPassword"/>
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_marginBottom="8dp"
+                        android:gravity="center">
+                        <TextView
+                            style="@style/txt_profile_title"
+                            android:text="新密碼：" />
+                        <EditText
+                            android:id="@+id/edtNewPwd"
+                            style="@style/edt_set_profile"
+                            android:layout_height="wrap_content"
+                            android:inputType="textPassword"/>
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_marginBottom="8dp"
+                        android:gravity="center">
+                        <TextView
+                            style="@style/txt_profile_title"
+                            android:text="確認新密碼：" />
+                        <EditText
+                            android:id="@+id/edtNewPwd2"
+                            style="@style/edt_set_profile"
+                            android:layout_height="wrap_content"
+                            android:inputType="textPassword"/>
+                    </TableRow>
+
+                </TableLayout>
+
+            </LinearLayout>
+        </ScrollView>
+
+        <ProgressBar
+            android:id="@+id/prgBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|center_vertical"/>
+    </FrameLayout>
+
+</LinearLayout>

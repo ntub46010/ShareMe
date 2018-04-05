@@ -4,13 +4,15 @@ public class Member extends ImageObj {
     private String imgURL;
     private String name, department, email;
     private String positive, negative;
+    private String pwd;
 
     //編輯個人檔案
-    public Member(String imgURL, String name, String department, String email) {
+    public Member(String imgURL, String name, String department, String email, String pwd) {
         this.imgURL = imgURL;
         this.name = name;
         this.department = department;
         this.email = email;
+        this.pwd = pwd;
     }
 
     //顯示個人檔案
@@ -45,5 +47,29 @@ public class Member extends ImageObj {
 
     public String getNegative() {
         return negative;
+    }
+
+    public String getPwd() {
+        return pwd;
+    }
+
+    public void setImgURL(String imgURL) {
+        this.imgURL = imgURL;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDepartment(String department) {
+        this.department = department;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPwd (String pwd) {
+        this.pwd = pwd;
     }
 }
