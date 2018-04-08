@@ -1,8 +1,11 @@
 package com.xy.shareme_tomcat.Settings;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -19,9 +22,12 @@ import android.widget.Toast;
 
 import com.xy.shareme_tomcat.Member.MemberProfileActivity;
 import com.xy.shareme_tomcat.R;
+import com.xy.shareme_tomcat.data.AlbumImageProvider;
+import com.xy.shareme_tomcat.data.ImageChild;
 import com.xy.shareme_tomcat.data.Member;
 import com.xy.shareme_tomcat.network_helper.GetBitmapTask;
 import com.xy.shareme_tomcat.network_helper.MyOkHttp;
+import com.xy.shareme_tomcat.structure.ImageUploadQueue;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -48,9 +54,13 @@ public class SettingProfileActivity extends AppCompatActivity {
     private ImageView btnUpdateInfo;
     private ProgressBar prgBar;
 
+    private ImageUploadQueue queue;
+    private Dialog dlgUpload;
+
     private Member member;
     private MyOkHttp conShowProfile, conEditProfile;
-    private boolean isShown = false;
+    private AlbumImageProvider provider;
+    private boolean isShown = false, isImageChanged = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +92,7 @@ public class SettingProfileActivity extends AppCompatActivity {
         prgBar = (ProgressBar) findViewById(R.id.prgBar);
 
         layInfo.setVisibility(View.INVISIBLE);
+
         spnDep.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -89,15 +100,34 @@ public class SettingProfileActivity extends AppCompatActivity {
                     member.setDepartment(getSpnDepCode(i));
                 }catch (NullPointerException e) {}
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
+
+        btnSelectAvatar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                provider = new AlbumImageProvider(SettingProfileActivity.this, 5, 6, 350, 420, new AlbumImageProvider.TaskListener() {
+                    @Override
+                    public void onFinished(Bitmap bitmap) {
+                        btnSelectAvatar.setImageBitmap(bitmap);
+                        isImageChanged = true;
+                    }
+                });
+                provider.select();
+            }
+        });
+
         btnUpdateInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                updateProfile();
+                if (isImageChanged)
+                    uploadAvatar();
+                else
+                    updateProfile();
+
+                dlgUpload.show();
             }
         });
     }
@@ -107,6 +137,37 @@ public class SettingProfileActivity extends AppCompatActivity {
         super.onResume();
         if (!isShown)
             loadData();
+    }
+
+    private void prepareDialog() {
+        dlgUpload = new Dialog(context);
+        dlgUpload.setContentView(R.layout.dlg_uploading);
+        dlgUpload.setCancelable(false);
+        TextView txtUploadHint = (TextView) dlgUpload.findViewById(R.id.txtHint);
+        txtUploadHint.setText("上傳中，長按取消...");
+
+        LinearLayout layUpload = (LinearLayout) dlgUpload.findViewById(R.id.layUpload);
+        layUpload.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                AlertDialog.Builder msgbox = new AlertDialog.Builder(context);
+                msgbox.setTitle("帳號設定")
+                        .setMessage("確定取消更新嗎？")
+                        .setNegativeButton("否", null)
+                        .setPositiveButton("是", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                try {
+                                    queue.cancelUpload();
+                                    Toast.makeText(context, "上傳已取消", Toast.LENGTH_SHORT).show();
+                                }catch (NullPointerException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }).show();
+                return true;
+            }
+        });
     }
 
     private void loadData() {
@@ -254,57 +315,6 @@ public class SettingProfileActivity extends AppCompatActivity {
         isShown = true;
     }
 
-    private void updateProfile() {
-        if (!isInfoValid(edtName.getText().toString(), edtEmail.getText().toString(), edtOldPwd.getText().toString(), edtNewPwd.getText().toString(), edtNewPwd2.getText().toString()))
-            return;
-
-        btnUpdateInfo.setEnabled(false);
-        conEditProfile = new MyOkHttp(SettingProfileActivity.this, new MyOkHttp.TaskListener() {
-            @Override
-            public void onFinished(final String result) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (result == null) {
-                            Toast.makeText(context, "連線失敗", Toast.LENGTH_SHORT).show();
-                            prgBar.setVisibility(View.GONE);
-                            return;
-                        }
-                        try {
-                            JSONObject resObj = new JSONObject(result);
-                            if (resObj.getBoolean(KEY_STATUS)) {
-                                Toast.makeText(context, "編輯成功", Toast.LENGTH_SHORT).show();
-
-                                Intent it = new Intent(context, MemberProfileActivity.class);
-                                Bundle bundle = new Bundle();
-                                bundle.putString(KEY_MEMBER_ID, loginUserId);
-                                it.putExtras(bundle);
-                                startActivity(it);
-                                finish();
-                            }else
-                                Toast.makeText(context, "編輯失敗", Toast.LENGTH_SHORT).show();
-                        }catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-            }
-        });
-        //開始連線
-        try {
-            JSONObject reqObj = new JSONObject();
-            reqObj.put(KEY_USER_ID, loginUserId);
-            reqObj.put(KEY_AVATAR, member.getImgURL());
-            reqObj.put(KEY_NAME, member.getName());
-            reqObj.put(KEY_DEPARTMENT, member.getDepartment());
-            reqObj.put(KEY_EMAIL, member.getEmail());
-            reqObj.put(KEY_PASSWORD, member.getPwd());
-            conEditProfile.execute(getString(R.string.link_edit_profile), reqObj.toString());
-        }catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
     private boolean isInfoValid(String name, String email, String oldPwd, String pwd1, String pwd2) {
         StringBuffer errMsg = new StringBuffer("");
         if (name.length() < 1)
@@ -340,6 +350,75 @@ public class SettingProfileActivity extends AppCompatActivity {
         }
     }
 
+    private void updateProfile() {
+        if (!isInfoValid(edtName.getText().toString(), edtEmail.getText().toString(), edtOldPwd.getText().toString(), edtNewPwd.getText().toString(), edtNewPwd2.getText().toString()))
+            return;
+
+        btnUpdateInfo.setEnabled(false);
+        conEditProfile = new MyOkHttp(SettingProfileActivity.this, new MyOkHttp.TaskListener() {
+            @Override
+            public void onFinished(final String result) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (result == null) {
+                            Toast.makeText(context, "連線失敗", Toast.LENGTH_SHORT).show();
+                            prgBar.setVisibility(View.GONE);
+                            return;
+                        }
+                        try {
+                            JSONObject resObj = new JSONObject(result);
+                            if (resObj.getBoolean(KEY_STATUS)) {
+                                Toast.makeText(context, "編輯成功", Toast.LENGTH_SHORT).show();
+                                dlgUpload.dismiss();
+
+                                Intent it = new Intent(context, MemberProfileActivity.class);
+                                Bundle bundle = new Bundle();
+                                bundle.putString(KEY_MEMBER_ID, loginUserId);
+                                it.putExtras(bundle);
+                                startActivity(it);
+                                finish();
+                            }else
+                                Toast.makeText(context, "編輯失敗", Toast.LENGTH_SHORT).show();
+                        }catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
+        });
+        //開始連線
+        try {
+            JSONObject reqObj = new JSONObject();
+            reqObj.put(KEY_USER_ID, loginUserId);
+            reqObj.put(KEY_AVATAR, member.getImgURL());
+            reqObj.put(KEY_NAME, member.getName());
+            reqObj.put(KEY_DEPARTMENT, member.getDepartment());
+            reqObj.put(KEY_EMAIL, member.getEmail());
+            reqObj.put(KEY_PASSWORD, member.getPwd());
+            conEditProfile.execute(getString(R.string.link_edit_profile), reqObj.toString());
+        }catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void uploadAvatar() {
+        prepareDialog();
+        Toast.makeText(context, "正在更新大頭貼，可能會多花點時間", Toast.LENGTH_SHORT).show();
+
+        String[] fileNames = new String[1];
+        fileNames[0] = "";
+        queue = new ImageUploadQueue(getResources(), context, getString(R.string.link_upload_avatar));
+        queue.enqueueFromRear(new ImageChild(provider.getImage(), true));
+        queue.startUpload(fileNames, dlgUpload, null, new ImageUploadQueue.TaskListener() {
+            @Override
+            public void onFinished(String[] fileNames) {
+                member.setImgURL(fileNames[0]);
+                updateProfile();
+            }
+        });
+    }
+
     @Override
     public void onPause() {
         cancelConnection();
@@ -361,5 +440,10 @@ public class SettingProfileActivity extends AppCompatActivity {
             conEditProfile.cancel();
         if (member != null)
             member.cancelDownloadImage();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        provider.onActivityResult(requestCode, resultCode, data);
     }
 }

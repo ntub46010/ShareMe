@@ -1,22 +1,11 @@
 package com.xy.shareme_tomcat.adapter;
 
-import android.Manifest;
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.net.Uri;
-import android.os.Environment;
-import android.provider.MediaStore;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,26 +18,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.xy.shareme_tomcat.R;
+import com.xy.shareme_tomcat.data.AlbumImageProvider;
 import com.xy.shareme_tomcat.data.DataHelper;
 import com.xy.shareme_tomcat.data.ImageChild;
 import com.xy.shareme_tomcat.structure.ImageUploadQueue;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Collections;
 
 public class ImageUploadAdapter extends RecyclerView.Adapter<ImageUploadAdapter.DataViewHolder> {
     private Context context;
-    private Activity activity;
     private ImageUploadQueue queue;
     private int pressedPosition = 0;
 
-    public static final int REQUEST_CAMERA = 1;
-    public static final int REQUEST_ALBUM = 2;
-    public static final int REQUEST_CROP = 3;
-
-    private File mImageFile = null;
-    private Bitmap mImageFileBitmap = null;
+    private AlbumImageProvider provider;
 
     public class DataViewHolder extends RecyclerView.ViewHolder {
         // 連結資料的顯示物件宣告
@@ -74,22 +56,7 @@ public class ImageUploadAdapter extends RecyclerView.Adapter<ImageUploadAdapter.
                         return;
                     }
                     pressedPosition = position;
-                    //將寫入使用者對寫入的權限指定至permission
-                    int permission = ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-                    //檢查是否開啟寫入權限
-                    if (permission != PackageManager.PERMISSION_GRANTED) {
-                        // 無權限，向使用者請求
-                        //執行完後執行onRequestPermissionsResult
-                        ActivityCompat.requestPermissions(
-                                activity,
-                                new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
-                                0 //requestCode
-                        );
-                    }else{
-                        //已有權限，準備選圖
-                        pickImageDialog();
-                    }
+                    provider.select();
                 }
             });
 
@@ -97,7 +64,7 @@ public class ImageUploadAdapter extends RecyclerView.Adapter<ImageUploadAdapter.
                 @Override
                 public boolean onLongClick(View v) {
                     pressedPosition = position;
-                    if (getItem(position).getBitmap() != null || getItem(position).getFileName() != "") {
+                    if (getItem(position).getBitmap() != null || !getItem(position).getFileName().equals("")) {
                         prepareDialog();
                         return true;
                     }
@@ -108,10 +75,10 @@ public class ImageUploadAdapter extends RecyclerView.Adapter<ImageUploadAdapter.
     }
 
     // 將連結的資料
-    public ImageUploadAdapter(Resources res, Activity activity, Context context) {
-        this.activity = activity;
+    public ImageUploadAdapter(Resources res, Context context, AlbumImageProvider provider, String linkUpload) {
         this.context = context;
-        queue = new ImageUploadQueue(res, context);
+        this.provider = provider;
+        queue = new ImageUploadQueue(res, context, linkUpload);
     }
 
     @Override
@@ -145,54 +112,6 @@ public class ImageUploadAdapter extends RecyclerView.Adapter<ImageUploadAdapter.
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
-    }
-
-    public void pickImageDialog() {
-        Intent albumIntent = new Intent(Intent.ACTION_PICK);
-        albumIntent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        activity.startActivityForResult(albumIntent, REQUEST_ALBUM);
-    }
-
-    public void cropImage(Uri uri){
-        Intent intent = new Intent("com.android.camera.action.CROP");
-        intent.setDataAndType(uri, "image/*");
-        intent.putExtra("crop", "true");
-        intent.putExtra("aspectX", 3);
-        intent.putExtra("aspectY", 4);
-        intent.putExtra("outputX", 900);
-        intent.putExtra("outputY", 1200);
-        intent.putExtra("outputFormat", "JPEG");
-        intent.putExtra("return-date", false);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(mImageFile));
-        activity.startActivityForResult(intent, REQUEST_CROP);
-    }
-
-    public boolean createImageFile() {
-        mImageFile = new File(Environment.getExternalStorageDirectory(), System.currentTimeMillis() + ".jpg");
-        try {
-            mImageFile.createNewFile();
-            return mImageFile.exists();
-        }catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public boolean mImageFileToBitmap(ImageChild image) {
-        mImageFileBitmap = BitmapFactory.decodeFile(mImageFile.getAbsolutePath());
-        if (mImageFileBitmap != null) {
-            image.setBitmap(mImageFileBitmap);
-            if (mImageFile.delete()) {
-                Log.w("Delete File", "deleted");
-            }
-            else {
-                mImageFile.deleteOnExit();
-                Log.w("Delete File", "delete failed and call deleteOnExit()");
-            }
-            return false;
-        }
-        else
-            return true;
     }
 
     public int getPressedPosition() {

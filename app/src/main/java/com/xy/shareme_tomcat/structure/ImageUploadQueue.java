@@ -14,6 +14,7 @@ import com.xy.shareme_tomcat.network_helper.ImageUploadTask;
 public class ImageUploadQueue extends Queue {
     private Resources res;
     private Context context;
+    private String linkUpload;
 
     private int itemIndex = 0, entityAmount = 0, itemCount = 0;
     private ImageUploadTask imageTask;
@@ -27,9 +28,10 @@ public class ImageUploadQueue extends Queue {
     public interface TaskListener { void onFinished(String[] fileNames); }
     private TaskListener taskListener;
 
-    public ImageUploadQueue(Resources res, Context context) {
+    public ImageUploadQueue(Resources res, Context context, String linkPrefix) {
         this.res = res;
         this.context = context;
+        this.linkUpload = linkPrefix;
     }
 
     @Override
@@ -64,8 +66,8 @@ public class ImageUploadQueue extends Queue {
         createUploadTask();
     }
 
-    private void initTrdWaitPhoto(boolean restart) {
-        Thread trdWaitPhoto = new Thread(new Runnable() {
+    private void initTrdWaitPhoto() {
+        new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -75,9 +77,7 @@ public class ImageUploadQueue extends Queue {
                 }
                 hdrWaitPhoto.sendMessage(hdrWaitPhoto.obtainMessage());
             }
-        });
-        if (restart)
-            trdWaitPhoto.start();
+        }).start();
     }
 
     private Handler hdrWaitPhoto = new Handler() {
@@ -88,9 +88,9 @@ public class ImageUploadQueue extends Queue {
 
             String fileName = imageTask.getPhotoName();
             if (fileName == null) {
-                initTrdWaitPhoto(true); //還沒收到檔名，繼續監聽
+                initTrdWaitPhoto(); //還沒收到檔名，繼續監聽
             }else {
-                initTrdWaitPhoto(false);
+                //initTrdWaitPhoto();
                 //寫入檔名
                 fileNames[itemIndex] = fileName;
 
@@ -105,19 +105,20 @@ public class ImageUploadQueue extends Queue {
         }
     };
 
-    private void createUploadTask(/*final int i*/) {
+    private void createUploadTask() {
         while (itemIndex < size()) {
             if (((ImageChild) get(itemIndex)).isEntity()) { //只有剛剛從手機選取的實體圖片才會被上傳
                 //開始上傳
                 itemCount++;
-                txtUploadHint.setText(res.getString(R.string.hint_upload_photo, String.valueOf(itemCount), String.valueOf(entityAmount)));
+                if (txtUploadHint != null)
+                    txtUploadHint.setText(res.getString(R.string.hint_upload_photo, String.valueOf(itemCount), String.valueOf(entityAmount)));
                 new Thread(new Runnable() {
                     public void run() {
-                        imageTask = new ImageUploadTask(context, res.getString(R.string.link_upload_image));
+                        imageTask = new ImageUploadTask(context, linkUpload);
                         imageTask.uploadFile(((ImageChild) get(itemIndex)).getBitmap());
                     }
                 }).start();
-                initTrdWaitPhoto(true); //監聽正在上傳的圖片檔名
+                initTrdWaitPhoto(); //監聽正在上傳的圖片檔名
                 //上傳完一張後，itemIndex才會遞增
                 break;
             }else

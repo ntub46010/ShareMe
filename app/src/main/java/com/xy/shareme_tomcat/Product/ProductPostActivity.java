@@ -5,8 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.net.Uri;
+import android.graphics.Bitmap;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -24,6 +23,7 @@ import android.widget.Toast;
 
 import com.xy.shareme_tomcat.R;
 import com.xy.shareme_tomcat.adapter.ImageUploadAdapter;
+import com.xy.shareme_tomcat.data.AlbumImageProvider;
 import com.xy.shareme_tomcat.data.ImageChild;
 import com.xy.shareme_tomcat.network_helper.MyOkHttp;
 import com.xy.shareme_tomcat.structure.ImageUploadQueue;
@@ -46,8 +46,7 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_SELLER;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_STATUS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TYPE;
-import static com.xy.shareme_tomcat.adapter.ImageUploadAdapter.REQUEST_ALBUM;
-import static com.xy.shareme_tomcat.adapter.ImageUploadAdapter.REQUEST_CROP;
+import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
 
 public class ProductPostActivity extends AppCompatActivity implements View.OnClickListener {
     private Context context;
@@ -62,6 +61,7 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
     private Dialog dlgUpload;
     private MyOkHttp conn;
 
+    private AlbumImageProvider provider;
     private RecyclerView recyclerView;
     private ImageUploadAdapter adapter;
 
@@ -124,63 +124,19 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
         linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
         recyclerView.setLayoutManager(linearLayoutManager);
 
-        adapter = new ImageUploadAdapter(getResources(), this, context);
+        provider = new AlbumImageProvider(this, 3, 4, 900, 1200, new AlbumImageProvider.TaskListener() {
+            @Override
+            public void onFinished(Bitmap bitmap) {
+                int position = adapter.getPressedPosition();
+                adapter.setItem(position, new ImageChild(bitmap, true));
+                if (adapter.getItemCount() < 5)
+                    adapter.addItem(new ImageChild(null, false)); //再新增一張空白圖
+                recyclerView.scrollToPosition(position);
+            }
+        });
+        adapter = new ImageUploadAdapter(getResources(), context, provider, getString(R.string.link_upload_image));
         adapter.addItem(new ImageChild(null, false)); //添加一張空白圖
         recyclerView.setAdapter(adapter);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        //詢問是否開啟權限
-        switch(requestCode) {
-            case 0:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    //取得權限，進行檔案存取
-                    adapter.pickImageDialog();
-                }else {
-                    //使用者拒絕權限，停用檔案存取功能，並顯示訊息
-                    Toast.makeText(context, "未給予權限，無法選擇圖片", Toast.LENGTH_SHORT).show();
-                }
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        //挑選完圖片後執行此方法，將圖片放上cardView
-        if (resultCode != RESULT_OK)
-            return;
-
-        Uri selectedImageUri = data.getData();
-        switch (requestCode) {
-            case REQUEST_ALBUM:
-                if (!adapter.createImageFile())
-                    return;
-                if (selectedImageUri != null)
-                    adapter.cropImage(selectedImageUri);
-                break;
-            case REQUEST_CROP:
-                final int position = adapter.getPressedPosition();
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        ImageChild image = adapter.getItem(position);
-                        boolean isEmptyCard = image.getBitmap() == null; //退出選圖畫面後，若為null代表剛剛沒選圖
-                        boolean bitmapIsNull = true;
-                        do {
-                            bitmapIsNull = adapter.mImageFileToBitmap(image);
-                        } while (bitmapIsNull);
-
-                        image.setEntity(true); //r將選好的圖片標記為實體
-                        adapter.setItem(position, image);
-
-                        if (isEmptyCard && adapter.getItemCount() < 5) //isEmptyCard意義不明，但拿掉的話，在該處選第二次圖時，會複製一個到旁邊去
-                            adapter.addItem(new ImageChild(null, false)); //再新增一張空白圖
-                    }
-                }).start();
-                recyclerView.scrollToPosition(position);
-
-                break;
-        }
     }
 
     private boolean isInfoValid() {
@@ -274,11 +230,11 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
                             return;
                         }
                         try {
-                            Toast.makeText(context, "刊登成功", Toast.LENGTH_SHORT).show();
                             JSONObject resObj = new JSONObject(result);
                             if (resObj.getBoolean(KEY_STATUS)) {
+                                Toast.makeText(context, "刊登成功", Toast.LENGTH_SHORT).show();
                                 dlgUpload.dismiss();
-                                //上傳成功
+
                                 JSONObject obj = resObj.getJSONObject(KEY_PRODUCT);
                                 Intent it = new Intent(context, ProductDetailActivity.class);
                                 Bundle bundle = new Bundle();
@@ -306,7 +262,7 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
             reqObj.put(KEY_CONDITION, condition);
             reqObj.put(KEY_NOTE, note);
             reqObj.put(KEY_PS, ps);
-            reqObj.put(KEY_SELLER, "10346011");
+            reqObj.put(KEY_SELLER, loginUserId);
             reqObj.put(KEY_PHOTO1, fileNames[0]);
             reqObj.put(KEY_PHOTO2, fileNames[1]);
             reqObj.put(KEY_PHOTO3, fileNames[2]);
@@ -348,18 +304,20 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
     @Override
     public void onDestroy() {
         cancelConnection();
-        adapter.destroyQueue(true);
         adapter = null;
         System.gc();
         super.onDestroy();
     }
 
     private void cancelConnection() {
-        try {
+        if (conn != null)
             conn.cancel();
-        }catch (NullPointerException e) {}
-        try {
+        if (adapter != null)
             adapter.destroyQueue(true);
-        }catch (NullPointerException e) {}
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        provider.onActivityResult(requestCode, resultCode, data);
     }
 }

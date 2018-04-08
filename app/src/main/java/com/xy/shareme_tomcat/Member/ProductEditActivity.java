@@ -5,8 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.net.Uri;
+import android.graphics.Bitmap;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -25,6 +24,7 @@ import android.widget.Toast;
 
 import com.xy.shareme_tomcat.R;
 import com.xy.shareme_tomcat.adapter.ImageUploadAdapter;
+import com.xy.shareme_tomcat.data.AlbumImageProvider;
 import com.xy.shareme_tomcat.data.Book;
 import com.xy.shareme_tomcat.data.ImageObj;
 import com.xy.shareme_tomcat.data.ImageChild;
@@ -70,6 +70,7 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
     private ArrayList<ImageObj> books;
     private ImageUploadAdapter adapter;
     private RecyclerView recyclerView;
+    private AlbumImageProvider provider;
 
     private String bookId, title, condition, price, ps, note;
     private StringBuffer sbDep;
@@ -145,59 +146,6 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
         super.onResume();
         if (!isShown)
             loadData();
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        //詢問是否開啟權限
-        switch(requestCode) {
-            case 0:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    //取得權限，進行檔案存取
-                    adapter.pickImageDialog();
-                }else {
-                    //使用者拒絕權限，停用檔案存取功能，並顯示訊息
-                    Toast.makeText(context, "未給予權限，無法選擇圖片", Toast.LENGTH_SHORT).show();
-                }
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode != RESULT_OK)
-            return;
-
-        Uri selectedImageUri = data.getData();
-        switch (requestCode) {
-            case ImageUploadAdapter.REQUEST_ALBUM:
-                if (!adapter.createImageFile())
-                    return;
-                if (selectedImageUri != null)
-                    adapter.cropImage(selectedImageUri);
-                break;
-            case ImageUploadAdapter.REQUEST_CROP:
-                final int position = adapter.getPressedPosition();
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        ImageChild image = adapter.getItem(position);
-                        boolean isEmptyCard = image.getBitmap() == null;
-                        boolean bitmapIsNull = true;
-                        do {
-                            bitmapIsNull = adapter.mImageFileToBitmap(image);
-                        } while (bitmapIsNull);
-
-                        image.setEntity(true);
-                        adapter.setItem(position, image);
-
-                        if (isEmptyCard && adapter.getItemCount() < 5) {
-                            adapter.addItem(new ImageChild(null, false)); //再新增一張空白圖
-                        }
-                    }
-                }).start();
-                recyclerView.scrollToPosition(position);
-                break;
-        }
     }
 
     private void prepareDialog() {
@@ -348,7 +296,17 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void showImages(Book book) {
-        adapter = new ImageUploadAdapter(getResources(), this, context);
+        provider = new AlbumImageProvider(this, 3, 4, 900, 1200, new AlbumImageProvider.TaskListener() {
+            @Override
+            public void onFinished(Bitmap bitmap) {
+                int position = adapter.getPressedPosition();
+                adapter.setItem(position, new ImageChild(bitmap, true));
+                if (adapter.getItemCount() < 5)
+                    adapter.addItem(new ImageChild(null, false)); //再新增一張空白圖
+                recyclerView.scrollToPosition(position);
+            }
+        });
+        adapter = new ImageUploadAdapter(getResources(), context, provider, getString(R.string.link_upload_image));
 
         //設置CardView上的圖片；網路下載回來的圖會有檔名(FileName)
         ImageChild image;
@@ -530,21 +488,26 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     public void onDestroy() {
-        adapter.destroyQueue(true);
         adapter = null;
         System.gc();
         super.onDestroy();
     }
 
     private void cancelConnection() {
-        try {
+        if (conLoadDetail != null)
             conLoadDetail.cancel();
-        }catch (NullPointerException e) {}
-        try {
+        if (getBitmap != null)
             getBitmap.cancel(true);
-        }catch (NullPointerException e) {}
-        try {
+        if (conEditProduct != null)
             conEditProduct.cancel();
-        }catch (NullPointerException e) {}
+        if (adapter != null) {
+            adapter.cancelUpload();
+            adapter.destroyQueue(true);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        provider.onActivityResult(requestCode, resultCode, data);
     }
 }
