@@ -129,8 +129,6 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
             public void onFinished(Bitmap bitmap) {
                 int position = adapter.getPressedPosition();
                 adapter.setItem(position, new ImageChild(bitmap, true));
-                if (adapter.getItemCount() < 5)
-                    adapter.addItem(new ImageChild(null, false)); //再新增一張空白圖
                 recyclerView.scrollToPosition(position);
             }
         });

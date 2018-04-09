@@ -280,6 +280,18 @@ public class DataHelper {
         }
     }
 
+    public static void showFoundStatus(ImageObj imageObj, ImageView imageView, TextView textView, String msg) {
+        if (imageObj == null) {
+            imageView.setImageResource(getNotFoundImg());
+            textView.setText(msg);
+            imageView.setVisibility(View.VISIBLE);
+            textView.setVisibility(View.VISIBLE);
+        }else {
+            imageView.setVisibility(View.GONE);
+            textView.setVisibility(View.GONE);
+        }
+    }
+
     private static int getNotFoundImg() {
         int imgId;
         switch ((int) (Math.random()* 5) + 1) {

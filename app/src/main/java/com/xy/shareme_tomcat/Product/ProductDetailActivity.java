@@ -21,7 +21,6 @@ import com.xy.shareme_tomcat.Member.MemberProfileActivity;
 import com.xy.shareme_tomcat.R;
 import com.xy.shareme_tomcat.adapter.ImageGroupAdapter;
 import com.xy.shareme_tomcat.data.Book;
-import com.xy.shareme_tomcat.data.ImageObj;
 import com.xy.shareme_tomcat.network_helper.GetBitmapBatch;
 import com.xy.shareme_tomcat.network_helper.MyOkHttp;
 
@@ -64,7 +63,7 @@ public class ProductDetailActivity extends AppCompatActivity {
     private TextView txtId, txtTitle, txtDep, txtStatus, txtNote, txtPrice, txtPS, txtSeller, txtPost, txtEdit;
     private FloatingActionButton fabContact, fabFavorite;
 
-    private ArrayList<ImageObj> books;
+    private Book book;
     public static ArrayList<Bitmap> images;
     private ImageGroupAdapter adapter;
     public static int indexSelectedImage;
@@ -140,7 +139,6 @@ public class ProductDetailActivity extends AppCompatActivity {
     private void loadData() {
         isShown = false;
         prgBar.setVisibility(View.VISIBLE);
-        books = new ArrayList<>();
         conn = new MyOkHttp(ProductDetailActivity.this, new MyOkHttp.TaskListener() {
             @Override
             public void onFinished(final String result) {
@@ -157,35 +155,35 @@ public class ProductDetailActivity extends AppCompatActivity {
                             JSONObject resObj = new JSONObject(result);
                             if (resObj.getBoolean(KEY_STATUS)) {
                                 JSONObject obj = resObj.getJSONObject(KEY_PRODUCT);
+                                book = new Book(
+                                        productId,
+                                        obj.getString(KEY_PHOTO1),
+                                        obj.getString(KEY_PHOTO2),
+                                        obj.getString(KEY_PHOTO3),
+                                        obj.getString(KEY_PHOTO4),
+                                        obj.getString(KEY_PHOTO5),
+                                        obj.getString(KEY_TITLE),
+                                        obj.getString(KEY_CONDITION),
+                                        obj.getString(KEY_NOTE),
+                                        obj.getString(KEY_PRICE),
+                                        obj.getString(KEY_PS),
+                                        obj.getString(KEY_SELLER_ID),
+                                        obj.getString(KEY_SELLER_NAME),
+                                        obj.getString(KEY_TYPE),
+                                        obj.getString(KEY_POST_TIME),
+                                        obj.getString(KEY_EDIT_TIME)
+                                );
 
                                 //若已在最愛清單，就改變愛心顏色
                                 if (obj.getBoolean(KEY_FAVORITE))
                                     fabFavorite.setImageResource(R.drawable.ic_favorite_yellow);
 
-                                    books.add(new Book(
-                                            productId,
-                                            obj.getString(KEY_PHOTO1),
-                                            obj.getString(KEY_PHOTO2),
-                                            obj.getString(KEY_PHOTO3),
-                                            obj.getString(KEY_PHOTO4),
-                                            obj.getString(KEY_PHOTO5),
-                                            obj.getString(KEY_TITLE),
-                                            obj.getString(KEY_CONDITION),
-                                            obj.getString(KEY_NOTE),
-                                            obj.getString(KEY_PRICE),
-                                            obj.getString(KEY_PS),
-                                            obj.getString(KEY_SELLER_ID),
-                                            obj.getString(KEY_SELLER_NAME),
-                                            obj.getString(KEY_TYPE),
-                                            obj.getString(KEY_POST_TIME),
-                                            obj.getString(KEY_EDIT_TIME)
-                                    ));
                                 // 產生物件ArrayList資料後，由圖片位址下載圖片，完成後再顯示資料.
-                                getBitmap = new GetBitmapBatch(context, getResources(), books, new GetBitmapBatch.TaskListener() {
+                                getBitmap = new GetBitmapBatch(context, getResources(), book, new GetBitmapBatch.TaskListener() {
                                     // 下載圖片完成後執行的方法
                                     @Override
                                     public void onFinished() {
-                                        showFoundStatus(books, imageView, textView, "");
+                                        showFoundStatus(book, imageView, textView, "");
                                         showData();
                                         prgBar.setVisibility(View.GONE);
                                     }
@@ -193,11 +191,11 @@ public class ProductDetailActivity extends AppCompatActivity {
                                 // 執行圖片下載
                                 getBitmap.execute();
                             }else {
-                                showFoundStatus(books, imageView, textView, "此商品不存在");
+                                showFoundStatus(book, imageView, textView, "此商品不存在");
                                 prgBar.setVisibility(View.GONE);
                             }
                         }catch (JSONException e) {
-                            showFoundStatus(books, imageView, textView, "處理JSON發生錯誤");
+                            showFoundStatus(book, imageView, textView, "處理JSON發生錯誤");
                             prgBar.setVisibility(View.GONE);
                         }
                     }
@@ -217,7 +215,6 @@ public class ProductDetailActivity extends AppCompatActivity {
     }
 
     private void showData () {
-        Book book = (Book) books.get(0);
         txtId.setText(productId);
         txtTitle.setText(book.getTitle());
         txtPrice.setText("$ " + book.getPrice());
@@ -275,7 +272,7 @@ public class ProductDetailActivity extends AppCompatActivity {
 
         showImages(book);
         isShown = true;
-        books = null;
+        book = null;
     }
 
     private void showImages(Book book) {
@@ -354,12 +351,10 @@ public class ProductDetailActivity extends AppCompatActivity {
     }
 
     private void cancelConnection() {
-        try {
+        if (conn != null)
             conn.cancel();
-        }catch (NullPointerException e) {}
-        try {
+        if (getBitmap != null)
             getBitmap.cancel(true);
-        }catch (NullPointerException e) {}
     }
 
 }

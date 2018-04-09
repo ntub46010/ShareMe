@@ -26,7 +26,6 @@ import com.xy.shareme_tomcat.R;
 import com.xy.shareme_tomcat.adapter.ImageUploadAdapter;
 import com.xy.shareme_tomcat.data.AlbumImageProvider;
 import com.xy.shareme_tomcat.data.Book;
-import com.xy.shareme_tomcat.data.ImageObj;
 import com.xy.shareme_tomcat.data.ImageChild;
 import com.xy.shareme_tomcat.network_helper.GetBitmapBatch;
 import com.xy.shareme_tomcat.network_helper.MyOkHttp;
@@ -67,7 +66,7 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
     private ImageView btnPost;
     private TextView txtId;
 
-    private ArrayList<ImageObj> books;
+    private Book book;
     private ImageUploadAdapter adapter;
     private RecyclerView recyclerView;
     private AlbumImageProvider provider;
@@ -181,7 +180,6 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
         btnPost.setVisibility(View.GONE);
         prgBar.setVisibility(View.VISIBLE);
 
-        books = new ArrayList<>();
         conLoadDetail = new MyOkHttp(ProductEditActivity.this, new MyOkHttp.TaskListener() {
             @Override
             public void onFinished(final String result) {
@@ -198,8 +196,7 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
                             JSONObject resObj = new JSONObject(result);
                             if (resObj.getBoolean(KEY_STATUS)) {
                                 JSONObject obj = resObj.getJSONObject(KEY_PRODUCT);
-
-                                books.add(new Book(
+                                book = new Book(
                                         obj.getString(KEY_PRODUCT_ID),
                                         obj.getString(KEY_PHOTO1),
                                         obj.getString(KEY_PHOTO2),
@@ -212,25 +209,28 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
                                         obj.getString(KEY_PRICE),
                                         obj.getString(KEY_PS),
                                         obj.getString(KEY_TYPE)
-                                ));
+                                );
+
                                 // 產生物件ArrayList資料後，由圖片位址下載圖片，完成後再顯示資料.
-                                getBitmap = new GetBitmapBatch(context, getResources(), books, new GetBitmapBatch.TaskListener() {
+                                getBitmap = new GetBitmapBatch(context, getResources(), book, new GetBitmapBatch.TaskListener() {
                                     // 下載圖片完成後執行的方法
                                     @Override
                                     public void onFinished() {
-                                        showFoundStatus(books, imageView, textView, "");
+                                        showFoundStatus(book, imageView, textView, "");
                                         showData();
+                                        prgBar.setVisibility(View.GONE);
                                     }
                                 });
                                 // 執行圖片下載
                                 getBitmap.execute();
                             }else {
-                                showFoundStatus(books, imageView, textView, "此商品不存在");
+                                prgBar.setVisibility(View.GONE);
+                                showFoundStatus(book, imageView, textView, "此商品不存在");
                             }
                         }catch (JSONException e) {
-                            showFoundStatus(books, imageView, textView, "伺服器發生例外");
+                            prgBar.setVisibility(View.GONE);
+                            showFoundStatus(book, imageView, textView, "伺服器發生例外");
                         }
-                        prgBar.setVisibility(View.GONE);
                     }
                 });
             }
@@ -247,7 +247,6 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void showData() {
-        Book book = (Book) books.get(0);
         txtId.setText(bookId);
         edtTitle.setText(book.getTitle());
         edtStatus.setText(book.getStatus());
@@ -288,8 +287,7 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
         }
 
         showImages(book);
-
-        books = null;
+        book = null;
         layDetail.setVisibility(View.VISIBLE);
         btnPost.setVisibility(View.VISIBLE);
         isShown = true;
@@ -301,8 +299,6 @@ public class ProductEditActivity extends AppCompatActivity implements View.OnCli
             public void onFinished(Bitmap bitmap) {
                 int position = adapter.getPressedPosition();
                 adapter.setItem(position, new ImageChild(bitmap, true));
-                if (adapter.getItemCount() < 5)
-                    adapter.addItem(new ImageChild(null, false)); //再新增一張空白圖
                 recyclerView.scrollToPosition(position);
             }
         });

@@ -64,7 +64,7 @@ public class ImageUploadAdapter extends RecyclerView.Adapter<ImageUploadAdapter.
                 @Override
                 public boolean onLongClick(View v) {
                     pressedPosition = position;
-                    if (getItem(position).getBitmap() != null || !getItem(position).getFileName().equals("")) {
+                    if (getItem(position).getBitmap() != null /*|| !getItem(position).getFileName().equals("")*/) {
                         prepareDialog();
                         return true;
                     }
@@ -83,7 +83,7 @@ public class ImageUploadAdapter extends RecyclerView.Adapter<ImageUploadAdapter.
 
     @Override
     public int getItemCount() {
-        return queue.size();
+        return queue.size(); //真圖加空白圖的數量
     }
 
     @Override
@@ -168,28 +168,30 @@ public class ImageUploadAdapter extends RecyclerView.Adapter<ImageUploadAdapter.
     }
 
     public void setItem(int position, ImageChild item) {
-        queue.dequeueFromRear();
-        queue.enqueueFromRear(item);
+        if (((ImageChild) queue.get(position)).getBitmap() == null && getItemCount() <= 4) //剛剛點的是空白圖(新增圖片)，且放圖片前至多有3+1張圖
+            addItem(new ImageChild(null, false)); //新增一張空白圖
+
+        queue.set(position, item);
         //notifyDataSetChanged(); //會出錯
         notifyItemChanged(position);
     }
 
-    public void addItem(ImageChild image) {
-        queue.enqueueFromRear(image);
+    public void addItem(ImageChild item) {
+        queue.enqueueFromRear(item);
         notifyDataSetChanged();
     }
 
     private void removeItem(int position) {
-        int bmpAmount = 0;
-        //第一條件，至少有兩張圖片(可能含一張空白)；第二條件，點選的不是空白圖
+        int amount = 0;
+        //第一條件，至少有兩張圖片(含一張空白)；第二條件，點選的不是空白圖
         if (getItemCount() > 1 && (getItem(position).getBitmap() != null)) {
             queue.remove(position);
             for (int i=0; i<queue.size(); i++) {
                 if (getItem(i).getBitmap() != null)
-                    bmpAmount++;
+                    amount++;
             }
-            if (bmpAmount == 5) {
-                //若移除前原先有5張真圖，要補一張空白圖
+            if (amount == 4) {
+                //若移除後剩4張真圖，要補一張空白圖
                 addItem(new ImageChild(null, false));
             }
             notifyDataSetChanged();

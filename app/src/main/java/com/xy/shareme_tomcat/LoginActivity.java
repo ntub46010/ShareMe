@@ -22,6 +22,7 @@ import android.widget.Toast;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.xy.shareme_tomcat.broadcast_helper.managers.RequestManager;
+import com.xy.shareme_tomcat.data.Member;
 import com.xy.shareme_tomcat.network_helper.MyOkHttp;
 
 import org.json.JSONException;
@@ -51,13 +52,11 @@ public class LoginActivity extends Activity {
 
     private LinearLayout layLoginField, layRegisterField;
     private EditText edtLogAcc, edtLogPwd, edtRegAcc, edtRegPwd, edtRegPwd2, edtRegName, edtRegEmail;
-    private TextView txtRegister;
-    private Button btnLogin, btnRegister, btnCancel;
     private RadioGroup rgpRegGender;
-    private Spinner spnRegDep;
     private ProgressBar prgBar;
 
-    private String userId = "", pwd = "", department = "51", method = "";
+    private Member member;
+    private String method = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +69,10 @@ public class LoginActivity extends Activity {
         layLoginField = (LinearLayout) findViewById(R.id.layLoginField);
         edtLogAcc = (EditText) findViewById(R.id.edtAccount);
         edtLogPwd = (EditText) findViewById(R.id.edtPassword);
-        txtRegister = (TextView) findViewById(R.id.txtRegister);
+        TextView txtRegister = (TextView) findViewById(R.id.txtRegister);
+        Button btnLogin = (Button) findViewById(R.id.btnLogin);
+        prgBar = (ProgressBar) findViewById(R.id.prgBar);
+
         txtRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -78,14 +80,15 @@ public class LoginActivity extends Activity {
                 layRegisterField.setVisibility(View.VISIBLE);
             }
         });
-        btnLogin = (Button) findViewById(R.id.btnLogin);
+
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                userId = edtLogAcc.getText().toString();
-                pwd = edtLogPwd.getText().toString();
-                if (!userId.equals("") && !pwd.equals(""))
-                    registerDevice(userId, pwd);
+                member = new Member();
+                member.setAcc(edtLogAcc.getText().toString());;
+                member.setPwd(edtLogPwd.getText().toString());
+                if (!member.getAcc().equals("") && !member.getPwd().equals(""))
+                    registerDevice(member);
             }
         });
 
@@ -97,46 +100,46 @@ public class LoginActivity extends Activity {
         edtRegName = (EditText) findViewById(R.id.edtRegName);
         edtRegEmail = (EditText) findViewById(R.id.edtRegEmail);
         rgpRegGender = (RadioGroup) findViewById(R.id.rgpRegGender);
-        spnRegDep = (Spinner) findViewById(R.id.spnRegDepartment);
-        btnRegister = (Button) findViewById(R.id.btnRegConfirm);
-        btnCancel = (Button) findViewById(R.id.btnRegCancel);
+        Spinner spnRegDep = (Spinner) findViewById(R.id.spnRegDepartment);
+        Button btnRegister = (Button) findViewById(R.id.btnRegConfirm);
+        Button btnCancel = (Button) findViewById(R.id.btnRegCancel);
 
         spnRegDep.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                department = getSpnDepCode(i);
+                member.setDepartment(getSpnDepCode(i));;
             }
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
+
         btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String acc = edtRegAcc.getText().toString();
-                String pwd = edtRegPwd.getText().toString();
-                String pwd2 = edtRegPwd2.getText().toString();
-                String name = edtRegName.getText().toString();
-                String email = edtRegEmail.getText().toString();
+                member = new Member();
+                member.setAcc(edtRegAcc.getText().toString());
+                member.setPwd(edtRegPwd.getText().toString());
+                member.setPwd2(edtRegPwd2.getText().toString());
+                member.setName(edtRegName.getText().toString());
+                member.setEmail(edtRegEmail.getText().toString());
 
-                String gender;
                 switch (rgpRegGender.getCheckedRadioButtonId()) {
                     case R.id.rdoRegMale:
-                        gender = "1";
+                        member.setGender("1");
                         break;
                     case R.id.rdoRegFemale:
-                        gender = "0";
+                        member.setGender("0");
                         break;
                     default:
-                        gender = "";
+                        member.setGender("");
                 }
 
-                if (isInfoValid(acc, pwd, pwd2, name, email, gender)) {
-                    registerMember(acc, pwd, name, email, gender);
-                }
-
+                if (isRegisterInfoValid(member))
+                    registerMember(member);
             }
         });
+
         btnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -144,16 +147,9 @@ public class LoginActivity extends Activity {
                 layLoginField.setVisibility(View.VISIBLE);
             }
         });
-
-        prgBar = (ProgressBar) findViewById(R.id.prgBar);
-        prgBar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-            }
-        });
     }
 
-    private void registerDevice(final String userId, final String pwd) {
+    private void registerDevice(Member member) {
         //連線確認登入帳密，成功後一律向Firebase重新註冊裝置Token，再取回
         layLoginField.setVisibility(View.GONE);
         prgBar.setVisibility(View.VISIBLE);
@@ -197,32 +193,32 @@ public class LoginActivity extends Activity {
         //開始連線
         try {
             JSONObject reqObj = new JSONObject();
-            reqObj.put(KEY_USER_ID, userId);
-            reqObj.put(KEY_PASSWORD, pwd);
+            reqObj.put(KEY_USER_ID, member.getAcc());
+            reqObj.put(KEY_PASSWORD, member.getPwd());
             conn.execute(getString(R.string.link_login), reqObj.toString());
         }catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    private boolean isInfoValid (String acc, String pwd, String pwd2, String name, String email, String gender) {
+    private boolean isRegisterInfoValid(Member member) {
         //還不能阻擋在帳密輸入中文
         String errMsg = "";
-        if (acc.length() < 8 || acc.length() > 10)
+        if (member.getAcc().length() < 8 || member.getAcc().length() > 10)
             errMsg += "帳號長度錯誤\n";
 
-        if (pwd.length() < 6 || pwd.length() > 15)
+        if (member.getPwd().length() < 6 || member.getPwd().length() > 15)
             errMsg += "密碼長度錯誤\n";
-        else if (!pwd.equals(pwd2))
+        else if (!member.getPwd().equals(member.getPwd2()))
             errMsg += "確認密碼錯誤\n";
 
-        if (name.length() < 1)
+        if (member.getName().length() < 1)
             errMsg += "姓名未輸入\n";
 
-        if (!email.contains("@") || email.indexOf("@") == 0 || email.indexOf("@") == email.length() - 1)
+        if (!member.getEmail().contains("@") || member.getEmail().indexOf("@") == 0 || member.getEmail().indexOf("@") == member.getEmail().length() - 1)
             errMsg += "信箱格式錯誤\n";
 
-        if (gender.equals(""))
+        if (member.getGender().equals(""))
             errMsg += "性別未選擇\n";
 
         if (!errMsg.equals("")){
@@ -233,14 +229,11 @@ public class LoginActivity extends Activity {
                     .setPositiveButton("確定", null)
                     .show();
             return false;
-        }else {
-            this.userId = acc;
-            this.pwd = pwd;
+        }else
             return true;
-        }
     }
 
-    private void registerMember(final String userId, final String pwd, String name, String email, String gender) {
+    private void registerMember(final Member member) {
         layRegisterField.setVisibility(View.GONE);
         prgBar.setVisibility(View.VISIBLE);
         initTrdFlag();
@@ -259,6 +252,7 @@ public class LoginActivity extends Activity {
                     JSONObject resObj = new JSONObject(result);
                     if (resObj.getBoolean(KEY_STATUS)) {
                         //註冊成功
+                        registerDevice(member);
                     }else {
                         method = "";
                         Toast.makeText(context, "該帳號已被使用", Toast.LENGTH_SHORT).show();
@@ -273,18 +267,16 @@ public class LoginActivity extends Activity {
         //開始連線
         try {
             JSONObject reqObj = new JSONObject();
-            reqObj.put(KEY_USER_ID, userId);
-            reqObj.put(KEY_PASSWORD, pwd);
-            reqObj.put(KEY_NAME, name);
-            reqObj.put(KEY_DEPARTMENT, department);
-            reqObj.put(KEY_GENDER, gender);
-            reqObj.put(KEY_EMAIL, email);
+            reqObj.put(KEY_USER_ID, member.getAcc());
+            reqObj.put(KEY_PASSWORD, member.getPwd());
+            reqObj.put(KEY_NAME, member.getName());
+            reqObj.put(KEY_EMAIL, member.getEmail());
+            reqObj.put(KEY_DEPARTMENT, member.getDepartment());
+            reqObj.put(KEY_GENDER, member.getGender());
             conn.execute(getString(R.string.link_register), reqObj.toString());
         }catch (JSONException e) {
             e.printStackTrace();
         }
-
-
     }
 
     private void initTrdTimer() {
@@ -331,13 +323,11 @@ public class LoginActivity extends Activity {
             if (!myName.equals("")) {
                 switch (method) {
                     case "registerDevice":
-                        deleteOriginalToken(userId);
+                        deleteOriginalToken(member.getAcc());
                         break;
                     case "registerMember":
                         Toast.makeText(context, "註冊成功", Toast.LENGTH_SHORT).show();
-                        registerDevice(userId, pwd);
-                        break;
-                    case "":
+                        registerDevice(member);
                         break;
                 }
             }else
@@ -365,8 +355,8 @@ public class LoginActivity extends Activity {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             if (tmpToken.equals("")) { //確定token已刪除，開始註冊新token
-                RequestManager.getInstance().insertUserPushData(userId);
-                RequestManager.getInstance().getTokenById(userId);
+                RequestManager.getInstance().insertUserPushData(member.getAcc());
+                RequestManager.getInstance().getTokenById(member.getAcc());
                 initTrdWaitLogin(); //嘗試取得新token，取得後即可真正的登入
             }else
                 initTrdWaitDelete(); //繼續嘗試取得Token，存到DataHelper.tmpToken
@@ -387,11 +377,13 @@ public class LoginActivity extends Activity {
             super.handleMessage(msg);
             if (!tmpToken.equals("token")) { //已取得新token
                 tmpToken = "token"; //恢復至尚未取得之值
-                prgBar.setVisibility(View.GONE);
-                loginUserId = userId;
+                loginUserId = member.getAcc();
                 writeLoginRecord();
 
                 startActivity(new Intent(context, MainActivity.class)); //真正登入
+                prgBar.setVisibility(View.GONE);
+                layLoginField.setVisibility(View.VISIBLE);
+                layRegisterField.setVisibility(View.VISIBLE);
                 finish();
             }else
                 initTrdWaitLogin();

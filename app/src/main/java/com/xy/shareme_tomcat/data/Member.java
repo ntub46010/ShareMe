@@ -2,9 +2,14 @@ package com.xy.shareme_tomcat.data;
 
 public class Member extends ImageObj {
     private String imgURL;
+    private String acc, pwd, pwd2;
     private String name, department, email;
     private String positive, negative;
-    private String pwd;
+    private String gender;
+
+    public Member() {
+
+    }
 
     //編輯個人檔案
     public Member(String imgURL, String name, String department, String email, String pwd) {
@@ -49,8 +54,20 @@ public class Member extends ImageObj {
         return negative;
     }
 
+    public String getAcc() {
+        return acc;
+    }
+
     public String getPwd() {
         return pwd;
+    }
+
+    public String getPwd2() {
+        return pwd2;
+    }
+
+    public String getGender() {
+        return gender;
     }
 
     public void setImgURL(String imgURL) {
@@ -69,7 +86,19 @@ public class Member extends ImageObj {
         this.email = email;
     }
 
+    public void setAcc(String acc) {
+        this.acc = acc;
+    }
+
     public void setPwd (String pwd) {
         this.pwd = pwd;
+    }
+
+    public void setPwd2 (String pwd2) {
+        this.pwd2 = pwd2;
+    }
+
+    public void setGender (String gender) {
+        this.gender = gender;
     }
 }

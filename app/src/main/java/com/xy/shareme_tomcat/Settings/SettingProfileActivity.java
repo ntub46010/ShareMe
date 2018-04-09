@@ -60,6 +60,8 @@ public class SettingProfileActivity extends AppCompatActivity {
     private Member member;
     private MyOkHttp conShowProfile, conEditProfile;
     private AlbumImageProvider provider;
+
+    private String originPwd;
     private boolean isShown = false, isImageChanged = false;
 
     @Override
@@ -196,6 +198,7 @@ public class SettingProfileActivity extends AppCompatActivity {
                                         obj.getString(KEY_EMAIL),
                                         obj.getString(KEY_PASSWORD)
                                 );
+                                originPwd = obj.getString(KEY_PASSWORD);
                                 member.setGetBitmap(new GetBitmapTask(getString(R.string.link_avatar), new GetBitmapTask.TaskListener() {
                                     @Override
                                     public void onFinished() {
@@ -315,7 +318,7 @@ public class SettingProfileActivity extends AppCompatActivity {
         isShown = true;
     }
 
-    private boolean isInfoValid(String name, String email, String oldPwd, String pwd1, String pwd2) {
+    private boolean isInfoValid(String name, String email, String oldPwd, String newPwd, String newPwd2) {
         StringBuffer errMsg = new StringBuffer("");
         if (name.length() < 1)
             errMsg.append("姓名未輸入\n");
@@ -324,21 +327,19 @@ public class SettingProfileActivity extends AppCompatActivity {
             errMsg.append("信箱格式錯誤\n");
 
         if (!oldPwd.equals("")) {
-            if (!oldPwd.equals(member.getPwd()))
+            if (!oldPwd.equals(this.originPwd))
                 errMsg.append("原密碼錯誤\n");
             else {
-                if (pwd1.length() < 6 || pwd1.length() > 15)
+                if (newPwd.length() < 6 || newPwd.length() > 15)
                     errMsg.append("新密碼長度錯誤\n");
-                else if (!pwd1.equals(pwd2))
+                else if (!newPwd.equals(newPwd2))
                     errMsg.append("確認密碼錯誤\n");
             }
         }
 
         if (errMsg.length() == 0) {
-            member.setName(name);
-            member.setEmail(email);
-            if (!pwd1.equals(""))
-                member.setPwd(pwd1);
+            if (!newPwd.equals(""))
+                member.setPwd(newPwd);
             return true;
         }else {
             AlertDialog.Builder msgbox = new AlertDialog.Builder(context);
@@ -351,7 +352,13 @@ public class SettingProfileActivity extends AppCompatActivity {
     }
 
     private void updateProfile() {
-        if (!isInfoValid(edtName.getText().toString(), edtEmail.getText().toString(), edtOldPwd.getText().toString(), edtNewPwd.getText().toString(), edtNewPwd2.getText().toString()))
+        member.setName(edtName.getText().toString());
+        member.setEmail(edtEmail.getText().toString());
+        member.setPwd(edtOldPwd.getText().toString());
+        String newPwd = edtNewPwd.getText().toString();
+        String newPwd2 = edtNewPwd2.getText().toString();
+
+        if (!isInfoValid(member.getName(), member.getEmail(), member.getPwd(), newPwd, newPwd2))
             return;
 
         btnUpdateInfo.setEnabled(false);
@@ -369,18 +376,19 @@ public class SettingProfileActivity extends AppCompatActivity {
                         try {
                             JSONObject resObj = new JSONObject(result);
                             if (resObj.getBoolean(KEY_STATUS)) {
-                                Toast.makeText(context, "編輯成功", Toast.LENGTH_SHORT).show();
-                                dlgUpload.dismiss();
-
                                 Intent it = new Intent(context, MemberProfileActivity.class);
                                 Bundle bundle = new Bundle();
                                 bundle.putString(KEY_MEMBER_ID, loginUserId);
                                 it.putExtras(bundle);
                                 startActivity(it);
+
+                                Toast.makeText(context, "編輯成功", Toast.LENGTH_SHORT).show();
+                                dlgUpload.dismiss();
                                 finish();
                             }else
-                                Toast.makeText(context, "編輯失敗", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, "伺服器發生例外", Toast.LENGTH_SHORT).show();
                         }catch (JSONException e) {
+                            Toast.makeText(context, "處理JSON發生例外", Toast.LENGTH_SHORT).show();
                             e.printStackTrace();
                         }
                     }

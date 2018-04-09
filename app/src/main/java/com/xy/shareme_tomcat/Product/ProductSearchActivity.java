@@ -114,12 +114,7 @@ public class ProductSearchActivity extends AppCompatActivity {
                                 showData();
                             }else {
                                 prgBar.setVisibility(View.GONE);
-                                /*runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {*/
-                                        showFoundStatus(books, imageView, textView, "沒有找到商品");
-                                    /*}
-                                });*/
+                                showFoundStatus(books, imageView, textView, "沒有找到商品");
                             }
                         }catch (JSONException e) {
                             prgBar.setVisibility(View.GONE);
@@ -162,14 +157,16 @@ public class ProductSearchActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-        adapter.destroy(true);
         System.gc();
         super.onDestroy();
     }
 
     private void cancelConnection() {
-        try {
+        if (conn != null)
             conn.cancel();
-        }catch (NullPointerException e) {}
+        if (adapter != null) {
+            adapter.destroy(true);
+            adapter = null;
+        }
     }
 }

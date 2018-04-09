@@ -135,7 +135,8 @@ public class ImageUploadQueue extends Queue {
 
     public void cancelUpload() {
         imageTask = null;
-        dlgUpload.dismiss();
+        if (dlgUpload != null)
+            dlgUpload.dismiss();
     }
 
 

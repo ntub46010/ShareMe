@@ -4,9 +4,11 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
@@ -23,16 +25,16 @@ public class AlbumImageProvider {
     private final int REQUEST_ALBUM = 1;
     private final int REQUEST_CROP = 2;
 
-    private File imageFile = null;
     private Bitmap imageBitmap = null;
     private int aspectX, aspectY, outputX, outputY;
+    private Uri cropImageUri;
 
     private Activity activity;
     private TaskListener taskListener;
 
     public interface TaskListener { void onFinished(Bitmap bitmap); }
 
-    public AlbumImageProvider (Activity activity, int aspectX, int aspectY, int outputX, int outputY, TaskListener taskListener) {
+    public AlbumImageProvider(Activity activity, int aspectX, int aspectY, int outputX, int outputY, TaskListener taskListener) {
         this.activity = activity;
         this.taskListener = taskListener;
         this.aspectX = aspectX;
@@ -51,12 +53,17 @@ public class AlbumImageProvider {
                     new String[] {android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE},
                     0 //requestCode
             );
+            openAlbum();
         }else {
             //已有權限，準備選圖
-            Intent albumIntent = new Intent(Intent.ACTION_PICK);
-            albumIntent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            activity.startActivityForResult(albumIntent, REQUEST_ALBUM);
+            openAlbum();
         }
+    }
+
+    private void openAlbum() {
+        Intent albumIntent = new Intent(Intent.ACTION_PICK);
+        albumIntent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        activity.startActivityForResult(albumIntent, REQUEST_ALBUM);
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -67,20 +74,17 @@ public class AlbumImageProvider {
         final Uri imageUri = data.getData();
         switch (requestCode) {
             case REQUEST_ALBUM:
-                if (!createImageFile())
-                    return;
                 if (imageUri != null)
                     cropImage(imageUri);
                 break;
 
             case REQUEST_CROP:
+                cropImageUri = imageUri;
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
                         try {
                             imageBitmap = BitmapFactory.decodeStream(activity.getContentResolver().openInputStream(imageUri));
-                            imageFile.delete();
-                            imageFile.deleteOnExit();
                         }catch (FileNotFoundException e) {
                             e.printStackTrace();
                         }
@@ -95,17 +99,26 @@ public class AlbumImageProvider {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             taskListener.onFinished(imageBitmap);
+            deleteFile(cropImageUri);
         }
     };
 
-    private boolean createImageFile() {
-        imageFile = new File(Environment.getExternalStorageDirectory(), System.currentTimeMillis() + ".jpg");
-        try {
-            imageFile.createNewFile();
-            return imageFile.exists();
-        }catch (IOException e) {
-            e.printStackTrace();
-            return false;
+    private void deleteFile(Uri imageUri) {
+        String[] projection = {MediaStore.Images.Media.DATA};
+        Cursor cursor = activity.managedQuery(imageUri, projection, null, null, null);
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+
+        File file = new File(cursor.getString(column_index));
+        file.delete(); //刪除後會留下圖片'空檔(快取)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) { //清除快取
+            final Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+            final Uri contentUri = Uri.fromFile(file);
+            scanIntent.setData(contentUri);
+            activity.sendBroadcast(scanIntent);
+        } else {
+            final Intent intent = new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + Environment.getExternalStorageDirectory()));
+            activity.sendBroadcast(intent);
         }
     }
 
