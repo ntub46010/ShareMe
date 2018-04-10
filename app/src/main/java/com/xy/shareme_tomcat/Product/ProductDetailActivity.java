@@ -179,7 +179,7 @@ public class ProductDetailActivity extends AppCompatActivity {
                                     fabFavorite.setImageResource(R.drawable.ic_favorite_yellow);
 
                                 // 產生物件ArrayList資料後，由圖片位址下載圖片，完成後再顯示資料.
-                                getBitmap = new GetBitmapBatch(context, getResources(), book, new GetBitmapBatch.TaskListener() {
+                                getBitmap = new GetBitmapBatch(book, getString(R.string.link_image), new GetBitmapBatch.TaskListener() {
                                     // 下載圖片完成後執行的方法
                                     @Override
                                     public void onFinished() {

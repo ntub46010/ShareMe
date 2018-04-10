@@ -13,9 +13,8 @@ import java.net.URL;
 import java.util.List;
 
 public class GetBitmapBatch extends AsyncTask<Void, Void, Void> {
-    private Context context;
     private ImageObj imageObj;
-    private Resources res;
+    private String linkPrefix;
 
     // 宣告一個TaskListener介面, 由接收結果的物件實作.
     public interface TaskListener {
@@ -25,11 +24,10 @@ public class GetBitmapBatch extends AsyncTask<Void, Void, Void> {
     // 接收結果的物件
     private final TaskListener taskListener;
 
-    public GetBitmapBatch(Context context, Resources res, ImageObj imageObj, TaskListener taskListener){
-        this.context = context;
+    public GetBitmapBatch(ImageObj imageObj, String linkPrefix, TaskListener taskListener){
         this.imageObj = imageObj;
+        this.linkPrefix = linkPrefix;
         this.taskListener = taskListener;
-        this.res = res;
     }
 
     @Override
@@ -46,12 +44,11 @@ public class GetBitmapBatch extends AsyncTask<Void, Void, Void> {
     //  由圖片地址下載圖片
     @Override
     protected Void doInBackground(Void... params) {
-        String imageLink = res.getString(R.string.link_image);
-        if (!imageObj.getImgURL().equals("")) imageObj.img = getImage(imageLink + imageObj.getImgURL());
-        if (!imageObj.getImgURL2().equals("")) imageObj.img2 = getImage(imageLink + imageObj.getImgURL2());
-        if (!imageObj.getImgURL3().equals("")) imageObj.img3 = getImage(imageLink + imageObj.getImgURL3());
-        if (!imageObj.getImgURL4().equals("")) imageObj.img4 = getImage(imageLink + imageObj.getImgURL4());
-        if (!imageObj.getImgURL5().equals("")) imageObj.img5 = getImage(imageLink + imageObj.getImgURL5());
+        if (!imageObj.getImgURL().equals("")) imageObj.img = getImage(linkPrefix + imageObj.getImgURL());
+        if (!imageObj.getImgURL2().equals("")) imageObj.img2 = getImage(linkPrefix + imageObj.getImgURL2());
+        if (!imageObj.getImgURL3().equals("")) imageObj.img3 = getImage(linkPrefix + imageObj.getImgURL3());
+        if (!imageObj.getImgURL4().equals("")) imageObj.img4 = getImage(linkPrefix + imageObj.getImgURL4());
+        if (!imageObj.getImgURL5().equals("")) imageObj.img5 = getImage(linkPrefix + imageObj.getImgURL5());
         return null;
     }
 

@@ -159,9 +159,9 @@ public class MemberMailboxActivity extends AppCompatActivity {
                 Intent it = new Intent(context, MemberChatActivity.class);
                 Bundle bundle = new Bundle();
                 bundle.putString(KEY_MEMBER_ID, chat.getMember());
-                bundle.putString(KEY_NAME, chat.getName());
                 bundle.putString(KEY_AVATAR, chat.getImgURL());
                 bundle.putString(KEY_PRODUCT_ID, chat.getProduct());
+                bundle.putString(KEY_NAME, chat.getName());
                 it.putExtras(bundle);
                 startActivity(it);
             }
@@ -182,17 +182,16 @@ public class MemberMailboxActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-        if (adapter != null) {
-            adapter.destroy(true);
-            adapter = null;
-        }
         System.gc();
         super.onDestroy();
     }
 
     private void cancelConnection() {
-        try {
+        if (conn != null)
             conn.cancel();
-        }catch (NullPointerException e) {}
+        if (adapter != null) {
+            adapter.destroy(true);
+            adapter = null;
+        }
     }
 }

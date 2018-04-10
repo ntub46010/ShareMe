@@ -7,9 +7,9 @@ public class Chat extends ImageObj {
     private String msg, date, innerDate, time;
     private String name, product, member, sender;
 
-    public Chat(String sender, Bitmap avatar, String msg, String date, String innerDate, String time) { //用於聊天室每則訊息
+    public Chat(String sender, String msg, String date, String innerDate, String time) { //用於聊天室每則訊息
         this.sender = sender;
-        this.img = avatar;
+        //this.img = avatar;
         this.msg = msg;
         this.date = date;
         this.innerDate = innerDate;

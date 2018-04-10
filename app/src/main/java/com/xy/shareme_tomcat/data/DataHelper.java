@@ -67,6 +67,8 @@ public class DataHelper {
     public static final String KEY_DATE = "Date";
     public static final String KEY_TIME = "Time";
     public static final String KEY_MEMBER_ID = "MemberId";
+    public static final String KEY_SENDER_ID = "SenderId";
+
     //---
     public static final String KEY_PROFILE = "Profile";
     public static final String KEY_PRODUCT = "Product";
