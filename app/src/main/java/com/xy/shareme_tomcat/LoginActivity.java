@@ -382,8 +382,8 @@ public class LoginActivity extends Activity {
 
                 startActivity(new Intent(context, MainActivity.class)); //真正登入
                 prgBar.setVisibility(View.GONE);
-                layLoginField.setVisibility(View.VISIBLE);
-                layRegisterField.setVisibility(View.VISIBLE);
+                layLoginField.setVisibility(View.INVISIBLE);
+                layRegisterField.setVisibility(View.INVISIBLE);
                 finish();
             }else
                 initTrdWaitLogin();

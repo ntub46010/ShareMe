@@ -171,13 +171,14 @@
     <style name="img_chat_avatar_left">
         <item name="android:layout_width">55dp</item>
         <item name="android:layout_height">66dp</item>
-        <item name="android:layout_marginTop">3dp</item>
+        <item name="android:layout_marginTop">4dp</item>
         <item name="android:layout_marginStart">3dp</item>
         <item name="android:scaleType">fitXY</item>
         <item name="android:background">#FFFFFF</item>
     </style>
 
     <style name="img_chat_avatar_right" parent="img_chat_avatar_left">
+        <item name="android:layout_marginTop">3dp</item>
         <item name="android:layout_marginStart">0dp</item>
         <item name="android:layout_marginEnd">3dp</item>
     </style>

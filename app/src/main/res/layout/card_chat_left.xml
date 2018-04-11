@@ -32,8 +32,7 @@
                 android:layout_height="21dp"
                 android:layout_marginStart="5dp"
                 android:layout_gravity="start"
-                android:textSize="13sp"
-                android:text="00:00"/>
+                android:textSize="13sp"/>
             <TextView
                 android:id="@+id/txtMsg"
                 style="@style/txt_chat_msg_right" />

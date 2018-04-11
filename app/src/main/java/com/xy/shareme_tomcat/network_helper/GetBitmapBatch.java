@@ -1,16 +1,12 @@
 package com.xy.shareme_tomcat.network_helper;
 
-import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 
-import com.xy.shareme_tomcat.R;
 import com.xy.shareme_tomcat.data.ImageObj;
 
 import java.net.URL;
-import java.util.List;
 
 public class GetBitmapBatch extends AsyncTask<Void, Void, Void> {
     private ImageObj imageObj;
@@ -44,11 +40,15 @@ public class GetBitmapBatch extends AsyncTask<Void, Void, Void> {
     //  由圖片地址下載圖片
     @Override
     protected Void doInBackground(Void... params) {
-        if (!imageObj.getImgURL().equals("")) imageObj.img = getImage(linkPrefix + imageObj.getImgURL());
-        if (!imageObj.getImgURL2().equals("")) imageObj.img2 = getImage(linkPrefix + imageObj.getImgURL2());
-        if (!imageObj.getImgURL3().equals("")) imageObj.img3 = getImage(linkPrefix + imageObj.getImgURL3());
-        if (!imageObj.getImgURL4().equals("")) imageObj.img4 = getImage(linkPrefix + imageObj.getImgURL4());
-        if (!imageObj.getImgURL5().equals("")) imageObj.img5 = getImage(linkPrefix + imageObj.getImgURL5());
+        try {
+            if (!imageObj.getImgURL().equals("")) imageObj.img = getImage(linkPrefix + imageObj.getImgURL());
+            if (!imageObj.getImgURL2().equals("")) imageObj.img2 = getImage(linkPrefix + imageObj.getImgURL2());
+            if (!imageObj.getImgURL3().equals("")) imageObj.img3 = getImage(linkPrefix + imageObj.getImgURL3());
+            if (!imageObj.getImgURL4().equals("")) imageObj.img4 = getImage(linkPrefix + imageObj.getImgURL4());
+            if (!imageObj.getImgURL5().equals("")) imageObj.img5 = getImage(linkPrefix + imageObj.getImgURL5());
+        }catch (NullPointerException e) {
+
+        }
         return null;
     }
 

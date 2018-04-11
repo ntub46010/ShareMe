@@ -182,6 +182,7 @@ public class MemberMailboxActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
+        adapter = null;
         System.gc();
         super.onDestroy();
     }
@@ -189,9 +190,7 @@ public class MemberMailboxActivity extends AppCompatActivity {
     private void cancelConnection() {
         if (conn != null)
             conn.cancel();
-        if (adapter != null) {
+        if (adapter != null)
             adapter.destroy(true);
-            adapter = null;
-        }
     }
 }

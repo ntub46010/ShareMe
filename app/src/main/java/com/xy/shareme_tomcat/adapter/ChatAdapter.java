@@ -1,6 +1,5 @@
 package com.xy.shareme_tomcat.adapter;
 
-import android.graphics.Bitmap;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -16,7 +15,6 @@ import com.xy.shareme_tomcat.data.ImageObj;
 import java.util.ArrayList;
 
 import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
-
 
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.DataViewHolder> {
     private ArrayList<ImageObj> chats;
@@ -90,15 +88,17 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.DataViewHolder
         Chat chat = (Chat) chats.get(i);
         dataViewHolder.position = i;
         dataViewHolder.txtMsg.setText(chat.getMsg());
-        dataViewHolder.txtTime.setText(chat.getDate() + chat.getTime());
+        dataViewHolder.txtTime.setText(chat.getDate() + "  " + chat.getTime());
 
         //根據傳送者ID給予對應大頭貼
-        if (chat.getSender().equals(loginUserId)) { //自身訊息
-            if (avatars.getImg() != null)
-                dataViewHolder.imgAvatar.setImageBitmap(avatars.getImg()); //Img是自身照片
-        }else { //對方訊息
-            if (avatars.getImg2() != null)
-                dataViewHolder.imgAvatar.setImageBitmap(avatars.getImg2()); //Img2是對方照片
+        if (avatars != null) {
+            if (chat.getSender().equals(loginUserId)) { //自身訊息
+                if (avatars.getImg() != null)
+                    dataViewHolder.imgAvatar.setImageBitmap(avatars.getImg()); //Img是自身照片
+            }else { //對方訊息
+                if (avatars.getImg2() != null)
+                    dataViewHolder.imgAvatar.setImageBitmap(avatars.getImg2()); //Img2是對方照片
+            }
         }
     }
 

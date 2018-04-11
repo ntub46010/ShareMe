@@ -126,7 +126,8 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
             @Override
             public void onFinished() {
                 isAvatarLoaded = true;
-                adpChat.notifyDataSetChanged();
+                adpChat = new ChatAdapter(chats, avatar);
+                recyChats.setAdapter(adpChat);
             }
         });
         gbmAvatar.execute();
@@ -151,6 +152,7 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
         recyChats.setVisibility(View.GONE);
         prgChat.setVisibility(View.VISIBLE);
         books = new ArrayList<>();
+        chats = new ArrayList<>();
 
         conn = new MyOkHttp(MemberChatActivity.this, new MyOkHttp.TaskListener() {
             @Override
@@ -166,6 +168,8 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
                         try {
                             JSONObject resObj = new JSONObject(result);
                             if (resObj.getBoolean(KEY_STATUS)) {
+                                myAvatarUrl = resObj.getString(KEY_AVATAR);
+
                                 //交談商品(文字)
                                 JSONArray aryProduct = resObj.getJSONArray(KEY_PRODUCTS);
                                 for (int i = 0; i < aryProduct.length(); i++) {
@@ -179,7 +183,19 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
                                 }
 
                                 //交談訊息(文字)
-                                loadChat(resObj.getJSONArray(KEY_MESSAGE));
+                                JSONArray aryChat = resObj.getJSONArray(KEY_MESSAGE);
+                                for (int i=0; i<aryChat.length(); i++) {
+                                    JSONObject obj = aryChat.getJSONObject(i);
+                                    chats.add(new Chat(
+                                            obj.getString(KEY_SENDER_ID),
+                                            URLDecoder.decode(obj.getString(KEY_MESSAGE), "UTF-8"),
+                                            obj.getString(KEY_DATE),
+                                            obj.getString(KEY_DATE),
+                                            obj.getString(KEY_TIME)
+                                    ));
+                                }
+                                showChatData();
+                                //loadChat(resObj.getJSONArray(KEY_MESSAGE));
 
                                 //個人照片
                                 loadAvatar();
@@ -188,9 +204,11 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
 
 
                             }else {
+                                Toast.makeText(context, "STATUS FALSE", Toast.LENGTH_SHORT).show();
                                 //showFoundStatus(chats, imageView, textView, "伺服器發生例外");
                             }
-                        } catch (JSONException | UnsupportedEncodingException e) {
+                        }catch (JSONException | UnsupportedEncodingException e) {
+                            e.printStackTrace();
                             //prgChat.setVisibility(View.GONE);
                         }
                     }
@@ -216,7 +234,6 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
 
         adpChat = new ChatAdapter(chats, avatar);
         recyChats.setAdapter(adpChat);
-        //adpChat.notifyDataSetChanged();
         recyChats.setVisibility(View.VISIBLE);
 
         //交談商品
