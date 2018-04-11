@@ -1,24 +1,18 @@
 package com.xy.shareme_tomcat.network_helper;
 
-import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 
-import com.xy.shareme_tomcat.R;
 import com.xy.shareme_tomcat.data.ImageObj;
 
 import java.net.URL;
-import java.util.List;
+import java.util.ArrayList;
 
 public class GetBitmap extends AsyncTask<Void, Void, Void> {
-    private Context context;
-    private List<ImageObj> imageObjs;
-    private ImageObj imgObj;
+    private ArrayList<ImageObj> imageObjs;
     private String linkPrefix;
-
-    private int type = 0, preLoadAmount = 0;
+    private int preLoadAmount = 0;
 
     // 宣告一個TaskListener介面, 由接收結果的物件實作.
     public interface TaskListener {
@@ -28,19 +22,10 @@ public class GetBitmap extends AsyncTask<Void, Void, Void> {
     // 接收結果的物件
     private final TaskListener taskListener;
 
-    public GetBitmap(Context context, List<ImageObj> imageObjs, String linkPrefix, TaskListener taskListener){
-        this.context = context;
+    public GetBitmap(ArrayList<ImageObj> imageObjs, String linkPrefix, TaskListener taskListener) {
         this.imageObjs = imageObjs;
         this.linkPrefix = linkPrefix;
         this.taskListener = taskListener;
-        this.type = 0;
-    }
-
-    public GetBitmap(Context context, ImageObj imgObj, TaskListener taskListener){
-        this.context = context;
-        this.imgObj = imgObj;
-        this.taskListener = taskListener;
-        this.type = 1;
     }
 
     @Override
@@ -57,23 +42,15 @@ public class GetBitmap extends AsyncTask<Void, Void, Void> {
     //  由圖片地址下載圖片
     @Override
     protected Void doInBackground(Void... params) {
-        /*
-                    type 0: 下載陣列裡的所有圖片，也可同時指定只要下載前幾個
-                    type 1: 下載一張圖片
-                */
-        if (type == 0) {
-            int count;
-            if (preLoadAmount == 0)
-                count = imageObjs.size();
-            else
-                count = Math.min(preLoadAmount, imageObjs.size());
+        int count;
+        if (preLoadAmount == 0)
+            count = imageObjs.size();
+        else
+            count = Math.min(preLoadAmount, imageObjs.size());
 
-            for(int i=0; i<count; i++){
-                ImageObj imageObj = imageObjs.get(i);
-                imageObj.img = getImage(linkPrefix + imageObj.getImgURL());
-            }
-        }else if (type == 1) {
-            imgObj.img = getImage(linkPrefix + imgObj.getImgURL());
+        for(int i=0; i<count; i++){
+            ImageObj imageObj = imageObjs.get(i);
+            imageObj.img = getImage(linkPrefix + imageObj.getImgURL());
         }
         return null;
     }

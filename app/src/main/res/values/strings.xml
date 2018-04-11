@@ -62,6 +62,8 @@
     <string name="link_evaluate">http://111.250.21.173:8080/ShareMe/api/evaluate</string>
     <string name="link_list_favorite">http://111.250.21.173:8080/ShareMe/api/list_favorite</string>
     <string name="link_list_mails">http://111.250.21.173:8080/ShareMe/api/list_mails</string>
+    <string name="link_show_chatroom">http://111.250.21.173:8080/ShareMe/api/show_chatroom</string>
+    <string name="link_list_message">http://111.250.21.173:8080/ShareMe/api/list_message</string>
     <string name="link_show_stock">http://111.250.21.173:8080/ShareMe/api/show_stock</string>
     <string name="link_drop_product">http://111.250.21.173:8080/ShareMe/api/drop_product</string>
     <string name="link_edit_product">http://111.250.21.173:8080/ShareMe/api/edit_product</string>
