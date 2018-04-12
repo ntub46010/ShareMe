@@ -11,7 +11,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
@@ -38,6 +37,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_AVATAR;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_CHAT;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_DATE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_MEMBER_ID;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_MESSAGE;
@@ -52,6 +52,7 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_STATUS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TIME;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_USER_ID;
+import static com.xy.shareme_tomcat.data.DataHelper.isChatroomAlive;
 import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
 import static com.xy.shareme_tomcat.data.DataHelper.myAvatarUrl;
 
@@ -71,9 +72,9 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
     private ImageObj avatar;
     private ChatAdapter adpChat;
     private ProductSpinnerAdapter adpProduct;
-    private String memberId, productId;
+    private String memberId, productId, title;
 
-    private boolean isAvatarLoaded = false, isChatShown = false;
+    private boolean isAvatarLoaded = false, isChatShown = false, isSpinnerInitialed = false;
 
     //交談訊息>個人照片>商品清單
     @Override
@@ -112,37 +113,38 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
         spnProduct.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                Toast.makeText(context, "C", Toast.LENGTH_SHORT).show();
-                productId = ((Book) books.get(i)).getId();
-                if (isChatShown) {
-                    Toast.makeText(context, "loadChat: " + productId, Toast.LENGTH_SHORT).show();
-                    loadChat();
-                }
+                if (isSpinnerInitialed) {
+                    if (isChatShown) {
+                        productId = ((Book) books.get(i)).getId();
+                        loadChat();
+                    }
+                }else
+                    isSpinnerInitialed = true;
             }
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
-
+        isChatroomAlive = true;
     }
 
     @Override
     public void onResume() {
         super.onResume();
         if (!isChatShown)
-            loadChatroom();/*
+            loadChatroom();
         else if (!isAvatarLoaded)
-            loadAvatar();*/
+            loadAvatar();
     }
 
     private void loadAvatar() {
+        isAvatarLoaded = false;
         avatar = new ImageObj();
         avatar.setImgURL(myAvatarUrl);
         avatar.setImgURL2(bundle.getString(KEY_AVATAR));
         gbmAvatar = new GetBitmapBatch(avatar, getString(R.string.link_avatar), new GetBitmapBatch.TaskListener() {
             @Override
             public void onFinished() {
-                Toast.makeText(context, "個人照片下載完成 ", Toast.LENGTH_SHORT).show();
                 isAvatarLoaded = true;
                 adpChat.notifyDataSetChanged();
             }
@@ -151,7 +153,7 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
     }
 
     private void loadChatroom() {
-        Toast.makeText(context, "loadChatroom: " + productId, Toast.LENGTH_SHORT).show();
+        isChatShown = false;
         recyChats.setVisibility(View.INVISIBLE);
         prgProduct.setVisibility(View.VISIBLE);
         prgChat.setVisibility(View.VISIBLE);
@@ -189,7 +191,9 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
                                 }
 
                                 //交談訊息(文字)
-                                JSONArray aryChat = resObj.getJSONArray(KEY_MESSAGE);
+                                JSONObject objChat = resObj.getJSONObject(KEY_CHAT);
+                                title = objChat.getString(KEY_TITLE);
+                                JSONArray aryChat = objChat.getJSONArray(KEY_MESSAGE);
                                 for (int i=0; i<aryChat.length(); i++) {
                                     JSONObject obj = aryChat.getJSONObject(i);
                                     chats.add(new Chat(
@@ -250,7 +254,9 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
                         try {
                             JSONObject resObj = new JSONObject(result);
                             if (resObj.getBoolean(KEY_STATUS)) {
-                                JSONArray aryChat = resObj.getJSONArray(KEY_MESSAGE);
+                                JSONObject objChat = resObj.getJSONObject(KEY_CHAT);
+                                title = objChat.getString(KEY_TITLE);
+                                JSONArray aryChat = objChat.getJSONArray(KEY_MESSAGE);
                                 for (int i = 0; i < aryChat.length(); i++) {
                                     JSONObject obj = aryChat.getJSONObject(i);
                                     chats.add(new Chat(
@@ -304,12 +310,12 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
         recyChats.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
         recyChats.setLayoutManager(linearLayoutManager);
-        btnSubmit.setEnabled(true);Toast.makeText(context, "A", Toast.LENGTH_SHORT).show();
+        btnSubmit.setEnabled(true);
         adpChat = new ChatAdapter(chats, avatar);
         recyChats.setAdapter(adpChat);
         prgChat.setVisibility(View.GONE);
         recyChats.setVisibility(View.VISIBLE);
-        btnSubmit.setEnabled(true);Toast.makeText(context, "B", Toast.LENGTH_SHORT).show();
+        btnSubmit.setEnabled(true);
         isChatShown = true;
     }
 
@@ -365,7 +371,7 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
                 it = new Intent(context, ProductDetailActivity.class);
                 bundle = new Bundle();
                 bundle.putString(KEY_PRODUCT_ID, productId);
-                bundle.putString(KEY_TITLE, "標題");
+                bundle.putString(KEY_TITLE, title);
                 it.putExtras(bundle);
                 startActivity(it);
                 break;
@@ -394,6 +400,7 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
         adpChat = null;
         avatar = null;
 
+        isChatroomAlive = false;
         System.gc();
         super.onDestroy();
     }

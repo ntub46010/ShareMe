@@ -39,6 +39,7 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_SELLER_ID;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_SELLER_NAME;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_STATUS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TIME;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_USER_ID;
 import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
 import static com.xy.shareme_tomcat.data.DataHelper.showFoundStatus;
@@ -123,6 +124,7 @@ public class MemberMailboxActivity extends AppCompatActivity {
                                             obj.getString(KEY_DATE),
                                             obj.getString(KEY_TIME),
                                             obj.getString(KEY_PRODUCT_ID),
+                                            obj.getString(KEY_TITLE),
                                             obj.getString(KEY_SELLER_ID)
                                     ));
                                 }
@@ -159,10 +161,11 @@ public class MemberMailboxActivity extends AppCompatActivity {
                 Chat chat = (Chat) adapter.getItem(i);
                 Intent it = new Intent(context, MemberChatActivity.class);
                 Bundle bundle = new Bundle();
-                bundle.putString(KEY_MEMBER_ID, chat.getMember());
                 bundle.putString(KEY_AVATAR, chat.getImgURL());
-                bundle.putString(KEY_PRODUCT_ID, chat.getProduct());
+                bundle.putString(KEY_MEMBER_ID, chat.getMemberId());
                 bundle.putString(KEY_NAME, chat.getName());
+                bundle.putString(KEY_PRODUCT_ID, chat.getProductId());
+                bundle.putString(KEY_TITLE, chat.getTitle());
                 it.putExtras(bundle);
                 startActivity(it);
             }

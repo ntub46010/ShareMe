@@ -1,29 +1,27 @@
 package com.xy.shareme_tomcat.data;
 
-import android.graphics.Bitmap;
-
 public class Chat extends ImageObj {
     private String imgURL;
     private String msg, date, innerDate, time;
-    private String name, product, member, sender;
+    private String name, productId, title, memberId, sender;
 
     public Chat(String sender, String msg, String date, String innerDate, String time) { //用於聊天室每則訊息
         this.sender = sender;
-        //this.img = avatar;
         this.msg = msg;
         this.date = date;
         this.innerDate = innerDate;
         this.time = time;
     }
 
-    public Chat(String imgURL, String name, String msg, String date, String time, String product, String member) { //信箱
+    public Chat(String imgURL, String name, String msg, String date, String time, String productId, String title, String memberId) { //信箱
         this.imgURL = imgURL;
         this.msg = msg;
         this.date = date;
         this.time = time;
         this.name = name;
-        this.product = product;
-        this.member = member;
+        this.productId = productId;
+        this.title = title;
+        this.memberId = memberId;
     }
 
     public String getImgURL() {
@@ -50,12 +48,16 @@ public class Chat extends ImageObj {
         return name;
     }
 
-    public String getProduct() {
-        return product;
+    public String getProductId() {
+        return productId;
     }
 
-    public String getMember() {
-        return member;
+    public String getTitle() {
+        return title;
+    }
+
+    public String getMemberId() {
+        return memberId;
     }
 
     public String getSender() {

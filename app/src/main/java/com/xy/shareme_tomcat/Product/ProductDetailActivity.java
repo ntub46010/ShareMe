@@ -54,6 +54,7 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_STATUS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TYPE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_USER_ID;
+import static com.xy.shareme_tomcat.data.DataHelper.isChatroomAlive;
 import static com.xy.shareme_tomcat.data.DataHelper.isProfileAlive;
 import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
 import static com.xy.shareme_tomcat.data.DataHelper.showFoundStatus;
@@ -126,13 +127,17 @@ public class ProductDetailActivity extends AppCompatActivity {
         fabContact.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent it = new Intent(context, MemberChatActivity.class);
-                Bundle bundle = new Bundle();
-                bundle.putString(KEY_MEMBER_ID, book.getSeller());
-                bundle.putString(KEY_PRODUCT_ID, book.getId());
-                bundle.putString(KEY_NAME, book.getSellerName());
-                it.putExtras(bundle);
-                startActivity(it);
+                if (!isChatroomAlive) {
+                    Intent it = new Intent(context, MemberChatActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putString(KEY_MEMBER_ID, book.getSeller());
+                    bundle.putString(KEY_PRODUCT_ID, book.getId());
+                    bundle.putString(KEY_TITLE, book.getTitle());
+                    bundle.putString(KEY_NAME, book.getSellerName());
+                    it.putExtras(bundle);
+                    startActivity(it);
+                }else
+                    Toast.makeText(context, "您先前已開啟該賣家的交談室，不可重複開啟", Toast.LENGTH_SHORT).show();
             }
         });
         fabFavorite = (FloatingActionButton) findViewById(R.id.fab_favorite);
@@ -238,16 +243,19 @@ public class ProductDetailActivity extends AppCompatActivity {
         String sellerName = book.getSellerName();
         txtSeller.setText(sellerName + " (" + sellerId + ")");
 
-        if (!sellerId.equals(loginUserId) && !isProfileAlive) {
+        if (!sellerId.equals(loginUserId)) {
             txtSeller.setTextColor(Color.parseColor("#0000FF"));
             txtSeller.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent it = new Intent(context, MemberProfileActivity.class);
-                    Bundle bundle = new Bundle();
-                    bundle.putString(KEY_MEMBER_ID, sellerId);
-                    it.putExtras(bundle);
-                    startActivity(it);
+                    if (!isProfileAlive) {
+                        Intent it = new Intent(context, MemberProfileActivity.class);
+                        Bundle bundle = new Bundle();
+                        bundle.putString(KEY_MEMBER_ID, sellerId);
+                        it.putExtras(bundle);
+                        startActivity(it);
+                    }else
+                        Toast.makeText(context, "您先前已開啟該賣家的個人檔案，不可重複開啟", Toast.LENGTH_SHORT).show();
                 }
             });
         }

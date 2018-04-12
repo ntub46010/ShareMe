@@ -325,10 +325,10 @@ public class MemberProfileActivity extends AppCompatActivity implements View.OnC
     }
 
     private void cancelConnection() {
-        try {
+        if (conn != null)
             conn.cancel();
+        if (member != null)
             member.cancelDownloadImage();
-        }catch (NullPointerException e) {}
     }
 
     @Override
