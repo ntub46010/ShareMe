@@ -17,6 +17,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.xy.shareme_tomcat.Member.MemberChatActivity;
 import com.xy.shareme_tomcat.Member.MemberProfileActivity;
 import com.xy.shareme_tomcat.R;
 import com.xy.shareme_tomcat.adapter.ImageGroupAdapter;
@@ -35,6 +36,7 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_EDIT_TIME;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_FAVORITE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_IS_ADD;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_MEMBER_ID;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_NAME;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_NOTE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_PHOTO1;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_PHOTO2;
@@ -124,7 +126,13 @@ public class ProductDetailActivity extends AppCompatActivity {
         fabContact.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                Intent it = new Intent(context, MemberChatActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putString(KEY_MEMBER_ID, book.getSeller());
+                bundle.putString(KEY_PRODUCT_ID, book.getId());
+                bundle.putString(KEY_NAME, book.getSellerName());
+                it.putExtras(bundle);
+                startActivity(it);
             }
         });
         fabFavorite = (FloatingActionButton) findViewById(R.id.fab_favorite);
@@ -272,7 +280,6 @@ public class ProductDetailActivity extends AppCompatActivity {
 
         showImages(book);
         isShown = true;
-        book = null;
     }
 
     private void showImages(Book book) {

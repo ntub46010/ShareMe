@@ -1,61 +1,103 @@
 package com.xy.shareme_tomcat.adapter;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.xy.shareme_tomcat.R;
 import com.xy.shareme_tomcat.data.Book;
 import com.xy.shareme_tomcat.data.ImageObj;
+import com.xy.shareme_tomcat.network_helper.GetBitmapTask;
+import com.xy.shareme_tomcat.structure.ImageDownloadQueue;
 
 import java.util.ArrayList;
 
-public class ProductSpinnerAdapter extends ArrayAdapter {
-    private Context context;
-    private ArrayList<ImageObj> products;
+public class ProductSpinnerAdapter extends BaseAdapter {
+    private Resources res;Context context;
+    private LayoutInflater layoutInflater;
+    private int layout, lastPosition, queueVolume;
 
-    public ProductSpinnerAdapter(Context context, ArrayList<ImageObj> objects, int layoutResource) {
-        super(context, layoutResource, objects);
-        this.context = context;
-        this.products = objects;
-    }
+    private ArrayList<ImageObj> books;
+    private ImageDownloadQueue queue;
 
-    // It gets a View that displays in the drop down popup the data at the specified position
-    @Override
-    public View getDropDownView(int position, View convertView, ViewGroup parent) {
-        return getCustomView(position, convertView, parent);
-    }
-
-    // It gets a View that displays the data at the specified position
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        return getCustomView(position, convertView, parent);
+    public ProductSpinnerAdapter(Resources res, Context context, ArrayList<ImageObj> books, int layout, int queueVolume) {
+        this.res = res;this.context = context;
+        this.books = books;
+        this.layout = layout;
+        layoutInflater = LayoutInflater.from(context);
+        this.queueVolume = queueVolume;
+        this.queue = new ImageDownloadQueue(queueVolume);
     }
 
     @Override
-    public Object getItem(int position) {
-        return products.get(position);
+    public int getCount() {
+        return books.size();
     }
 
-
-    public View getCustomView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = LayoutInflater.from(context);
-        View layout = inflater.inflate(R.layout.spn_chat_product, parent, false);
-
-        ImageView imgBookPic = (ImageView) layout.findViewById(R.id.imgBookSummaryPic);
-        TextView txtBookTitle = (TextView) layout.findViewById(R.id.txtBookSummaryTitle);
-        TextView txtBookPrice = (TextView) layout.findViewById(R.id.txtBookSummaryPrice);
-
-        Book book = (Book) products.get(position);
-        //imgBookPic.setImageBitmap(book.getImg());
-        txtBookTitle.setText(book.getTitle());
-        txtBookPrice.setText("$ " + book.getPrice());
-
-        return layout;
+    @Override
+    public Object getItem(int i) {
+        return books.get(i);
     }
 
+    @Override
+    public long getItemId(int i) {
+        return 0;
+    }
+
+    @Override
+    public View getView(int i, View convertView, ViewGroup parent) {
+        //Toast.makeText(context, "last: " + String.valueOf(lastPosition) + "\ni: " + String.valueOf(i), Toast.LENGTH_SHORT).show();
+        if (convertView == null)
+            convertView = layoutInflater.inflate(layout, parent, false);
+
+        ImageView imgBookPic = (ImageView) convertView.findViewById(R.id.imgBookSummaryPic);
+        TextView txtBookTitle = (TextView) convertView.findViewById(R.id.txtBookSummaryTitle);
+        TextView txtBookPrice = (TextView) convertView.findViewById(R.id.txtBookSummaryPrice);
+
+        txtBookTitle.setText(((Book) books.get(i)).getTitle());
+        txtBookPrice.setText("$ " + ((Book) books.get(i)).getPrice());
+
+        if (i >= lastPosition) {
+            if (books.get(i).getImg() == null) {
+                setImageDownloader(i, imgBookPic);
+                queue.enqueueFromRear(books.get(i));
+            }else
+                imgBookPic.setImageBitmap(books.get(i).getImg());
+        }else {
+            if (books.get(i).getImg() == null) {
+                setImageDownloader(i, imgBookPic);
+                queue.enqueueFromFront(books.get(i));
+            }else
+                imgBookPic.setImageBitmap(books.get(i).getImg());
+        }
+
+        lastPosition = i;
+        return convertView;
+    }
+
+    private void setImageDownloader (final int i, final ImageView imageView) {
+        books.get(i).setGetBitmap(new GetBitmapTask(res.getString(R.string.link_image), new GetBitmapTask.TaskListener() {
+            @Override
+            public void onFinished() {
+                imageView.setImageBitmap(books.get(i).getImg());
+                //notifyDataSetChanged();
+            }
+        }));
+    }
+
+    public void destroy(boolean isFully) {
+        if (queue != null) {
+            queue.destroy();
+            if (isFully)
+                queue = null;
+            else
+                queue = new ImageDownloadQueue(queueVolume);
+        }
+    }
 }

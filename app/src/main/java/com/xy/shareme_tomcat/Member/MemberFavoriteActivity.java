@@ -70,6 +70,7 @@ public class MemberFavoriteActivity extends AppCompatActivity {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                adapter.destroy(false);
                 loadData();
             }
         });
@@ -174,8 +175,8 @@ public class MemberFavoriteActivity extends AppCompatActivity {
     }
 
     private void cancelConnection() {
-        try {
+        if (conn != null)
             conn.cancel();
-        }catch (NullPointerException e) {}
+
     }
 }

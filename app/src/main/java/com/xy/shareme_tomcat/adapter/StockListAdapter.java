@@ -19,9 +19,7 @@ import com.xy.shareme_tomcat.structure.ImageDownloadQueue;
 import java.util.ArrayList;
 
 public class StockListAdapter extends BaseAdapter {
-    private Context context;
-    private Resources res = null;
-
+    private Resources res;
     private LayoutInflater layoutInflater;
     private int layout, lastPosition, backgroundColor, queueVolume;
 
@@ -30,7 +28,6 @@ public class StockListAdapter extends BaseAdapter {
 
     public StockListAdapter(Resources res, Context context, ArrayList<ImageObj> books, int layout, int queueVolume) {
         this.res = res;
-        this.context = context;
         this.books = books;
         this.layout = layout;
         layoutInflater = LayoutInflater.from(context);
@@ -61,6 +58,9 @@ public class StockListAdapter extends BaseAdapter {
         ImageView imgBookPic = (ImageView) convertView.findViewById(R.id.imgBookSummaryPic);
         TextView txtTitle = (TextView) convertView.findViewById(R.id.txtBookSummaryTitle);
 
+        imgBookPic.setImageBitmap(books.get(i).getImg());
+        txtTitle.setText(((Book) books.get(i)).getTitle());
+
         //依滑動方向檢查圖片
         if (i > lastPosition) { //往下滑
             if (books.get(i).getImg() == null) { //若發現沒圖片
@@ -73,9 +73,6 @@ public class StockListAdapter extends BaseAdapter {
                 queue.enqueueFromFront(books.get(i));
             }
         }
-
-        imgBookPic.setImageBitmap(books.get(i).getImg());
-        txtTitle.setText(((Book) books.get(i)).getTitle());
 
         if (layout == R.layout.spn_chat_product) { //商品管理：追加選單背景色、價格
             LinearLayout linearLayout = (LinearLayout) convertView.findViewById(R.id.layProductSummaryList);

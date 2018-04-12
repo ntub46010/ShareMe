@@ -8,6 +8,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -24,7 +25,6 @@ import com.xy.shareme_tomcat.adapter.ProductSpinnerAdapter;
 import com.xy.shareme_tomcat.data.Book;
 import com.xy.shareme_tomcat.data.Chat;
 import com.xy.shareme_tomcat.data.ImageObj;
-import com.xy.shareme_tomcat.network_helper.GetBitmap;
 import com.xy.shareme_tomcat.network_helper.GetBitmapBatch;
 import com.xy.shareme_tomcat.network_helper.MyOkHttp;
 
@@ -34,6 +34,7 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_AVATAR;
@@ -45,6 +46,7 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_PHOTO1;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_PRICE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_PRODUCTS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_PRODUCT_ID;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_RECEIVER_ID;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_SENDER_ID;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_STATUS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TIME;
@@ -59,12 +61,11 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
     private ImageView btnProfile, btnProduct;
     private Spinner spnProduct;
     private ProgressBar prgProduct, prgChat;
-    private FrameLayout layChatField;
     private RecyclerView recyChats;
     private EditText edtMsg;
+    private Button btnSubmit;
 
     private MyOkHttp conn;
-    private GetBitmap gbmProduct;
     private GetBitmapBatch gbmAvatar;
     private ArrayList<ImageObj> chats, books;
     private ImageObj avatar;
@@ -72,7 +73,7 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
     private ProductSpinnerAdapter adpProduct;
     private String memberId, productId;
 
-    private boolean isProductShown = false, isAvatarLoaded = false, isChatShown = false;
+    private boolean isAvatarLoaded = false, isChatShown = false;
 
     //交談訊息>個人照片>商品清單
     @Override
@@ -81,6 +82,8 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
         setContentView(R.layout.activity_member_chat);
         context = this;
         bundle = getIntent().getExtras();
+        memberId = bundle.getString(KEY_MEMBER_ID);
+        productId = bundle.getString(KEY_PRODUCT_ID);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         TextView txtBarTitle = (TextView) findViewById(R.id.txtToolbarTitle);
@@ -96,26 +99,40 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
 
         btnProfile = (ImageView) findViewById(R.id.btnProfile);
         btnProduct = (ImageView) findViewById(R.id.btnProduct);
-        layChatField = (FrameLayout) findViewById(R.id.layChatField);
         spnProduct =  (Spinner) findViewById(R.id.spnProduct);
         prgProduct = (ProgressBar) findViewById(R.id.prgProduct);
-        recyChats = (RecyclerView) findViewById(R.id.recy_chats);
         prgChat = (ProgressBar) findViewById(R.id.prgChat);
+        recyChats = (RecyclerView) findViewById(R.id.recy_chats);
         edtMsg = (EditText) findViewById(R.id.edtMsg);
-        Button btnSubmit = (Button) findViewById(R.id.btnSubmit);
+        btnSubmit = (Button) findViewById(R.id.btnSubmit);
 
         btnProfile.setOnClickListener(this);
         btnProduct.setOnClickListener(this);
         btnSubmit.setOnClickListener(this);
+        spnProduct.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                Toast.makeText(context, "C", Toast.LENGTH_SHORT).show();
+                productId = ((Book) books.get(i)).getId();
+                if (isChatShown) {
+                    Toast.makeText(context, "loadChat: " + productId, Toast.LENGTH_SHORT).show();
+                    loadChat();
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
 
-        memberId = bundle.getString(KEY_MEMBER_ID);
-        productId = bundle.getString(KEY_PRODUCT_ID);
-        loadChatroom();
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        if (!isChatShown)
+            loadChatroom();/*
+        else if (!isAvatarLoaded)
+            loadAvatar();*/
     }
 
     private void loadAvatar() {
@@ -125,32 +142,21 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
         gbmAvatar = new GetBitmapBatch(avatar, getString(R.string.link_avatar), new GetBitmapBatch.TaskListener() {
             @Override
             public void onFinished() {
+                Toast.makeText(context, "個人照片下載完成 ", Toast.LENGTH_SHORT).show();
                 isAvatarLoaded = true;
-                adpChat = new ChatAdapter(chats, avatar);
-                recyChats.setAdapter(adpChat);
+                adpChat.notifyDataSetChanged();
             }
         });
         gbmAvatar.execute();
     }
 
-    private void loadChat(JSONArray aryChat) throws JSONException, UnsupportedEncodingException{
-        chats = new ArrayList<>();
-        for (int i=0; i<aryChat.length(); i++) {
-            JSONObject obj = aryChat.getJSONObject(i);
-            chats.add(new Chat(
-                    obj.getString(KEY_SENDER_ID),
-                    URLDecoder.decode(obj.getString(KEY_MESSAGE), "UTF-8"),
-                    obj.getString(KEY_DATE),
-                    obj.getString(KEY_DATE),
-                    obj.getString(KEY_TIME)
-            ));
-        }
-        showChatData();
-    }
-
     private void loadChatroom() {
-        recyChats.setVisibility(View.GONE);
+        Toast.makeText(context, "loadChatroom: " + productId, Toast.LENGTH_SHORT).show();
+        recyChats.setVisibility(View.INVISIBLE);
+        prgProduct.setVisibility(View.VISIBLE);
         prgChat.setVisibility(View.VISIBLE);
+        btnSubmit.setEnabled(false);
+
         books = new ArrayList<>();
         chats = new ArrayList<>();
 
@@ -194,22 +200,19 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
                                             obj.getString(KEY_TIME)
                                     ));
                                 }
-                                showChatData();
-                                //loadChat(resObj.getJSONArray(KEY_MESSAGE));
-
                                 //個人照片
                                 loadAvatar();
 
-                                //交談商品(圖片)
-
-
+                                showChatroomData();
                             }else {
-                                Toast.makeText(context, "STATUS FALSE", Toast.LENGTH_SHORT).show();
-                                //showFoundStatus(chats, imageView, textView, "伺服器發生例外");
+                                Toast.makeText(context, "伺服器發生例外", Toast.LENGTH_SHORT).show();
+                                prgProduct.setVisibility(View.GONE);
+                                prgChat.setVisibility(View.GONE);
                             }
                         }catch (JSONException | UnsupportedEncodingException e) {
-                            e.printStackTrace();
-                            //prgChat.setVisibility(View.GONE);
+                            prgProduct.setVisibility(View.GONE);
+                            prgChat.setVisibility(View.GONE);
+                            Toast.makeText(context, "處理JSON發生錯誤", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
@@ -226,24 +229,123 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
-    private void showChatData() {
-        //交談訊息
-        recyChats.setHasFixedSize(true);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
-        recyChats.setLayoutManager(linearLayoutManager);
+    private void loadChat() {
+        isChatShown = false;
+        recyChats.setVisibility(View.INVISIBLE);
+        prgChat.setVisibility(View.VISIBLE);
+        btnSubmit.setEnabled(false);
 
-        adpChat = new ChatAdapter(chats, avatar);
-        recyChats.setAdapter(adpChat);
-        recyChats.setVisibility(View.VISIBLE);
+        chats = new ArrayList<>();
+        conn = new MyOkHttp(MemberChatActivity.this, new MyOkHttp.TaskListener() {
+            @Override
+            public void onFinished(final String result) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (result == null) {
+                            Toast.makeText(context, "連線失敗", Toast.LENGTH_SHORT).show();
+                            prgChat.setVisibility(View.GONE);
+                            return;
+                        }
+                        try {
+                            JSONObject resObj = new JSONObject(result);
+                            if (resObj.getBoolean(KEY_STATUS)) {
+                                JSONArray aryChat = resObj.getJSONArray(KEY_MESSAGE);
+                                for (int i = 0; i < aryChat.length(); i++) {
+                                    JSONObject obj = aryChat.getJSONObject(i);
+                                    chats.add(new Chat(
+                                            obj.getString(KEY_SENDER_ID),
+                                            URLDecoder.decode(obj.getString(KEY_MESSAGE), "UTF-8"),
+                                            obj.getString(KEY_DATE),
+                                            obj.getString(KEY_DATE),
+                                            obj.getString(KEY_TIME)
+                                    ));
+                                }
+                                showChatData();
+                            }else {
+                                prgProduct.setVisibility(View.GONE);
+                                prgChat.setVisibility(View.GONE);
+                                Toast.makeText(context, "伺服器發生例外", Toast.LENGTH_SHORT).show();
+                            }
+                        }catch (JSONException | UnsupportedEncodingException e) {
+                            prgProduct.setVisibility(View.GONE);
+                            prgChat.setVisibility(View.GONE);
+                            Toast.makeText(context, "處理JSON發生錯誤", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            }
+        });
+        try {
+            JSONObject reqObj = new JSONObject();
+            reqObj.put(KEY_USER_ID, loginUserId);
+            reqObj.put(KEY_MEMBER_ID, memberId);
+            reqObj.put(KEY_PRODUCT_ID, productId);
+            conn.execute(getString(R.string.link_list_message), reqObj.toString());
+        }catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
 
+    private void showChatroomData() {
         //交談商品
-        adpProduct = new ProductSpinnerAdapter(context, books, R.layout.spn_chat_product);
+        adpProduct = new ProductSpinnerAdapter(getResources(), context, books, R.layout.spn_chat_product, 10);
         spnProduct.setAdapter(adpProduct);
 
         btnProduct.setVisibility(View.VISIBLE);
         btnProfile.setVisibility(View.VISIBLE);
-        isChatShown = true;
+        prgProduct.setVisibility(View.GONE);
+
+        //交談訊息
+        showChatData();
+    }
+
+    private void showChatData() {
+        recyChats.setHasFixedSize(true);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
+        recyChats.setLayoutManager(linearLayoutManager);
+        btnSubmit.setEnabled(true);Toast.makeText(context, "A", Toast.LENGTH_SHORT).show();
+        adpChat = new ChatAdapter(chats, avatar);
+        recyChats.setAdapter(adpChat);
         prgChat.setVisibility(View.GONE);
+        recyChats.setVisibility(View.VISIBLE);
+        btnSubmit.setEnabled(true);Toast.makeText(context, "B", Toast.LENGTH_SHORT).show();
+        isChatShown = true;
+    }
+
+    private void sendMessage(String msg) {
+        conn = new MyOkHttp(MemberChatActivity.this, new MyOkHttp.TaskListener() {
+            @Override
+            public void onFinished(final String result) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            JSONObject resObj = new JSONObject(result);
+                            if (resObj.getBoolean(KEY_STATUS)) {
+                                edtMsg.setText("");
+                                loadChat();
+                            }else {
+                                Toast.makeText(context, "傳送失敗", Toast.LENGTH_SHORT).show();
+                            }
+                            btnSubmit.setEnabled(true);
+                        }catch (JSONException e) {
+                            Toast.makeText(context, "處理JSON發生錯誤", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            }
+        });
+        try {
+            JSONObject reqObj = new JSONObject();
+            reqObj.put(KEY_SENDER_ID, loginUserId);
+            reqObj.put(KEY_RECEIVER_ID, memberId);
+            reqObj.put(KEY_PRODUCT_ID, productId);
+            reqObj.put(KEY_MESSAGE, URLEncoder.encode(msg, "UTF-8"));
+            conn.execute(getString(R.string.link_send_message), reqObj.toString());
+        }catch (JSONException | UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -269,8 +371,37 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
                 break;
 
             case R.id.btnSubmit:
-
+                String msg = edtMsg.getText().toString();
+                if (!msg.equals("")) {
+                    btnSubmit.setEnabled(false);
+                    sendMessage(msg);
+                }
                 break;
         }
+    }
+
+    @Override
+    public void onPause() {
+        cancelConnection();
+        super.onPause();
+    }
+
+    @Override
+    public void onDestroy() {
+        conn = null;
+        if (adpProduct != null)
+            adpProduct.destroy(true);
+        adpChat = null;
+        avatar = null;
+
+        System.gc();
+        super.onDestroy();
+    }
+
+    private void cancelConnection() {
+        if (conn != null)
+            conn.cancel();
+        if (gbmAvatar != null)
+            gbmAvatar.cancel(true);
     }
 }
