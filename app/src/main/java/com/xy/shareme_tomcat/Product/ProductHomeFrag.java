@@ -206,9 +206,8 @@ public class ProductHomeFrag extends Fragment {
     }
 
     private void cancelConnection() {
-        try {
+        if (conProductHome != null)
             conProductHome.cancel();
-        }catch (NullPointerException e) {}
     }
 }
 

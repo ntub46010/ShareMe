@@ -70,8 +70,8 @@ public class RequestManager {
         });
     }
 
-    public void prepareNotification(final String sendId, final String title, final String message, final String photoUrl) {
-        databaseRefUsers.child(UserData.DATABASE_USERS).child(sendId).addListenerForSingleValueEvent(new ValueEventListener() {
+    public void prepareNotification(final String receiverId, final String title, final String message, final String photoUrl) {
+        databaseRefUsers.child(UserData.DATABASE_USERS).child(receiverId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final UserData pushUser = dataSnapshot.getValue(UserData.class);

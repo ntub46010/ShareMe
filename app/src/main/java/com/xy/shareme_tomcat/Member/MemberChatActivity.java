@@ -21,6 +21,7 @@ import com.xy.shareme_tomcat.Product.ProductDetailActivity;
 import com.xy.shareme_tomcat.R;
 import com.xy.shareme_tomcat.adapter.ChatAdapter;
 import com.xy.shareme_tomcat.adapter.ProductSpinnerAdapter;
+import com.xy.shareme_tomcat.broadcast_helper.managers.RequestManager;
 import com.xy.shareme_tomcat.data.Book;
 import com.xy.shareme_tomcat.data.Chat;
 import com.xy.shareme_tomcat.data.ImageObj;
@@ -36,7 +37,9 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_ANYWAY;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_AVATAR;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_AVATAR2;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_CHAT;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_DATE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_MEMBER_ID;
@@ -54,11 +57,10 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_USER_ID;
 import static com.xy.shareme_tomcat.data.DataHelper.isChatroomAlive;
 import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
-import static com.xy.shareme_tomcat.data.DataHelper.myAvatarUrl;
+import static com.xy.shareme_tomcat.data.DataHelper.myName;
 
 public class MemberChatActivity extends AppCompatActivity implements View.OnClickListener {
     private Context context;
-    private Bundle bundle;
     private ImageView btnProfile, btnProduct;
     private Spinner spnProduct;
     private ProgressBar prgProduct, prgChat;
@@ -72,7 +74,7 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
     private ImageObj avatar;
     private ChatAdapter adpChat;
     private ProductSpinnerAdapter adpProduct;
-    private String memberId, productId, title;
+    private String memberId, productId, title, avatar1, avatar2;
 
     private boolean isAvatarLoaded = false, isChatShown = false, isSpinnerInitialed = false;
 
@@ -82,7 +84,7 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_member_chat);
         context = this;
-        bundle = getIntent().getExtras();
+        Bundle bundle = getIntent().getExtras();
         memberId = bundle.getString(KEY_MEMBER_ID);
         productId = bundle.getString(KEY_PRODUCT_ID);
 
@@ -125,12 +127,12 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
             public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
-        isChatroomAlive = true;
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        isChatroomAlive = true;
         if (!isChatShown)
             loadChatroom();
         else if (!isAvatarLoaded)
@@ -140,8 +142,8 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
     private void loadAvatar() {
         isAvatarLoaded = false;
         avatar = new ImageObj();
-        avatar.setImgURL(myAvatarUrl);
-        avatar.setImgURL2(bundle.getString(KEY_AVATAR));
+        avatar.setImgURL(avatar1);
+        avatar.setImgURL2(avatar2);
         gbmAvatar = new GetBitmapBatch(avatar, getString(R.string.link_avatar), new GetBitmapBatch.TaskListener() {
             @Override
             public void onFinished() {
@@ -176,7 +178,8 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
                         try {
                             JSONObject resObj = new JSONObject(result);
                             if (resObj.getBoolean(KEY_STATUS)) {
-                                myAvatarUrl = resObj.getString(KEY_AVATAR);
+                                avatar1 = resObj.getString(KEY_AVATAR);
+                                avatar2 = resObj.getString(KEY_AVATAR2);
 
                                 //交談商品(文字)
                                 JSONArray aryProduct = resObj.getJSONArray(KEY_PRODUCTS);
@@ -235,8 +238,6 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
 
     private void loadChat() {
         isChatShown = false;
-        recyChats.setVisibility(View.INVISIBLE);
-        prgChat.setVisibility(View.VISIBLE);
         btnSubmit.setEnabled(false);
 
         chats = new ArrayList<>();
@@ -372,6 +373,7 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
                 bundle = new Bundle();
                 bundle.putString(KEY_PRODUCT_ID, productId);
                 bundle.putString(KEY_TITLE, title);
+                bundle.putString(KEY_ANYWAY, "1");
                 it.putExtras(bundle);
                 startActivity(it);
                 break;
@@ -381,6 +383,7 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
                 if (!msg.equals("")) {
                     btnSubmit.setEnabled(false);
                     sendMessage(msg);
+                    RequestManager.getInstance().prepareNotification(memberId, myName.equals("")?"xxx":myName, msg, getString(R.string.link_avatar) + avatar1); //發送推播
                 }
                 break;
         }
@@ -389,6 +392,7 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
     @Override
     public void onPause() {
         cancelConnection();
+        isChatroomAlive = false;
         super.onPause();
     }
 
@@ -400,7 +404,6 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
         adpChat = null;
         avatar = null;
 
-        isChatroomAlive = false;
         System.gc();
         super.onDestroy();
     }

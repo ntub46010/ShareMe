@@ -21,11 +21,11 @@ public class DataHelper {
     public static String loginUserId = "10246010";
     public static String myName = ""; //用於發送推播
     public static int myGender = -1; //用於個人檔案icon，包含從信箱退出時的狀況
-    public static String myAvatarUrl = ""; //用於發送推播
     public static String tmpToken = "token"; //登入時接收自己token(確認Firebase註冊成功)，或進交談室時接收對方token(確認可推播)。空字串代表無該帳號，token字串代表尚未取得
 
     public static boolean isFromDepartment = false; //是否因為按了科系按鈕，而移動到商品首頁
     public static boolean isProfileAlive = false;
+    public static boolean isMailboxAlive = false;
     public static boolean isChatroomAlive = false;
 
     public static final String KEY_STATUS = "Status";
@@ -64,6 +64,7 @@ public class DataHelper {
     public static final String KEY_VALUE = "Value";
     //
     public static final String KEY_AVATAR = "Avatar";
+    public static final String KEY_AVATAR2 = "Avatar2";
     public static final String KEY_MESSAGE = "Message";
     public static final String KEY_DATE = "Date";
     public static final String KEY_TIME = "Time";

@@ -2,6 +2,7 @@ package com.xy.shareme_tomcat.Member;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -41,7 +42,10 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_STATUS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TIME;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_USER_ID;
+import static com.xy.shareme_tomcat.data.DataHelper.isMailboxAlive;
 import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
+import static com.xy.shareme_tomcat.data.DataHelper.myGender;
+import static com.xy.shareme_tomcat.data.DataHelper.myName;
 import static com.xy.shareme_tomcat.data.DataHelper.showFoundStatus;
 
 public class MemberMailboxActivity extends AppCompatActivity {
@@ -83,11 +87,20 @@ public class MemberMailboxActivity extends AppCompatActivity {
         });
 
         prgBar = (ProgressBar) findViewById(R.id.prgBar);
+
+        SharedPreferences sp = getSharedPreferences(getString(R.string.sp_fileName), MODE_PRIVATE);
+        if (sp.getBoolean(getString(R.string.sp_isFromNotification), false)) {
+            loginUserId = sp.getString(getString(R.string.sp_myLoginUserId), "");
+            myName = sp.getString(getString(R.string.sp_myName), "");
+            myGender = sp.getInt(getString(R.string.sp_myGender), -1);
+            sp.edit().putBoolean(getString(R.string.sp_isFromNotification), false).apply();
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        isMailboxAlive = true;
         if (!isShown)
             loadData();
     }
@@ -161,7 +174,6 @@ public class MemberMailboxActivity extends AppCompatActivity {
                 Chat chat = (Chat) adapter.getItem(i);
                 Intent it = new Intent(context, MemberChatActivity.class);
                 Bundle bundle = new Bundle();
-                bundle.putString(KEY_AVATAR, chat.getImgURL());
                 bundle.putString(KEY_MEMBER_ID, chat.getMemberId());
                 bundle.putString(KEY_NAME, chat.getName());
                 bundle.putString(KEY_PRODUCT_ID, chat.getProductId());
@@ -181,6 +193,7 @@ public class MemberMailboxActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         cancelConnection();
+        isMailboxAlive = false;
         super.onPause();
     }
 

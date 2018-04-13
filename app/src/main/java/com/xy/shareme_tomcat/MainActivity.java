@@ -57,6 +57,7 @@ public class MainActivity extends FragmentActivity {
                     .putBoolean(getString(R.string.sp_isFirstUse), false)
                     .apply();
         }
+        sp.edit().putBoolean(getString(R.string.sp_isFromNotification), false).apply();
 
         initSearchView();
 

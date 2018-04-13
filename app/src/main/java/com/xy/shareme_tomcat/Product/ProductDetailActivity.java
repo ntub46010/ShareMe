@@ -220,7 +220,7 @@ public class ProductDetailActivity extends AppCompatActivity {
             JSONObject reqObj = new JSONObject();
             reqObj.put(KEY_USER_ID, loginUserId);
             reqObj.put(KEY_PRODUCT_ID, productId);
-            reqObj.put(KEY_ANYWAY, "0");
+            reqObj.put(KEY_ANYWAY, getIntent().getExtras().getString(KEY_ANYWAY));
             conn.execute(getString(R.string.link_product_detail), reqObj.toString());
         }catch (JSONException e) {
             e.printStackTrace();

@@ -1,17 +1,22 @@
 package com.xy.shareme_tomcat.broadcast_helper.managers;
 
+import android.app.Activity;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v4.app.NotificationCompat;
 
+import com.xy.shareme_tomcat.Member.MemberMailboxActivity;
 import com.xy.shareme_tomcat.R;
-import com.xy.shareme_tomcat.MainActivity;
 
-public class NotificationManager {
+import static com.xy.shareme_tomcat.data.DataHelper.isChatroomAlive;
+import static com.xy.shareme_tomcat.data.DataHelper.isMailboxAlive;
+
+public class NotificationManager extends Activity {
     public static final int NOTIFICATION_ID = -Integer.MAX_VALUE;
 
     private static NotificationManager INSTANCE = null;
@@ -41,25 +46,28 @@ public class NotificationManager {
     }
 
     private Notification createNotification(Context context, Bitmap bitmap, String title, String message) {
-        Intent intent = new Intent(context.getApplicationContext(), MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(
-                context.getApplicationContext(),
-                0,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context);
         //NotificationCompat.Style notificationStyle = createNotificationStyle(message, bitmap);
-        Notification notification = mBuilder.setSmallIcon(R.mipmap.ic_launcher)
+        mBuilder = mBuilder.setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(title)
                 .setContentText(message)
                 .setLargeIcon(bitmap)
                 .setAutoCancel(true)
-                .setContentIntent(pendingIntent)
                 .setTicker(message)
-                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setPriority(NotificationCompat.PRIORITY_MAX);
                 //.setStyle(notificationStyle) 將大圖示圖片附加在下面
-                .build();
+
+        if (!isMailboxAlive && !isChatroomAlive) { //使用者不位於信箱或交談室時，點擊推播才會導引至信箱畫面
+            Intent intent = new Intent(context.getApplicationContext(), MemberMailboxActivity.class); //設定點擊推播後要顯示的Activity
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                    context.getApplicationContext(),
+                    0,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+            mBuilder.setContentIntent(pendingIntent);
+        }
+        Notification notification = mBuilder.build();
+
         notification.flags |= Intent.FLAG_ACTIVITY_SINGLE_TOP;
         notification.defaults |= Notification.DEFAULT_VIBRATE;
 
@@ -85,6 +93,9 @@ public class NotificationManager {
         if (notification != null) {
             android.app.NotificationManager notificationManager = (android.app.NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.notify(NOTIFICATION_ID, notification);
+
+            SharedPreferences sp = getSharedPreferences(getString(R.string.sp_fileName), MODE_PRIVATE);
+            sp.edit().putBoolean(getString(R.string.sp_isFromNotification), true).apply();
         }
     }
 }

@@ -22,6 +22,7 @@ import com.xy.shareme_tomcat.structure.ImageDownloadQueue;
 
 import java.util.ArrayList;
 
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_ANYWAY;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_PRODUCT_ID;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 
@@ -59,6 +60,7 @@ public class ProductDisplayAdapter extends RecyclerView.Adapter<ProductDisplayAd
                     Bundle bundle = new Bundle();
                     bundle.putString(KEY_PRODUCT_ID, ((Book) books.get(position)).getId());
                     bundle.putString(KEY_TITLE, ((Book) books.get(position)).getTitle());
+                    bundle.putString(KEY_ANYWAY, "0");
                     it.putExtras(bundle);
                     context.startActivity(it);
                 }

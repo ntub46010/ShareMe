@@ -37,10 +37,8 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_PASSWORD;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_PROFILE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_STATUS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_USER_ID;
-//import static com.xy.shareme_tomcat.data.DataHelper.conFlag;
 import static com.xy.shareme_tomcat.data.DataHelper.getSpnDepCode;
 import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
-import static com.xy.shareme_tomcat.data.DataHelper.myAvatarUrl;
 import static com.xy.shareme_tomcat.data.DataHelper.myGender;
 import static com.xy.shareme_tomcat.data.DataHelper.myName;
 import static com.xy.shareme_tomcat.data.DataHelper.tmpToken;
@@ -175,8 +173,7 @@ public class LoginActivity extends Activity {
                                 //帳密正確，存取所需資料
                                 JSONObject obj = resObj.getJSONObject(KEY_PROFILE);
                                 myName = obj.getString(KEY_NAME);
-                                myGender = obj.getBoolean(KEY_GENDER) ? 1 : 0;
-                                myAvatarUrl = getString(R.string.link_avatar) + obj.getString(KEY_AVATAR);
+                                myGender = obj.getInt(KEY_GENDER);
                             }else { //BUG，登入失敗後，之後若登入成功，會出現兩個MainActivity
                                 Toast.makeText(context, "帳號或密碼錯誤", Toast.LENGTH_SHORT).show();
                                 loginUserId = "failed"; //若給予空字串，會出現連線逾時
@@ -184,6 +181,7 @@ public class LoginActivity extends Activity {
                                 prgBar.setVisibility(View.GONE);
                             }
                         }catch (JSONException e) {
+                            Toast.makeText(context, "處理JSON發生錯誤", Toast.LENGTH_SHORT).show();
                             e.printStackTrace();
                         }
                     }
@@ -379,7 +377,6 @@ public class LoginActivity extends Activity {
                 tmpToken = "token"; //恢復至尚未取得之值
                 loginUserId = member.getAcc();
                 writeLoginRecord();
-
                 startActivity(new Intent(context, MainActivity.class)); //真正登入
                 prgBar.setVisibility(View.GONE);
                 layLoginField.setVisibility(View.INVISIBLE);
@@ -393,7 +390,6 @@ public class LoginActivity extends Activity {
     private void writeLoginRecord () {
         sp.edit()
                 .putString(getString(R.string.sp_myLoginUserId), loginUserId)
-                .putString(getString(R.string.sp_myAvatar), myAvatarUrl)
                 .putString(getString(R.string.sp_myName), myName)
                 .putInt(getString(R.string.sp_myGender), myGender)
                 .apply();
