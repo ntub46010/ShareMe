@@ -33,6 +33,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_ANYWAY;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_AVATAR;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_DEPARTMENT;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_EMAIL;
@@ -51,7 +52,7 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_STOCK;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_USER_ID;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_VALUE;
-import static com.xy.shareme_tomcat.data.DataHelper.isProfileAlive;
+import static com.xy.shareme_tomcat.data.DataHelper.canShowProfile;
 import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
 
 public class MemberProfileActivity extends AppCompatActivity implements View.OnClickListener{
@@ -111,6 +112,7 @@ public class MemberProfileActivity extends AppCompatActivity implements View.OnC
                 Bundle bundle = new Bundle();
                 bundle.putString(KEY_PRODUCT_ID, book.getId());
                 bundle.putString(KEY_TITLE, book.getTitle());
+                bundle.putString(KEY_ANYWAY, "0");
                 it.putExtras(bundle);
                 startActivity(it);
             }
@@ -134,7 +136,7 @@ public class MemberProfileActivity extends AppCompatActivity implements View.OnC
                 }
             }
         });
-        isProfileAlive = true;
+        canShowProfile = false;
     }
 
     @Override
@@ -319,7 +321,7 @@ public class MemberProfileActivity extends AppCompatActivity implements View.OnC
             adapter.destroy(true);
             adapter = null;
         }
-        isProfileAlive = false;
+        canShowProfile = true;
         System.gc();
         super.onDestroy();
     }

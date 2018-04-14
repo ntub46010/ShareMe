@@ -13,7 +13,9 @@ import com.xy.shareme_tomcat.data.ZoomableImageView;
 public class ImageFrag extends Fragment {
     private Bitmap image;
 
-    public ImageFrag() {}
+    public ImageFrag() {
+
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -21,7 +23,7 @@ public class ImageFrag extends Fragment {
         if (getArguments() != null) {
             //由索引取得對應圖片
             int index = getArguments().getInt("index");
-            image = ProductDetailActivity.images.get(index);
+            //image = ProductDetailActivity.images.get(index);
         }
     }
 

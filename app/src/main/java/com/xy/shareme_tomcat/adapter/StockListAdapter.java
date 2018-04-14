@@ -75,7 +75,7 @@ public class StockListAdapter extends BaseAdapter {
         }
 
         if (layout == R.layout.spn_chat_product) { //商品管理：追加選單背景色、價格
-            LinearLayout linearLayout = (LinearLayout) convertView.findViewById(R.id.layProductSummaryList);
+            LinearLayout linearLayout = (LinearLayout) convertView.findViewById(R.id.layBookSummary);
             linearLayout.setBackgroundColor(res.getColor(backgroundColor));
             TextView txtPrice = (TextView) convertView.findViewById(R.id.txtBookSummaryPrice);
             txtPrice.setText("$ " + ((Book) books.get(i)).getPrice());

@@ -19,7 +19,8 @@ import com.xy.shareme_tomcat.structure.ImageDownloadQueue;
 import java.util.ArrayList;
 
 public class ProductSpinnerAdapter extends BaseAdapter {
-    private Resources res;Context context;
+    private Resources res;
+    private Context context;
     private LayoutInflater layoutInflater;
     private int layout, lastPosition, queueVolume;
 
@@ -27,7 +28,8 @@ public class ProductSpinnerAdapter extends BaseAdapter {
     private ImageDownloadQueue queue;
 
     public ProductSpinnerAdapter(Resources res, Context context, ArrayList<ImageObj> books, int layout, int queueVolume) {
-        this.res = res;this.context = context;
+        this.res = res;
+        this.context = context;
         this.books = books;
         this.layout = layout;
         layoutInflater = LayoutInflater.from(context);
@@ -52,7 +54,7 @@ public class ProductSpinnerAdapter extends BaseAdapter {
 
     @Override
     public View getView(int i, View convertView, ViewGroup parent) {
-        //Toast.makeText(context, "last: " + String.valueOf(lastPosition) + "\ni: " + String.valueOf(i), Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, "i: " + String.valueOf(i), Toast.LENGTH_SHORT).show();
         if (convertView == null)
             convertView = layoutInflater.inflate(layout, parent, false);
 
@@ -60,17 +62,21 @@ public class ProductSpinnerAdapter extends BaseAdapter {
         TextView txtBookTitle = (TextView) convertView.findViewById(R.id.txtBookSummaryTitle);
         TextView txtBookPrice = (TextView) convertView.findViewById(R.id.txtBookSummaryPrice);
 
-        txtBookTitle.setText(((Book) books.get(i)).getTitle());
-        txtBookPrice.setText("$ " + ((Book) books.get(i)).getPrice());
+        try {
+            txtBookTitle.setText(((Book) books.get(i)).getTitle());
+            txtBookPrice.setText("$ " + ((Book) books.get(i)).getPrice());
+        }catch (NullPointerException e) {
+            Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
+        }
 
-        if (i >= lastPosition) {
-            if (books.get(i).getImg() == null) {
+        if (i > lastPosition) {
+            if (!books.get(i).isStartDownload() && books.get(i).getImg() == null) {
                 setImageDownloader(i, imgBookPic);
                 queue.enqueueFromRear(books.get(i));
             }else
                 imgBookPic.setImageBitmap(books.get(i).getImg());
         }else {
-            if (books.get(i).getImg() == null) {
+            if (!books.get(i).isStartDownload() && books.get(i).getImg() == null) {
                 setImageDownloader(i, imgBookPic);
                 queue.enqueueFromFront(books.get(i));
             }else
@@ -81,12 +87,12 @@ public class ProductSpinnerAdapter extends BaseAdapter {
         return convertView;
     }
 
-    private void setImageDownloader (final int i, final ImageView imageView) {
+    private void setImageDownloader (final int i, final ImageView imageView) { //BUG，重新展開Spinner才會顯示下載好的圖片
         books.get(i).setGetBitmap(new GetBitmapTask(res.getString(R.string.link_image), new GetBitmapTask.TaskListener() {
             @Override
             public void onFinished() {
                 imageView.setImageBitmap(books.get(i).getImg());
-                //notifyDataSetChanged();
+                //notifyDataSetChanged(); //圖片可即時顯示，但會無限執行getView
             }
         }));
     }

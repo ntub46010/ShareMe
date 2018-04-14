@@ -28,11 +28,18 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 
 public class ProductDisplayAdapter extends RecyclerView.Adapter<ProductDisplayAdapter.DataViewHolder> {
     private Context context;
-    private Resources res = null;
-
+    private Resources res;
     private ArrayList<ImageObj> books;
     private ImageDownloadQueue queue;
     private int lastPosition = -1, backgroundColor, queueVolume;
+
+    public ProductDisplayAdapter(Resources res, Context context, ArrayList<ImageObj> books, int queueVolume){
+        this.res = res;
+        this.context = context;
+        this.books = books;
+        this.queueVolume = queueVolume;
+        this.queue = new ImageDownloadQueue(queueVolume);
+    }
 
     public class DataViewHolder extends RecyclerView.ViewHolder {
         // 連結資料的顯示物件宣告
@@ -66,15 +73,6 @@ public class ProductDisplayAdapter extends RecyclerView.Adapter<ProductDisplayAd
                 }
             });
         }
-    }
-
-    // 將連結的資料
-    public ProductDisplayAdapter(Resources res, Context context, ArrayList<ImageObj> books, int queueVolume){
-        this.res = res;
-        this.context = context;
-        this.books = books;
-        this.queueVolume = queueVolume;
-        this.queue = new ImageDownloadQueue(queueVolume);
     }
 
     @Override
@@ -145,6 +143,4 @@ public class ProductDisplayAdapter extends RecyclerView.Adapter<ProductDisplayAd
                 queue = new ImageDownloadQueue(queueVolume);
         }
     }
-
-
 }

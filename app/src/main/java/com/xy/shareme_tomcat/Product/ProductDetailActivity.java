@@ -34,6 +34,7 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_ANYWAY;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_CONDITION;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_EDIT_TIME;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_FAVORITE;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_HAVE_TALKED;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_IS_ADD;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_MEMBER_ID;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_NAME;
@@ -55,12 +56,13 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TYPE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_USER_ID;
 import static com.xy.shareme_tomcat.data.DataHelper.isChatroomAlive;
-import static com.xy.shareme_tomcat.data.DataHelper.isProfileAlive;
+import static com.xy.shareme_tomcat.data.DataHelper.canShowProfile;
 import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
 import static com.xy.shareme_tomcat.data.DataHelper.showFoundStatus;
 
 public class ProductDetailActivity extends AppCompatActivity {
     private Context context;
+    private Bundle bundle;
     private LinearLayout layDetail;
     private ProgressBar prgBar;
     private TextView txtId, txtTitle, txtDep, txtStatus, txtNote, txtPrice, txtPS, txtSeller, txtPost, txtEdit;
@@ -69,12 +71,11 @@ public class ProductDetailActivity extends AppCompatActivity {
     private Book book;
     public static ArrayList<Bitmap> images;
     private ImageGroupAdapter adapter;
-    public static int indexSelectedImage;
     private String productId;
 
     private MyOkHttp conn;
     private GetBitmapBatch getBitmap;
-    private boolean isShown = false;
+    private boolean isShown = false, haveTalked = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +84,7 @@ public class ProductDetailActivity extends AppCompatActivity {
         context = this;
 
         //設置Toolbar
-        Bundle bundle = getIntent().getExtras();
+        bundle = getIntent().getExtras();
         productId = bundle.getString(KEY_PRODUCT_ID);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle(bundle.getString(KEY_TITLE));
@@ -134,6 +135,12 @@ public class ProductDetailActivity extends AppCompatActivity {
                     bundle.putString(KEY_PRODUCT_ID, book.getId());
                     bundle.putString(KEY_TITLE, book.getTitle());
                     bundle.putString(KEY_NAME, book.getSellerName());
+                    bundle.putBoolean(KEY_HAVE_TALKED, haveTalked);
+
+                    if (!haveTalked) {
+                        bundle.putSerializable(KEY_PRODUCT, new Book(book.getId(), book.getImgURL(), book.getTitle(), book.getPrice()));
+                    }
+
                     it.putExtras(bundle);
                     startActivity(it);
                 }else
@@ -191,6 +198,10 @@ public class ProductDetailActivity extends AppCompatActivity {
                                 if (obj.getBoolean(KEY_FAVORITE))
                                     fabFavorite.setImageResource(R.drawable.ic_favorite_yellow);
 
+                                //檢查有無談過這個商品
+                                if (obj.getBoolean(KEY_HAVE_TALKED))
+                                    haveTalked = true;
+
                                 // 產生物件ArrayList資料後，由圖片位址下載圖片，完成後再顯示資料.
                                 getBitmap = new GetBitmapBatch(book, getString(R.string.link_image), new GetBitmapBatch.TaskListener() {
                                     // 下載圖片完成後執行的方法
@@ -220,7 +231,7 @@ public class ProductDetailActivity extends AppCompatActivity {
             JSONObject reqObj = new JSONObject();
             reqObj.put(KEY_USER_ID, loginUserId);
             reqObj.put(KEY_PRODUCT_ID, productId);
-            reqObj.put(KEY_ANYWAY, getIntent().getExtras().getString(KEY_ANYWAY));
+            reqObj.put(KEY_ANYWAY, bundle.getString(KEY_ANYWAY));
             conn.execute(getString(R.string.link_product_detail), reqObj.toString());
         }catch (JSONException e) {
             e.printStackTrace();
@@ -248,7 +259,7 @@ public class ProductDetailActivity extends AppCompatActivity {
             txtSeller.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (!isProfileAlive) {
+                    if (canShowProfile) {
                         Intent it = new Intent(context, MemberProfileActivity.class);
                         Bundle bundle = new Bundle();
                         bundle.putString(KEY_MEMBER_ID, sellerId);

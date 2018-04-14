@@ -9,6 +9,7 @@ public class ImageObj {
     private String imgURL, imgURL2, imgURL3, imgURL4, imgURL5;   //圖片網址
     public Bitmap img, img2, img3, img4, img5;      //圖片
     private GetBitmapTask getBitmap;
+    private boolean isStartDownload = false;
 
     public ImageObj() {}
 
@@ -17,13 +18,17 @@ public class ImageObj {
     }
 
     public void startDownloadImage() {
+        isStartDownload = true;
         getBitmap.execute(this);
     }
 
+    public boolean isStartDownload() {
+        return isStartDownload;
+    }
+
     public void cancelDownloadImage() {
-        try {
+        if (getBitmap != null)
             getBitmap.cancel(true);
-        }catch (NullPointerException e) {}
     }
 
     public String getImgURL() {

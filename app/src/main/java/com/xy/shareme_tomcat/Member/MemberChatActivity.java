@@ -1,17 +1,23 @@
 package com.xy.shareme_tomcat.Member;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -21,6 +27,7 @@ import com.xy.shareme_tomcat.Product.ProductDetailActivity;
 import com.xy.shareme_tomcat.R;
 import com.xy.shareme_tomcat.adapter.ChatAdapter;
 import com.xy.shareme_tomcat.adapter.ProductSpinnerAdapter;
+import com.xy.shareme_tomcat.adapter.StockListAdapter;
 import com.xy.shareme_tomcat.broadcast_helper.managers.RequestManager;
 import com.xy.shareme_tomcat.data.Book;
 import com.xy.shareme_tomcat.data.Chat;
@@ -36,17 +43,21 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_ANYWAY;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_AVATAR;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_AVATAR2;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_CHAT;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_DATE;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_HAVE_TALKED;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_MEMBER_ID;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_MESSAGE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_NAME;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_PHOTO1;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_PRICE;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_PRODUCT;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_PRODUCTS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_PRODUCT_ID;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_RECEIVER_ID;
@@ -55,12 +66,16 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_STATUS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TIME;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_USER_ID;
+import static com.xy.shareme_tomcat.data.DataHelper.canShowChatroom;
+import static com.xy.shareme_tomcat.data.DataHelper.canShowProfile;
 import static com.xy.shareme_tomcat.data.DataHelper.isChatroomAlive;
 import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
 import static com.xy.shareme_tomcat.data.DataHelper.myName;
+import static com.xy.shareme_tomcat.data.DataHelper.tmpToken;
 
 public class MemberChatActivity extends AppCompatActivity implements View.OnClickListener {
     private Context context;
+    private Bundle bundle;
     private ImageView btnProfile, btnProduct;
     private Spinner spnProduct;
     private ProgressBar prgProduct, prgChat;
@@ -76,7 +91,7 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
     private ProductSpinnerAdapter adpProduct;
     private String memberId, productId, title, avatar1, avatar2;
 
-    private boolean isAvatarLoaded = false, isChatShown = false, isSpinnerInitialed = false;
+    private boolean isAvatarLoaded = false, isChatShown = false, isSpinnerInitialed = false, isContinueLoadToken = false;
 
     //交談訊息>個人照片>商品清單
     @Override
@@ -84,7 +99,7 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_member_chat);
         context = this;
-        Bundle bundle = getIntent().getExtras();
+        bundle = getIntent().getExtras();
         memberId = bundle.getString(KEY_MEMBER_ID);
         productId = bundle.getString(KEY_PRODUCT_ID);
 
@@ -112,6 +127,8 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
         btnProfile.setOnClickListener(this);
         btnProduct.setOnClickListener(this);
         btnSubmit.setOnClickListener(this);
+        //prepareDialog();
+
         spnProduct.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -127,6 +144,21 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
             public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
+
+        RequestManager.getInstance().getTokenById(memberId);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(30000);
+                }catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                hdrTimer.sendMessage(hdrTimer.obtainMessage());
+            }
+        });
+
+        canShowChatroom = false;
     }
 
     @Override
@@ -148,7 +180,8 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
             @Override
             public void onFinished() {
                 isAvatarLoaded = true;
-                adpChat.notifyDataSetChanged();
+                if (adpChat != null)
+                    adpChat.notifyDataSetChanged();
             }
         });
         gbmAvatar.execute();
@@ -210,7 +243,8 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
                                 //個人照片
                                 loadAvatar();
 
-                                showChatroomData();
+                                if (!tmpToken.equals(""))
+                                    showChatroomData();
                             }else {
                                 Toast.makeText(context, "伺服器發生例外", Toast.LENGTH_SHORT).show();
                                 prgProduct.setVisibility(View.GONE);
@@ -239,6 +273,8 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
     private void loadChat() {
         isChatShown = false;
         btnSubmit.setEnabled(false);
+        recyChats.setVisibility(View.INVISIBLE);
+        prgChat.setVisibility(View.VISIBLE);
 
         chats = new ArrayList<>();
         conn = new MyOkHttp(MemberChatActivity.this, new MyOkHttp.TaskListener() {
@@ -295,7 +331,19 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
     }
 
     private void showChatroomData() {
-        //交談商品
+        //交談商品清單
+        if (!bundle.getBoolean(KEY_HAVE_TALKED)) { //檢查有無談過這個商品，若無則在Spinner放入
+            books.add((Book) bundle.getSerializable(KEY_PRODUCT));
+        }
+
+        //將正在談的商品移動到清單第一個
+        for (int i = 0; i < books.size(); i++) {
+            if (((Book) books.get(i)).getId().equals(productId)) {
+                books.add(0, books.get(i));
+                books.remove(i + 1);
+            }
+        }
+
         adpProduct = new ProductSpinnerAdapter(getResources(), context, books, R.layout.spn_chat_product, 10);
         spnProduct.setAdapter(adpProduct);
 
@@ -361,11 +409,14 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
         Bundle bundle;
         switch (view.getId()) {
             case R.id.btnProfile:
-                it = new Intent(context, MemberProfileActivity.class);
-                bundle = new Bundle();
-                bundle.putString(KEY_MEMBER_ID, memberId);
-                it.putExtras(bundle);
-                startActivity(it);
+                if (canShowProfile) {
+                    it = new Intent(context, MemberProfileActivity.class);
+                    bundle = new Bundle();
+                    bundle.putString(KEY_MEMBER_ID, memberId);
+                    it.putExtras(bundle);
+                    startActivity(it);
+                }else
+                    Toast.makeText(context, "您先前已開啟該賣家的個人檔案，不可重複開啟", Toast.LENGTH_SHORT).show();
                 break;
 
             case R.id.btnProduct:
@@ -383,7 +434,9 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
                 if (!msg.equals("")) {
                     btnSubmit.setEnabled(false);
                     sendMessage(msg);
-                    RequestManager.getInstance().prepareNotification(memberId, myName.equals("")?"xxx":myName, msg, getString(R.string.link_avatar) + avatar1); //發送推播
+
+                    //發送推播
+                    RequestManager.getInstance().prepareNotification(memberId, myName, msg, getString(R.string.link_avatar) + avatar1);
                 }
                 break;
         }
@@ -391,18 +444,22 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
 
     @Override
     public void onPause() {
-        cancelConnection();
         isChatroomAlive = false;
+        cancelConnection();
         super.onPause();
     }
 
     @Override
     public void onDestroy() {
         conn = null;
-        if (adpProduct != null)
+        if (adpProduct != null) {
             adpProduct.destroy(true);
+            adpProduct = null;
+        }
+
         adpChat = null;
         avatar = null;
+        isChatroomAlive = false;
 
         System.gc();
         super.onDestroy();
@@ -414,4 +471,44 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
         if (gbmAvatar != null)
             gbmAvatar.cancel(true);
     }
+
+    private void initTrdWaitToken() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(250);
+                }catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                hdrWaitToken.sendMessage(hdrWaitToken.obtainMessage());
+            }
+        }).start();
+    }
+
+    private Handler hdrWaitToken = new Handler() {
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            if (!tmpToken.equals("")) {
+                showChatroomData();
+                tmpToken = "";
+            }else {
+                if (isContinueLoadToken)
+                    initTrdWaitToken();
+                else{
+                    tmpToken = "";
+                    prgProduct.setVisibility(View.GONE);
+                    prgChat.setVisibility(View.GONE);
+                    Toast.makeText(context, "無法取得對方Token，請再試一次", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    };
+
+    private Handler hdrTimer = new Handler() {
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            isContinueLoadToken = false;
+        }
+    };
 }

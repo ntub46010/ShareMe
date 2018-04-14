@@ -306,7 +306,7 @@ public class LoginActivity extends Activity {
             @Override
             public void run() {
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(250);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -349,7 +349,7 @@ public class LoginActivity extends Activity {
         }).start();
     };
 
-    private  Handler hdrWaitDelete = new Handler() { //等待token值從預設文字被改為空
+    private Handler hdrWaitDelete = new Handler() { //等待token值從預設文字被改為空
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             if (tmpToken.equals("")) { //確定token已刪除，開始註冊新token

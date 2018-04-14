@@ -24,7 +24,7 @@ public class MailListAdapter extends BaseAdapter{
     private LayoutInflater layoutInflater;
     private ArrayList<ImageObj> mails;
     private ImageDownloadQueue queue;
-    private int lastPosition, backgroundColor, queueVolume;
+    private int lastPosition, queueVolume;
 
     public MailListAdapter(Resources res, Context context, ArrayList<ImageObj> mails, int queueVolume) {
         this.res = res;

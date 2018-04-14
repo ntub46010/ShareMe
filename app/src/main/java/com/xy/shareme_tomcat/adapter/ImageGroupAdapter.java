@@ -3,6 +3,7 @@ package com.xy.shareme_tomcat.adapter;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -20,6 +21,13 @@ public class ImageGroupAdapter extends RecyclerView.Adapter<ImageGroupAdapter.Da
     private Context context;
     private ArrayList<Bitmap> pictures;
     private boolean isPhotoZoomable = false;
+
+    // 將連結的資料
+    public ImageGroupAdapter(Context context, ArrayList<Bitmap> pictures, boolean isPhotoZoomable) {
+        this.context = context;
+        this.pictures = pictures;
+        this.isPhotoZoomable = isPhotoZoomable;
+    }
 
     public class DataViewHolder extends RecyclerView.ViewHolder {
         // 連結資料的顯示物件宣告
@@ -39,20 +47,17 @@ public class ImageGroupAdapter extends RecyclerView.Adapter<ImageGroupAdapter.Da
                 @Override
                 public void onClick(View view) {
                     if (isPhotoZoomable) {
-                        ProductDetailActivity.indexSelectedImage = position;
-                        context.startActivity(new Intent(context, ImageActivity.class));
+                        Intent it = new Intent(context, ImageActivity.class);
+                        Bundle bundle = new Bundle();
+                        //bundle.putSerializable("Images", pictures);
+                        bundle.putInt("CurrentIndex", position);
+                        it.putExtras(bundle);
+                        context.startActivity(it);
                     }
                 }
             });
 
         }
-    }
-
-    // 將連結的資料
-    public ImageGroupAdapter(Context context, ArrayList<Bitmap> pictures, boolean isPhotoZoomable) {
-        this.context = context;
-        this.pictures = pictures;
-        this.isPhotoZoomable = isPhotoZoomable;
     }
 
     @Override

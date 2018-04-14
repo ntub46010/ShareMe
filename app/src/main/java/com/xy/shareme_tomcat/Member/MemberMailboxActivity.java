@@ -31,6 +31,7 @@ import java.util.ArrayList;
 
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_AVATAR;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_DATE;
+import static com.xy.shareme_tomcat.data.DataHelper.KEY_HAVE_TALKED;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_MAILS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_MEMBER_ID;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_MESSAGE;
@@ -178,6 +179,7 @@ public class MemberMailboxActivity extends AppCompatActivity {
                 bundle.putString(KEY_NAME, chat.getName());
                 bundle.putString(KEY_PRODUCT_ID, chat.getProductId());
                 bundle.putString(KEY_TITLE, chat.getTitle());
+                bundle.putBoolean(KEY_HAVE_TALKED, true);
                 it.putExtras(bundle);
                 startActivity(it);
             }

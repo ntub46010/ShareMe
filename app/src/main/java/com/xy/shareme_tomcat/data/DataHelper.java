@@ -24,9 +24,10 @@ public class DataHelper {
     public static String tmpToken = "token"; //登入時接收自己token(確認Firebase註冊成功)，或進交談室時接收對方token(確認可推播)。空字串代表無該帳號，token字串代表尚未取得
 
     public static boolean isFromDepartment = false; //是否因為按了科系按鈕，而移動到商品首頁
-    public static boolean isProfileAlive = false;
+    public static boolean canShowProfile = true;
     public static boolean isMailboxAlive = false;
     public static boolean isChatroomAlive = false;
+    public static boolean canShowChatroom = true;
 
     public static final String KEY_STATUS = "Status";
     public static final String KEY_USER_ID = "UserId";
@@ -70,7 +71,7 @@ public class DataHelper {
     public static final String KEY_TIME = "Time";
     public static final String KEY_MEMBER_ID = "MemberId";
     public static final String KEY_SENDER_ID = "SenderId";
-
+    public static final String KEY_HAVE_TALKED = "HaveTalked";
     //---
     public static final String KEY_PROFILE = "Profile";
     public static final String KEY_PRODUCT = "Product";

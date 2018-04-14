@@ -29,8 +29,15 @@ public class ImageUploadAdapter extends RecyclerView.Adapter<ImageUploadAdapter.
     private Context context;
     private ImageUploadQueue queue;
     private int pressedPosition = 0;
-
+    private Dialog dialog;
     private AlbumImageProvider provider;
+
+    public ImageUploadAdapter(Resources res, Context context, AlbumImageProvider provider, String linkUpload) {
+        this.context = context;
+        this.provider = provider;
+        queue = new ImageUploadQueue(res, context, linkUpload);
+        prepareDialog();
+    }
 
     public class DataViewHolder extends RecyclerView.ViewHolder {
         // 連結資料的顯示物件宣告
@@ -64,21 +71,14 @@ public class ImageUploadAdapter extends RecyclerView.Adapter<ImageUploadAdapter.
                 @Override
                 public boolean onLongClick(View v) {
                     pressedPosition = position;
-                    if (getItem(position).getBitmap() != null /*|| !getItem(position).getFileName().equals("")*/) {
-                        prepareDialog();
+                    if (getItem(position).getBitmap() != null) {
+                        dialog.show();
                         return true;
                     }
                     return false;
                 }
             });
         }
-    }
-
-    // 將連結的資料
-    public ImageUploadAdapter(Resources res, Context context, AlbumImageProvider provider, String linkUpload) {
-        this.context = context;
-        this.provider = provider;
-        queue = new ImageUploadQueue(res, context, linkUpload);
     }
 
     @Override
@@ -119,9 +119,9 @@ public class ImageUploadAdapter extends RecyclerView.Adapter<ImageUploadAdapter.
     }
 
     private void prepareDialog() {
-        final Dialog dialog = new Dialog(context);
+        dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.dlg_gallery_options);
+        dialog.setContentView(R.layout.dlg_list_options);
         dialog.setCancelable(true);
 
         String[] textGroup = {"左移", "右移", "移除"};
@@ -131,7 +131,7 @@ public class ImageUploadAdapter extends RecyclerView.Adapter<ImageUploadAdapter.
                 R.drawable.icon_delete
         };
 
-        ListView listView = (ListView) dialog.findViewById(R.id.lstGalleryOptions);
+        ListView listView = (ListView) dialog.findViewById(R.id.lstOptions);
         listView.setAdapter(DataHelper.getSimpleAdapter(
                 context,
                 R.layout.lst_text_with_icon_black,
@@ -159,8 +159,6 @@ public class ImageUploadAdapter extends RecyclerView.Adapter<ImageUploadAdapter.
                 dialog.dismiss();
             }
         });
-
-        dialog.show();
     }
 
     public ImageChild getItem(int position) {
@@ -230,21 +228,5 @@ public class ImageUploadAdapter extends RecyclerView.Adapter<ImageUploadAdapter.
             if (isFully)
                 queue = null;
         }
-    }
-
-    public String getImageStatus() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("fileName:\n");
-        for (int i = 0; i<queue.size(); i++)
-            sb.append(String.valueOf(i)).append(": ").append(((ImageChild) queue.get(i)).getFileName()).append("、\n");
-        sb.append("isEntity:\n");
-        for (int i = 0; i<queue.size(); i++) {
-            if (((ImageChild) queue.get(i)).isEntity())
-                sb.append("O");
-            else
-                sb.append("X");
-        }
-
-        return sb.toString();
     }
 }

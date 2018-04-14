@@ -1,6 +1,8 @@
 package com.xy.shareme_tomcat.data;
 
-public class Book extends ImageObj {
+import java.io.Serializable;
+
+public class Book extends ImageObj implements Serializable {
     private String imgURL, imgURL2, imgURL3, imgURL4, imgURL5;
     private String id, title;
     private String price, dep, seller, sellerName, sellerAvatar;

@@ -20,6 +20,11 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.DataViewHolder
     private ArrayList<ImageObj> chats;
     private ImageObj avatars;
 
+    public ChatAdapter(ArrayList<ImageObj> chats, ImageObj avatars) {
+        this.chats = chats;
+        this.avatars = avatars;
+    }
+
     public class DataViewHolder extends RecyclerView.ViewHolder {
         // 連結資料的顯示物件宣告
         private CardView cardView;
@@ -44,11 +49,6 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.DataViewHolder
                 }
             });
         }
-    }
-
-    public ChatAdapter(ArrayList<ImageObj> chats, ImageObj avatars) {
-        this.chats = chats;
-        this.avatars = avatars;
     }
 
     @Override
