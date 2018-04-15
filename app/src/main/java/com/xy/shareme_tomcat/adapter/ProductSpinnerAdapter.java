@@ -20,7 +20,6 @@ import java.util.ArrayList;
 
 public class ProductSpinnerAdapter extends BaseAdapter {
     private Resources res;
-    private Context context;
     private LayoutInflater layoutInflater;
     private int layout, lastPosition, queueVolume;
 
@@ -29,7 +28,6 @@ public class ProductSpinnerAdapter extends BaseAdapter {
 
     public ProductSpinnerAdapter(Resources res, Context context, ArrayList<ImageObj> books, int layout, int queueVolume) {
         this.res = res;
-        this.context = context;
         this.books = books;
         this.layout = layout;
         layoutInflater = LayoutInflater.from(context);
@@ -54,7 +52,6 @@ public class ProductSpinnerAdapter extends BaseAdapter {
 
     @Override
     public View getView(int i, View convertView, ViewGroup parent) {
-        Toast.makeText(context, "i: " + String.valueOf(i), Toast.LENGTH_SHORT).show();
         if (convertView == null)
             convertView = layoutInflater.inflate(layout, parent, false);
 
@@ -66,7 +63,7 @@ public class ProductSpinnerAdapter extends BaseAdapter {
             txtBookTitle.setText(((Book) books.get(i)).getTitle());
             txtBookPrice.setText("$ " + ((Book) books.get(i)).getPrice());
         }catch (NullPointerException e) {
-            Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
         }
 
         if (i > lastPosition) {

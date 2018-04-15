@@ -13,8 +13,8 @@ import android.support.v4.app.NotificationCompat;
 import com.xy.shareme_tomcat.Member.MemberMailboxActivity;
 import com.xy.shareme_tomcat.R;
 
-import static com.xy.shareme_tomcat.data.DataHelper.isChatroomAlive;
-import static com.xy.shareme_tomcat.data.DataHelper.isMailboxAlive;
+import static com.xy.shareme_tomcat.data.DataHelper.canShowChatroom;
+import static com.xy.shareme_tomcat.data.DataHelper.canShowMailbox;
 
 public class NotificationManager extends Activity {
     public static final int NOTIFICATION_ID = -Integer.MAX_VALUE;
@@ -48,7 +48,7 @@ public class NotificationManager extends Activity {
     private Notification createNotification(Context context, Bitmap bitmap, String title, String message) {
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context);
         //NotificationCompat.Style notificationStyle = createNotificationStyle(message, bitmap);
-        mBuilder = mBuilder.setSmallIcon(R.mipmap.ic_launcher)
+        mBuilder = mBuilder.setSmallIcon(R.drawable.logo_ntub)
                 .setContentTitle(title)
                 .setContentText(message)
                 .setLargeIcon(bitmap)
@@ -57,7 +57,7 @@ public class NotificationManager extends Activity {
                 .setPriority(NotificationCompat.PRIORITY_MAX);
                 //.setStyle(notificationStyle) 將大圖示圖片附加在下面
 
-        if (!isMailboxAlive && !isChatroomAlive) { //使用者不位於信箱或交談室時，點擊推播才會導引至信箱畫面
+        if (canShowMailbox && canShowChatroom) { //使用者未開啟信箱或交談室時，點擊推播才會導引至信箱畫面
             Intent intent = new Intent(context.getApplicationContext(), MemberMailboxActivity.class); //設定點擊推播後要顯示的Activity
             PendingIntent pendingIntent = PendingIntent.getActivity(
                     context.getApplicationContext(),

@@ -95,6 +95,12 @@ public class SettingHomeFrag extends Fragment {
     private void logout() {
         DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
         mDatabase.child(DATABASE_USERS).child(loginUserId).removeValue();
+
+        getActivity().getSharedPreferences(getString(R.string.sp_fileName), MODE_PRIVATE).edit()
+                .putBoolean(getString(R.string.sp_isAutoLogin), false)
+                .remove(getString(R.string.sp_myLoginUserId))
+                .remove(getString(R.string.sp_myPassword))
+                .apply();
         getActivity().finish();
     }
 

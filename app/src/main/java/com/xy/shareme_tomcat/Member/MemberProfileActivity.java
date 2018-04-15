@@ -124,11 +124,11 @@ public class MemberProfileActivity extends AppCompatActivity implements View.OnC
             public void onClick(View view) {
                 try{
                     if (memberId.equals(loginUserId))
-                        Toast.makeText(context, "你的電子郵件是：" + email, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "您的電子郵件是：" + email, Toast.LENGTH_SHORT).show();
                     else {
                         Intent it = new Intent (Intent.ACTION_VIEW , Uri.parse("mailto:" + email));
-                        it.putExtra(Intent.EXTRA_SUBJECT, "主旨");
-                        it.putExtra(Intent.EXTRA_TEXT, "內文");
+                        //it.putExtra(Intent.EXTRA_SUBJECT, "主旨");
+                        //it.putExtra(Intent.EXTRA_TEXT, "內文");
                         startActivity(it);
                     }
                 }catch (ActivityNotFoundException e) {
@@ -337,10 +337,12 @@ public class MemberProfileActivity extends AppCompatActivity implements View.OnC
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.layPositive:
-                giveValue(1);
+                if (!memberId.equals(loginUserId))
+                    giveValue(1);
                 break;
             case R.id.layNegative:
-                giveValue(-1);
+                if (!memberId.equals(loginUserId))
+                    giveValue(-1);
                 break;
         }
     }

@@ -6,6 +6,10 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+
+        <!--<item name="colorControlHighlight">#0000FF</item>--> <!--清單點擊顏色-->
+        <item name="colorControlActivated">@color/bg_header</item> <!--ProgressBar、EditText點擊後顏色-->
+        <!--<item name="colorControlNormal">#00FF00</item>--> <!--Toolbar返回鍵、EditText點擊前顏色-->
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -134,6 +138,11 @@
         <item name="android:textSize">18sp</item>
     </style>
 
+    <style name="prg_normal">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_horizontal|center_vertical</item>
+    </style>
     <style name="prg_medium">
         <item name="android:layout_width">30dp</item>
         <item name="android:layout_height">30dp</item>

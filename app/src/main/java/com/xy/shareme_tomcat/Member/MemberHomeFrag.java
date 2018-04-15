@@ -12,7 +12,6 @@ import android.widget.ListView;
 import com.xy.shareme_tomcat.R;
 
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_MEMBER_ID;
-import static com.xy.shareme_tomcat.data.DataHelper.KEY_USER_ID;
 import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
 import static com.xy.shareme_tomcat.data.DataHelper.myGender;
 import static com.xy.shareme_tomcat.data.DataHelper.getSimpleAdapter;
@@ -40,7 +39,7 @@ public class MemberHomeFrag extends Fragment {
                 R.drawable.icon_profile_boy,
                 R.drawable.icon_favorite,
                 R.drawable.icon_mailbox,
-                R.drawable.icon_package
+                R.drawable.icon_stock
         };
         if (myGender == 0)
             iconId[0] = R.drawable.icon_profile_girl;

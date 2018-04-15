@@ -42,6 +42,7 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_PASSWORD;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_PROFILE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_STATUS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_USER_ID;
+import static com.xy.shareme_tomcat.data.DataHelper.getMD5;
 import static com.xy.shareme_tomcat.data.DataHelper.getSpnDepCode;
 import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
 
@@ -61,7 +62,7 @@ public class SettingProfileActivity extends AppCompatActivity {
     private MyOkHttp conShowProfile, conEditProfile;
     private AlbumImageProvider provider;
 
-    private String originPwd;
+    private String originPwd, newPwd = "", newPwd2 = "";
     private boolean isShown = false, isImageChanged = false;
 
     @Override
@@ -124,6 +125,15 @@ public class SettingProfileActivity extends AppCompatActivity {
         btnUpdateInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                member.setName(edtName.getText().toString());
+                member.setEmail(edtEmail.getText().toString());
+                member.setPwd(edtOldPwd.getText().toString());
+                newPwd = edtNewPwd.getText().toString();
+                newPwd2 = edtNewPwd2.getText().toString();
+
+                if (!isInfoValid(member.getName(), member.getEmail(), member.getPwd(), newPwd, newPwd2))
+                    return;
+
                 if (isImageChanged)
                     uploadAvatar();
                 else
@@ -132,6 +142,8 @@ public class SettingProfileActivity extends AppCompatActivity {
                 dlgUpload.show();
             }
         });
+
+        prepareDialog();
     }
 
     @Override
@@ -320,14 +332,14 @@ public class SettingProfileActivity extends AppCompatActivity {
 
     private boolean isInfoValid(String name, String email, String oldPwd, String newPwd, String newPwd2) {
         StringBuffer errMsg = new StringBuffer("");
-        if (name.length() < 1)
+        if (name.length() < 2)
             errMsg.append("姓名未輸入\n");
 
         if (!email.contains("@") || email.indexOf("@") == 0 || email.indexOf("@") == email.length() - 1)
             errMsg.append("信箱格式錯誤\n");
 
         if (!oldPwd.equals("")) {
-            if (!oldPwd.equals(this.originPwd))
+            if (!getMD5(oldPwd).equals(originPwd))
                 errMsg.append("原密碼錯誤\n");
             else {
                 if (newPwd.length() < 6 || newPwd.length() > 15)
@@ -352,15 +364,6 @@ public class SettingProfileActivity extends AppCompatActivity {
     }
 
     private void updateProfile() {
-        member.setName(edtName.getText().toString());
-        member.setEmail(edtEmail.getText().toString());
-        member.setPwd(edtOldPwd.getText().toString());
-        String newPwd = edtNewPwd.getText().toString();
-        String newPwd2 = edtNewPwd2.getText().toString();
-
-        if (!isInfoValid(member.getName(), member.getEmail(), member.getPwd(), newPwd, newPwd2))
-            return;
-
         btnUpdateInfo.setEnabled(false);
         conEditProfile = new MyOkHttp(SettingProfileActivity.this, new MyOkHttp.TaskListener() {
             @Override
@@ -403,7 +406,7 @@ public class SettingProfileActivity extends AppCompatActivity {
             reqObj.put(KEY_NAME, member.getName());
             reqObj.put(KEY_DEPARTMENT, member.getDepartment());
             reqObj.put(KEY_EMAIL, member.getEmail());
-            reqObj.put(KEY_PASSWORD, member.getPwd());
+            reqObj.put(KEY_PASSWORD, getMD5(member.getPwd()));
             conEditProfile.execute(getString(R.string.link_edit_profile), reqObj.toString());
         }catch (JSONException e) {
             e.printStackTrace();
@@ -411,7 +414,6 @@ public class SettingProfileActivity extends AppCompatActivity {
     }
 
     private void uploadAvatar() {
-        prepareDialog();
         Toast.makeText(context, "正在更新大頭貼，可能會多花點時間", Toast.LENGTH_SHORT).show();
 
         String[] fileNames = new String[1];
@@ -425,6 +427,7 @@ public class SettingProfileActivity extends AppCompatActivity {
                 updateProfile();
             }
         });
+
     }
 
     @Override

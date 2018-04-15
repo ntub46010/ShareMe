@@ -29,7 +29,7 @@
                 android:id="@+id/btnProduct"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
-                android:src="@drawable/icon_product_detail"
+                android:src="@drawable/icon_chatroom_product"
                 android:layout_alignParentEnd="true"/>
             <ImageView
                 android:id="@+id/btnProfile"
@@ -37,7 +37,7 @@
                 android:layout_height="35dp"
                 android:layout_marginEnd="10dp"
                 android:paddingTop="3dp"
-                android:src="@drawable/icon_member_profile"
+                android:src="@drawable/icon_chatroom_profile"
                 android:layout_toStartOf="@id/btnProduct"/>
         </RelativeLayout>
     </android.support.v7.widget.Toolbar>
@@ -100,7 +100,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="#EEEEEE">
-                    <!--<include layout="@layout/spn_chat_product" />-->
+                    <!--<include layout="@layout/lst_stock" />-->
                     <Spinner
                         android:id="@+id/spnProduct"
                         android:layout_width="match_parent"

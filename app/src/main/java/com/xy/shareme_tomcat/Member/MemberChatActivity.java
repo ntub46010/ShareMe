@@ -1,6 +1,5 @@
 package com.xy.shareme_tomcat.Member;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
@@ -11,13 +10,10 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -27,7 +23,6 @@ import com.xy.shareme_tomcat.Product.ProductDetailActivity;
 import com.xy.shareme_tomcat.R;
 import com.xy.shareme_tomcat.adapter.ChatAdapter;
 import com.xy.shareme_tomcat.adapter.ProductSpinnerAdapter;
-import com.xy.shareme_tomcat.adapter.StockListAdapter;
 import com.xy.shareme_tomcat.broadcast_helper.managers.RequestManager;
 import com.xy.shareme_tomcat.data.Book;
 import com.xy.shareme_tomcat.data.Chat;
@@ -43,8 +38,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_ANYWAY;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_AVATAR;
@@ -68,7 +61,7 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_USER_ID;
 import static com.xy.shareme_tomcat.data.DataHelper.canShowChatroom;
 import static com.xy.shareme_tomcat.data.DataHelper.canShowProfile;
-import static com.xy.shareme_tomcat.data.DataHelper.isChatroomAlive;
+import static com.xy.shareme_tomcat.data.DataHelper.isChatroomExist;
 import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
 import static com.xy.shareme_tomcat.data.DataHelper.myName;
 import static com.xy.shareme_tomcat.data.DataHelper.tmpToken;
@@ -127,7 +120,6 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
         btnProfile.setOnClickListener(this);
         btnProduct.setOnClickListener(this);
         btnSubmit.setOnClickListener(this);
-        //prepareDialog();
 
         spnProduct.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -159,12 +151,12 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
         });
 
         canShowChatroom = false;
+        isChatroomExist = true;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        isChatroomAlive = true;
         if (!isChatShown)
             loadChatroom();
         else if (!isAvatarLoaded)
@@ -192,6 +184,8 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
         recyChats.setVisibility(View.INVISIBLE);
         prgProduct.setVisibility(View.VISIBLE);
         prgChat.setVisibility(View.VISIBLE);
+        btnProfile.setVisibility(View.INVISIBLE);
+        btnProduct.setVisibility(View.INVISIBLE);
         btnSubmit.setEnabled(false);
 
         books = new ArrayList<>();
@@ -236,7 +230,6 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
                                             obj.getString(KEY_SENDER_ID),
                                             URLDecoder.decode(obj.getString(KEY_MESSAGE), "UTF-8"),
                                             obj.getString(KEY_DATE),
-                                            obj.getString(KEY_DATE),
                                             obj.getString(KEY_TIME)
                                     ));
                                 }
@@ -272,6 +265,8 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
 
     private void loadChat() {
         isChatShown = false;
+        btnProfile.setVisibility(View.INVISIBLE);
+        btnProduct.setVisibility(View.INVISIBLE);
         btnSubmit.setEnabled(false);
         recyChats.setVisibility(View.INVISIBLE);
         prgChat.setVisibility(View.VISIBLE);
@@ -299,7 +294,6 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
                                     chats.add(new Chat(
                                             obj.getString(KEY_SENDER_ID),
                                             URLDecoder.decode(obj.getString(KEY_MESSAGE), "UTF-8"),
-                                            obj.getString(KEY_DATE),
                                             obj.getString(KEY_DATE),
                                             obj.getString(KEY_TIME)
                                     ));
@@ -344,12 +338,9 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
             }
         }
 
-        adpProduct = new ProductSpinnerAdapter(getResources(), context, books, R.layout.spn_chat_product, 10);
+        adpProduct = new ProductSpinnerAdapter(getResources(), context, books, R.layout.lst_stock, 10);
         spnProduct.setAdapter(adpProduct);
 
-        btnProduct.setVisibility(View.VISIBLE);
-        btnProfile.setVisibility(View.VISIBLE);
-        prgProduct.setVisibility(View.GONE);
 
         //交談訊息
         showChatData();
@@ -362,7 +353,11 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
         btnSubmit.setEnabled(true);
         adpChat = new ChatAdapter(chats, avatar);
         recyChats.setAdapter(adpChat);
+
+        prgProduct.setVisibility(View.GONE);
         prgChat.setVisibility(View.GONE);
+        btnProduct.setVisibility(View.VISIBLE);
+        btnProfile.setVisibility(View.VISIBLE);
         recyChats.setVisibility(View.VISIBLE);
         btnSubmit.setEnabled(true);
         isChatShown = true;
@@ -444,7 +439,6 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
 
     @Override
     public void onPause() {
-        isChatroomAlive = false;
         cancelConnection();
         super.onPause();
     }
@@ -459,7 +453,8 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
 
         adpChat = null;
         avatar = null;
-        isChatroomAlive = false;
+        canShowChatroom = true;
+        isChatroomExist = false;
 
         System.gc();
         super.onDestroy();

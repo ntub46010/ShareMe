@@ -71,7 +71,8 @@ public class ProductHomeFrag extends Fragment {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                loadData("");
+                adpProductHome.destroy(false);
+                loadData("", false);
             }
         });
 
@@ -84,10 +85,10 @@ public class ProductHomeFrag extends Fragment {
         if (isFromDepartment) {
             isFromDepartment = false;
             searchView.setQueryHint(getString(R.string.hint_search_product, getBoardNickname()));
-            loadData("");
+            loadData("", true);
         }else if (!isShown) {
             searchView.setQueryHint(getString(R.string.hint_search_product, getBoardNickname()));
-            loadData("");
+            loadData("", true);
         }
     }
 
@@ -115,10 +116,11 @@ public class ProductHomeFrag extends Fragment {
         });
     }
 
-    private void loadData(String keyword) {
+    private void loadData(String keyword, boolean showPrgBar) {
         isShown = false;
         swipeRefreshLayout.setEnabled(false);
-        prgBar.setVisibility(View.VISIBLE);
+        if (showPrgBar)
+            prgBar.setVisibility(View.VISIBLE);
 
         books = new ArrayList<>();
         conProductHome = new MyOkHttp(getActivity(), new MyOkHttp.TaskListener() {

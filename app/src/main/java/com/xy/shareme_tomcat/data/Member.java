@@ -1,7 +1,6 @@
 package com.xy.shareme_tomcat.data;
 
 public class Member extends ImageObj {
-    private String imgURL;
     private String acc, pwd, pwd2;
     private String name, department, email;
     private String positive, negative;
@@ -13,7 +12,7 @@ public class Member extends ImageObj {
 
     //編輯個人檔案
     public Member(String imgURL, String name, String department, String email, String pwd) {
-        this.imgURL = imgURL;
+        super.imgURL = imgURL;
         this.name = name;
         this.department = department;
         this.email = email;
@@ -22,16 +21,12 @@ public class Member extends ImageObj {
 
     //顯示個人檔案
     public Member(String imgURL, String name, String department, String positive, String negative, String email) {
-        this.imgURL = imgURL;
+        super.imgURL = imgURL;
         this.name = name;
         this.department = department;
         this.email = email;
         this.positive = positive;
         this.negative = negative;
-    }
-
-    public String getImgURL() {
-        return imgURL;
     }
 
     public String getName() {

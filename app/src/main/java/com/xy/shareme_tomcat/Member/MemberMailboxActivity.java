@@ -43,7 +43,8 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_STATUS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TIME;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_USER_ID;
-import static com.xy.shareme_tomcat.data.DataHelper.isMailboxAlive;
+import static com.xy.shareme_tomcat.data.DataHelper.canShowMailbox;
+import static com.xy.shareme_tomcat.data.DataHelper.isMailboxExist;
 import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
 import static com.xy.shareme_tomcat.data.DataHelper.myGender;
 import static com.xy.shareme_tomcat.data.DataHelper.myName;
@@ -101,7 +102,8 @@ public class MemberMailboxActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        isMailboxAlive = true;
+        isMailboxExist = true;
+        canShowMailbox = false;
         if (!isShown)
             loadData();
     }
@@ -178,7 +180,7 @@ public class MemberMailboxActivity extends AppCompatActivity {
                 bundle.putString(KEY_MEMBER_ID, chat.getMemberId());
                 bundle.putString(KEY_NAME, chat.getName());
                 bundle.putString(KEY_PRODUCT_ID, chat.getProductId());
-                bundle.putString(KEY_TITLE, chat.getTitle());
+                //bundle.putString(KEY_TITLE, chat.getTitle());
                 bundle.putBoolean(KEY_HAVE_TALKED, true);
                 it.putExtras(bundle);
                 startActivity(it);
@@ -195,7 +197,7 @@ public class MemberMailboxActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         cancelConnection();
-        isMailboxAlive = false;
+        isMailboxExist = false;
         super.onPause();
     }
 
@@ -205,6 +207,7 @@ public class MemberMailboxActivity extends AppCompatActivity {
             adapter.destroy(true);
             adapter = null;
         }
+        canShowMailbox = true;
         System.gc();
         super.onDestroy();
     }

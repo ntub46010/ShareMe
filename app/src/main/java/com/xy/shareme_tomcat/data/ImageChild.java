@@ -28,10 +28,6 @@ public class ImageChild {
         this.fileName = fileName;
     }
 
-    public void setEntity(boolean isEntity) {
-        this.isEntity = isEntity;
-    }
-
     public boolean isEntity() {
         return isEntity;
     }

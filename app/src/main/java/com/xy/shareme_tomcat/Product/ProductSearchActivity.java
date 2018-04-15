@@ -145,6 +145,7 @@ public class ProductSearchActivity extends AppCompatActivity {
         recyProduct.setAdapter(adapter);
         books = null;
 
+        prgBar.setVisibility(View.GONE);
         recyProduct.setVisibility(View.VISIBLE);
         isShown = true;
     }

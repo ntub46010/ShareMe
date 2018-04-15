@@ -10,7 +10,7 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/title"
+        android:background="@drawable/shareme"
         android:gravity="center"/>
 
     <LinearLayout
@@ -22,7 +22,7 @@
         <EditText
             android:id="@+id/edtAccount"
             style="@style/edt_login"
-            android:drawableLeft="@drawable/user"
+            android:drawableLeft="@drawable/icon_account"
             android:hint="User"
             android:inputType="text"
             android:text="10346010"/>
@@ -31,16 +31,24 @@
             android:id="@+id/edtPassword"
             style="@style/edt_login"
             android:layout_marginTop="5dp"
-            android:drawableLeft="@drawable/locked"
+            android:drawableLeft="@drawable/icon_password"
             android:hint="Password"
             android:inputType="textPassword"
             android:text="111111"/>
     </LinearLayout>
 
+    <CheckBox
+        android:id="@+id/chkAutoLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:layout_gravity="center"
+        android:text="自動登入"/>
+
     <Button
         android:id="@+id/btnLogin"
         style="@style/btn_login"
-        android:layout_marginTop="35dp"
+        android:layout_marginTop="25dp"
         android:text="log in"
         android:textSize="23sp"
         android:background="@drawable/btn_login"/>

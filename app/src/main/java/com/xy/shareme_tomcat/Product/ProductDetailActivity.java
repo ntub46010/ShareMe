@@ -55,7 +55,7 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_STATUS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TYPE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_USER_ID;
-import static com.xy.shareme_tomcat.data.DataHelper.isChatroomAlive;
+import static com.xy.shareme_tomcat.data.DataHelper.isChatroomExist;
 import static com.xy.shareme_tomcat.data.DataHelper.canShowProfile;
 import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
 import static com.xy.shareme_tomcat.data.DataHelper.showFoundStatus;
@@ -128,7 +128,7 @@ public class ProductDetailActivity extends AppCompatActivity {
         fabContact.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!isChatroomAlive) {
+                if (!isChatroomExist) {
                     Intent it = new Intent(context, MemberChatActivity.class);
                     Bundle bundle = new Bundle();
                     bundle.putString(KEY_MEMBER_ID, book.getSeller());
@@ -196,7 +196,7 @@ public class ProductDetailActivity extends AppCompatActivity {
 
                                 //若已在最愛清單，就改變愛心顏色
                                 if (obj.getBoolean(KEY_FAVORITE))
-                                    fabFavorite.setImageResource(R.drawable.ic_favorite_yellow);
+                                    fabFavorite.setImageResource(R.drawable.icon_favorite_yellow);
 
                                 //檢查有無談過這個商品
                                 if (obj.getBoolean(KEY_HAVE_TALKED))
@@ -337,10 +337,10 @@ public class ProductDetailActivity extends AppCompatActivity {
                             if (resObj.getBoolean(KEY_STATUS)) {
                                 if (resObj.getBoolean(KEY_IS_ADD)) {
                                     Toast.makeText(context, "加入到我的最愛", Toast.LENGTH_SHORT).show();
-                                    fabFavorite.setImageResource(R.drawable.ic_favorite_yellow);
+                                    fabFavorite.setImageResource(R.drawable.icon_favorite_yellow);
                                 }else {
                                     Toast.makeText(context, "從我的最愛移除", Toast.LENGTH_SHORT).show();
-                                    fabFavorite.setImageResource(R.drawable.ic_favorite_white);
+                                    fabFavorite.setImageResource(R.drawable.icon_favorite_white);
                                 }
                             }else
                                 Toast.makeText(context, "伺服器發生例外", Toast.LENGTH_SHORT).show();

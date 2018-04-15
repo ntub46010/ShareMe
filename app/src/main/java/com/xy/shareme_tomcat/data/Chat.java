@@ -1,20 +1,19 @@
 package com.xy.shareme_tomcat.data;
 
 public class Chat extends ImageObj {
-    private String imgURL;
-    private String msg, date, innerDate, time;
+    //private String imgURL;
+    private String msg, date, time;
     private String name, productId, title, memberId, sender;
 
-    public Chat(String sender, String msg, String date, String innerDate, String time) { //用於聊天室每則訊息
+    public Chat(String sender, String msg, String date, String time) { //用於聊天室每則訊息
         this.sender = sender;
         this.msg = msg;
         this.date = date;
-        this.innerDate = innerDate;
         this.time = time;
     }
 
     public Chat(String imgURL, String name, String msg, String date, String time, String productId, String title, String memberId) { //信箱
-        this.imgURL = imgURL;
+        super.imgURL = imgURL;
         this.msg = msg;
         this.date = date;
         this.time = time;
@@ -24,9 +23,10 @@ public class Chat extends ImageObj {
         this.memberId = memberId;
     }
 
-    public String getImgURL() {
+    /*public String getImgURL() {
         return imgURL;
     }
+    */
 
     public String getMsg() {
         return msg;
@@ -34,10 +34,6 @@ public class Chat extends ImageObj {
 
     public String getDate() {
         return date;
-    }
-
-    public String getInnerDate() {
-        return innerDate;
     }
 
     public String getTime() {
@@ -62,10 +58,6 @@ public class Chat extends ImageObj {
 
     public String getSender() {
         return sender;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
     }
 
 }

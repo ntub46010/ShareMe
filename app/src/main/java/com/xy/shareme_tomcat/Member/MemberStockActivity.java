@@ -78,7 +78,9 @@ public class MemberStockActivity extends AppCompatActivity {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                loadData();
+                adapter.destroy(false);
+                adapter = null;
+                loadData(false);
             }
         });
 
@@ -103,7 +105,7 @@ public class MemberStockActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         if (!isShown)
-            loadData();
+            loadData(true);
     }
 
     private void prepareDialog() {
@@ -114,7 +116,7 @@ public class MemberStockActivity extends AppCompatActivity {
 
         String[] textGroup = {"查看", "編輯", "下架"};
         int[] iconGroup = {
-                R.drawable.icon_see,
+                R.drawable.icon_check,
                 R.drawable.icon_edit,
                 R.drawable.icon_delete
         };
@@ -169,11 +171,11 @@ public class MemberStockActivity extends AppCompatActivity {
         });
     }
 
-    private void loadData() {
+    private void loadData(boolean showPrgBar) {
         isShown = false;
         swipeRefreshLayout.setEnabled(false);
-        prgBar.setVisibility(View.VISIBLE);
-        lstProduct.setVisibility(View.GONE);
+        if (showPrgBar)
+            prgBar.setVisibility(View.VISIBLE);
 
         books = new ArrayList<>();
         conLoadStock = new MyOkHttp(MemberStockActivity.this, new MyOkHttp.TaskListener() {
@@ -227,7 +229,7 @@ public class MemberStockActivity extends AppCompatActivity {
     }
 
     private void showData() {
-        adapter = new StockListAdapter(getResources(), context, books, R.layout.spn_chat_product, 10);
+        adapter = new StockListAdapter(getResources(), context, books, R.layout.lst_stock, 10);
         adapter.setBackgroundColor(R.color.lst_stock);
         lstProduct.setAdapter(adapter);
 
@@ -259,7 +261,7 @@ public class MemberStockActivity extends AppCompatActivity {
                                 Toast.makeText(context, "商品成功下架", Toast.LENGTH_SHORT).show();
                                 adapter.destroy(true);
                                 adapter = null;
-                                loadData();
+                                loadData(true);
                             }else {
                                 prgBar.setVisibility(View.GONE);
                                 Toast.makeText(context, "伺服器發生例外", Toast.LENGTH_SHORT).show();

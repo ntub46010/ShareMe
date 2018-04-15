@@ -22,37 +22,37 @@
             <Button
                 android:id="@+id/btnDepAI"
                 style="@style/btnDep"
-                android:drawableTop="@drawable/calculator3"
+                android:drawableTop="@drawable/dep_ai"
                 android:text="會資系"/>
 
             <Button
                 android:id="@+id/btnDepFT"
                 style="@style/btnDep"
-                android:drawableTop="@drawable/change2"
+                android:drawableTop="@drawable/dep_ft"
                 android:text="財稅系"/>
 
             <Button
                 android:id="@+id/btnDepBM"
                 style="@style/btnDep"
-                android:drawableTop="@drawable/graph2"
+                android:drawableTop="@drawable/dep_bm"
                 android:text="企管系"/>
 
             <Button
                 android:id="@+id/btnDepAFL"
                 style="@style/btnDep"
-                android:drawableTop="@drawable/translation2"
+                android:drawableTop="@drawable/dep_af"
                 android:text="應外系"/>
 
             <Button
                 android:id="@+id/btnDepCC"
                 style="@style/btnDep"
-                android:drawableTop="@drawable/idea2"
+                android:drawableTop="@drawable/dep_cc"
                 android:text="商創系"/>
 
             <Button
                 android:id="@+id/btnDepGN"
                 style="@style/btnDep"
-                android:drawableTop="@drawable/openbook"
+                android:drawableTop="@drawable/dep_gn"
                 android:text="通識"/>
         </LinearLayout>
 
@@ -65,37 +65,37 @@
             <Button
                 android:id="@+id/btnDepFN"
                 style="@style/btnDep"
-                android:drawableTop="@drawable/bank2"
+                android:drawableTop="@drawable/dep_fn"
                 android:text="財金系"/>
 
             <Button
                 android:id="@+id/btnDepIB"
                 style="@style/btnDep"
-                android:drawableTop="@drawable/team2"
+                android:drawableTop="@drawable/dep_ib"
                 android:text="國商系"/>
 
             <Button
                 android:id="@+id/btnDepIM"
                 style="@style/btnDep"
-                android:drawableTop="@drawable/programmer2"
+                android:drawableTop="@drawable/dep_im"
                 android:text="資管系"/>
 
             <Button
                 android:id="@+id/btnDepCD"
                 style="@style/btnDep"
-                android:drawableTop="@drawable/palette"
+                android:drawableTop="@drawable/dep_cd"
                 android:text="商設系"/>
 
             <Button
                 android:id="@+id/btnDepDM"
                 style="@style/btnDep"
-                android:drawableTop="@drawable/playbtn2"
+                android:drawableTop="@drawable/dep_dm"
                 android:text="數媒系"/>
 
             <Button
                 android:id="@+id/btnDepAll"
                 style="@style/btnDep"
-                android:drawableTop="@drawable/star3"
+                android:drawableTop="@drawable/dep_all"
                 android:text="全部"/>
         </LinearLayout>
 

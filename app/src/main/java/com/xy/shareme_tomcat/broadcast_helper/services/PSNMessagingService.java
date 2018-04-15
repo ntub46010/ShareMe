@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
@@ -19,10 +18,6 @@ import com.xy.shareme_tomcat.broadcast_helper.managers.NotificationManager;
 
 import java.util.Map;
 
-import static com.xy.shareme_tomcat.MainActivity.context;
-import static com.xy.shareme_tomcat.data.DataHelper.isChatroomAlive;
-import static com.xy.shareme_tomcat.data.DataHelper.isMailboxAlive;
-
 public class PSNMessagingService extends FirebaseMessagingService {
 
     @Override
@@ -35,10 +30,12 @@ public class PSNMessagingService extends FirebaseMessagingService {
             final String title = map.get(KeyData.TITLE);
             final String message = map.get(KeyData.MESSAGE);
 
-            if (isMailboxAlive || isChatroomAlive) {
-                Toast.makeText(context, title + "傳送了訊息", Toast.LENGTH_SHORT).show();
+            /*
+            if (isMailboxExist || isChatroomExist) {
+                Toast.makeText(context, shareme + "傳送了訊息", Toast.LENGTH_SHORT).show();
                 return;
             }
+            */
 
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(new Runnable() {

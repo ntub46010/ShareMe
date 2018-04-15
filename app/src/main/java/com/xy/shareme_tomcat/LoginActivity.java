@@ -11,10 +11,12 @@ import android.os.Message;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RadioGroup;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,6 +39,7 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_PASSWORD;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_PROFILE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_STATUS;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_USER_ID;
+import static com.xy.shareme_tomcat.data.DataHelper.getMD5;
 import static com.xy.shareme_tomcat.data.DataHelper.getSpnDepCode;
 import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
 import static com.xy.shareme_tomcat.data.DataHelper.myGender;
@@ -48,9 +51,11 @@ public class LoginActivity extends Activity {
     private Context context;
     private SharedPreferences sp;
 
-    private LinearLayout layLoginField, layRegisterField;
+    private LinearLayout layLoginField;
+    private ScrollView layRegisterField;
     private EditText edtLogAcc, edtLogPwd, edtRegAcc, edtRegPwd, edtRegPwd2, edtRegName, edtRegEmail;
     private RadioGroup rgpRegGender;
+    private CheckBox chkAutoLogin;
     private ProgressBar prgBar;
 
     private Member member;
@@ -67,6 +72,7 @@ public class LoginActivity extends Activity {
         layLoginField = (LinearLayout) findViewById(R.id.layLoginField);
         edtLogAcc = (EditText) findViewById(R.id.edtAccount);
         edtLogPwd = (EditText) findViewById(R.id.edtPassword);
+        chkAutoLogin = (CheckBox)  findViewById(R.id.chkAutoLogin);
         TextView txtRegister = (TextView) findViewById(R.id.txtRegister);
         Button btnLogin = (Button) findViewById(R.id.btnLogin);
         prgBar = (ProgressBar) findViewById(R.id.prgBar);
@@ -91,7 +97,7 @@ public class LoginActivity extends Activity {
         });
 
         //註冊元件
-        layRegisterField = (LinearLayout) findViewById(R.id.layRegisterField);
+        layRegisterField = (ScrollView) findViewById(R.id.layRegisterField);
         edtRegAcc = (EditText) findViewById(R.id.edtRegAccount);
         edtRegPwd = (EditText) findViewById(R.id.edtRegPassword);
         edtRegPwd2 = (EditText) findViewById(R.id.edtRegPasswordAgain);
@@ -105,7 +111,8 @@ public class LoginActivity extends Activity {
         spnRegDep.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                member.setDepartment(getSpnDepCode(i));;
+                if (member != null)
+                    member.setDepartment(getSpnDepCode(i));;
             }
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
@@ -145,6 +152,13 @@ public class LoginActivity extends Activity {
                 layLoginField.setVisibility(View.VISIBLE);
             }
         });
+
+        if (sp.getBoolean(getString(R.string.sp_isAutoLogin), false)) {
+            member = new Member();
+            member.setAcc(sp.getString(getString(R.string.sp_myLoginUserId), ""));
+            member.setPwd(sp.getString(getString(R.string.sp_myPassword), ""));
+            registerDevice(member);
+        }
     }
 
     private void registerDevice(Member member) {
@@ -192,7 +206,7 @@ public class LoginActivity extends Activity {
         try {
             JSONObject reqObj = new JSONObject();
             reqObj.put(KEY_USER_ID, member.getAcc());
-            reqObj.put(KEY_PASSWORD, member.getPwd());
+            reqObj.put(KEY_PASSWORD, getMD5(member.getPwd()));
             conn.execute(getString(R.string.link_login), reqObj.toString());
         }catch (JSONException e) {
             e.printStackTrace();
@@ -393,6 +407,17 @@ public class LoginActivity extends Activity {
                 .putString(getString(R.string.sp_myName), myName)
                 .putInt(getString(R.string.sp_myGender), myGender)
                 .apply();
+        if (chkAutoLogin.isChecked()) {
+            sp.edit()
+                    .putString(getString(R.string.sp_myPassword), member.getPwd())
+                    .putBoolean(getString(R.string.sp_isAutoLogin), true)
+                    .apply();
+        }else {
+            sp.edit()
+                    .putString(getString(R.string.sp_myPassword), "")
+                    .putBoolean(getString(R.string.sp_isAutoLogin), false)
+                    .apply();
+        }
     }
 
     @Override

@@ -30,7 +30,7 @@ public class StockListAdapter extends BaseAdapter {
         this.res = res;
         this.books = books;
         this.layout = layout;
-        layoutInflater = LayoutInflater.from(context);
+        this.layoutInflater = LayoutInflater.from(context);
         this.queueVolume = queueVolume;
         this.queue = new ImageDownloadQueue(queueVolume);
     }
@@ -74,7 +74,7 @@ public class StockListAdapter extends BaseAdapter {
             }
         }
 
-        if (layout == R.layout.spn_chat_product) { //商品管理：追加選單背景色、價格
+        if (layout == R.layout.lst_stock) { //商品管理：追加選單背景色、價格
             LinearLayout linearLayout = (LinearLayout) convertView.findViewById(R.id.layBookSummary);
             linearLayout.setBackgroundColor(res.getColor(backgroundColor));
             TextView txtPrice = (TextView) convertView.findViewById(R.id.txtBookSummaryPrice);

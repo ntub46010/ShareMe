@@ -8,6 +8,9 @@ import android.widget.TextView;
 
 import com.xy.shareme_tomcat.R;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,16 +20,16 @@ import static com.xy.shareme_tomcat.MainActivity.board;
 import static com.xy.shareme_tomcat.MainActivity.txtBarTitle;
 
 public class DataHelper {
-    //public static boolean conFlag = false; //表示OKHttp的取資料工作結束，將流程交還原Activity進行後續操作
     public static String loginUserId = "10246010";
-    public static String myName = ""; //用於發送推播
+    public static String myName = ""; //用於進入交談室傳送訊息時發送推播
     public static int myGender = -1; //用於個人檔案icon，包含從信箱退出時的狀況
     public static String tmpToken = "token"; //登入時接收自己token(確認Firebase註冊成功)，或進交談室時接收對方token(確認可推播)。空字串代表無該帳號，token字串代表尚未取得
 
     public static boolean isFromDepartment = false; //是否因為按了科系按鈕，而移動到商品首頁
     public static boolean canShowProfile = true;
-    public static boolean isMailboxAlive = false;
-    public static boolean isChatroomAlive = false;
+    public static boolean isMailboxExist = false;
+    public static boolean isChatroomExist = false;
+    public static boolean canShowMailbox = true;
     public static boolean canShowChatroom = true;
 
     public static final String KEY_STATUS = "Status";
@@ -57,13 +60,11 @@ public class DataHelper {
     public static final String KEY_EDIT_TIME = "EditTime";
     public static final String KEY_FAVORITE = "Favorite";
     public static final String KEY_IS_ADD = "IsAdd";
-
     public static final String KEY_POSITIVE = "Positive";
     public static final String KEY_NEGATIVE = "Negative";
     public static final String KEY_GIVER_ID = "GiverId";
     public static final String KEY_RECEIVER_ID = "ReceiverId";
     public static final String KEY_VALUE = "Value";
-    //
     public static final String KEY_AVATAR = "Avatar";
     public static final String KEY_AVATAR2 = "Avatar2";
     public static final String KEY_MESSAGE = "Message";
@@ -72,7 +73,6 @@ public class DataHelper {
     public static final String KEY_MEMBER_ID = "MemberId";
     public static final String KEY_SENDER_ID = "SenderId";
     public static final String KEY_HAVE_TALKED = "HaveTalked";
-    //---
     public static final String KEY_PROFILE = "Profile";
     public static final String KEY_PRODUCT = "Product";
     public static final String KEY_PRODUCTS = "Products";
@@ -258,7 +258,7 @@ public class DataHelper {
         for (int i = 0; i< icon.length ; i++) {
             Map<String, Object> item = new HashMap<>();
             item.put("icon", icon[i]);
-            item.put("title", title[i]);
+            item.put("shareme", title[i]);
             list.add(item);
         }
 
@@ -266,7 +266,7 @@ public class DataHelper {
                 context,
                 list,
                 layoutId,
-                new String[] {"icon", "title"},
+                new String[] {"icon", "shareme"},
                 new int[] {layoutIconId, layoutTitleId}
         );
 
@@ -320,5 +320,17 @@ public class DataHelper {
                 break;
         }
         return imgId;
+    }
+
+    public static String getMD5(String s) {
+        try {
+            MessageDigest m = MessageDigest.getInstance("MD5");
+            m.update(s.getBytes(), 0, s.length());
+            BigInteger i = new BigInteger(1, m.digest());
+            return String.format("%1$032x", i).toUpperCase();
+        }catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 }

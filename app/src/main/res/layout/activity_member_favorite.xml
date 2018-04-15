@@ -13,4 +13,5 @@
         app:titleTextColor="#FFFFFF"/>
 
     <include layout="@layout/content_product_display"/>
+
 </LinearLayout>
