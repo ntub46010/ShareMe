@@ -7,6 +7,10 @@ public class Book extends ImageObj implements Serializable {
     private String price, dep, seller, sellerName, sellerAvatar;
     private String status, note, ps, postDate, editDate;
 
+    public Book() {
+
+    }
+
     public Book(String id, String imgURL, String title) {
         this.id = id;
         super.imgURL = imgURL;
@@ -113,5 +117,22 @@ public class Book extends ImageObj implements Serializable {
     public void setTitle(String title) {
         this.title = title;
     }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+
+    public void setPrice (String price) {
+        this.price = price;
+    }
+
+    public void setCondition(String condition) {
+        this.status = condition;
+    }
+
+    public void setPs(String ps) {
+        this.ps = ps;
+    }
+
 
 }

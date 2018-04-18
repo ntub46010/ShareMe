@@ -24,7 +24,9 @@ import android.widget.Toast;
 import com.xy.shareme_tomcat.R;
 import com.xy.shareme_tomcat.adapter.ImageUploadAdapter;
 import com.xy.shareme_tomcat.data.AlbumImageProvider;
+import com.xy.shareme_tomcat.data.Book;
 import com.xy.shareme_tomcat.data.ImageChild;
+import com.xy.shareme_tomcat.data.Verifier;
 import com.xy.shareme_tomcat.network_helper.MyOkHttp;
 import com.xy.shareme_tomcat.structure.ImageUploadQueue;
 
@@ -54,8 +56,9 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
     private EditText edtTitle, edtStatus, edtPrice, edtPS;
     private CheckBox chkAI, chkFN, chkFT, chkIB, chkBM, chkIM, chkAF, chkCD, chkCC, chkDM, chkGN;
 
-    private String title, condition, note, price, ps;
+    private Book book;
     private StringBuffer sbDep;
+    private String note = "0";
 
     private TextView txtUploadHint;
     private Dialog dlgUpload;
@@ -138,19 +141,22 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
     }
 
     private boolean isInfoValid() {
+        Verifier v = new Verifier(context);
         StringBuffer sbErrMsg = new StringBuffer();
-        title = edtTitle.getText().toString();
-        price = edtPrice.getText().toString();
-        condition = edtStatus.getText().toString();
-        ps = edtPS.getText().toString();
+        book.setTitle(edtTitle.getText().toString());
+        book.setPrice(edtPrice.getText().toString());
+        book.setCondition(edtStatus.getText().toString());
+        book.setPs(edtPS.getText().toString());
         sbDep = new StringBuffer();
 
         //書名、價格
-        if (title.equals("")) sbErrMsg.append("書名\n");
-        if (price.equals(""))
-            sbErrMsg.append("價格\n"); //EditText已限制只能輸入>=0的整數，就算複製其他文字過來也能過濾掉
-        else
-            price = String.valueOf(Integer.parseInt(price)); //避免有人開頭輸入一堆0
+        sbErrMsg.append(v.chkTitle(book.getTitle()));
+        sbErrMsg.append(v.chkPrice(book.getPrice()));
+
+        //書況、備註、筆記
+        sbErrMsg.append(v.chkCondition(book.getStatus()));
+        sbErrMsg.append(v.chkPs(book.getPs()));
+        if (note.equals("0")) sbErrMsg.append(getString(R.string.chkNote));
 
         //科系
         if (chkGN.isChecked()) sbDep.append("00#");
@@ -165,23 +171,16 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
         if (chkCC.isChecked()) sbDep.append("B#");
         if (chkDM.isChecked()) sbDep.append("C#");
         if (sbDep.length() == 0)
-            sbErrMsg.append("分類\n");
-
-        //書況、筆記
-        if (condition.equals("")) sbErrMsg.append("書況\n");
-        if (note.equals("0") || note.equals("")) sbErrMsg.append("筆記提供方式\n");
-
+            sbErrMsg.append(getString(R.string.chkDep));
 
         if (sbErrMsg.length() != 0) {
-            sbErrMsg.insert(0, "以下資料未填寫：\n");
-            AlertDialog.Builder msgbox = new AlertDialog.Builder(context);
-            msgbox.setTitle("刊登商品")
-                    .setPositiveButton("確定", null)
-                    .setMessage(sbErrMsg.substring(0, sbErrMsg.length() - 1))
-                    .show();
+            v.getDialog("刊登商品", sbErrMsg.substring(0, sbErrMsg.length() - 1)).show();
             return false;
-        }else
+        }else {
+            book.setPrice(String.valueOf(Integer.parseInt(book.getPrice()))); //避免有人開頭輸入一堆0
+            book.setNote(note);
             return true;
+        }
     }
 
     private void prepareDialog() {
@@ -254,12 +253,12 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
         //開始連線
         try {
             JSONObject reqObj = new JSONObject();
-            reqObj.put(KEY_TITLE, title);
-            reqObj.put(KEY_PRICE, price);
+            reqObj.put(KEY_TITLE, book.getTitle());
+            reqObj.put(KEY_PRICE, book.getPrice());
             reqObj.put(KEY_TYPE, sbDep.toString());
-            reqObj.put(KEY_CONDITION, condition);
-            reqObj.put(KEY_NOTE, note);
-            reqObj.put(KEY_PS, ps);
+            reqObj.put(KEY_CONDITION, book.getStatus());
+            reqObj.put(KEY_NOTE, book.getNote());
+            reqObj.put(KEY_PS, book.getPs());
             reqObj.put(KEY_SELLER, loginUserId);
             reqObj.put(KEY_PHOTO1, fileNames[0]);
             reqObj.put(KEY_PHOTO2, fileNames[1]);
@@ -276,6 +275,7 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btnSubmit:
+                book = new Book();
                 if (!isInfoValid())
                     return;
 

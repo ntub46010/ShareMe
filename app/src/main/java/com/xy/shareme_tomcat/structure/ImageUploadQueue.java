@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Message;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.xy.shareme_tomcat.R;
 import com.xy.shareme_tomcat.data.ImageChild;
@@ -125,6 +126,7 @@ public class ImageUploadQueue extends Queue {
                 itemIndex++;
         }
         //未知情況
+        Toast.makeText(context, "ImageUploadQueue未知情況", Toast.LENGTH_SHORT).show();
     }
 
     private void onUploadFinished() {

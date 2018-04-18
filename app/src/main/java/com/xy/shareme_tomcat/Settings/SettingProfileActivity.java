@@ -25,6 +25,7 @@ import com.xy.shareme_tomcat.R;
 import com.xy.shareme_tomcat.data.AlbumImageProvider;
 import com.xy.shareme_tomcat.data.ImageChild;
 import com.xy.shareme_tomcat.data.Member;
+import com.xy.shareme_tomcat.data.Verifier;
 import com.xy.shareme_tomcat.network_helper.GetBitmapTask;
 import com.xy.shareme_tomcat.network_helper.MyOkHttp;
 import com.xy.shareme_tomcat.structure.ImageUploadQueue;
@@ -131,7 +132,7 @@ public class SettingProfileActivity extends AppCompatActivity {
                 newPwd = edtNewPwd.getText().toString();
                 newPwd2 = edtNewPwd2.getText().toString();
 
-                if (!isInfoValid(member.getName(), member.getEmail(), member.getPwd(), newPwd, newPwd2))
+                if (!isInfoValid(member, newPwd, newPwd2))
                     return;
 
                 if (isImageChanged)
@@ -330,36 +331,27 @@ public class SettingProfileActivity extends AppCompatActivity {
         isShown = true;
     }
 
-    private boolean isInfoValid(String name, String email, String oldPwd, String newPwd, String newPwd2) {
+    private boolean isInfoValid(Member member, String newPwd, String newPwd2) {
+        Verifier v = new Verifier(context);
         StringBuffer errMsg = new StringBuffer("");
-        if (name.length() < 2)
-            errMsg.append("姓名未輸入\n");
 
-        if (!email.contains("@") || email.indexOf("@") == 0 || email.indexOf("@") == email.length() - 1)
-            errMsg.append("信箱格式錯誤\n");
+        errMsg.append(v.chkName(member.getName()));
+        errMsg.append(v.chkEmail(member.getEmail()));
 
-        if (!oldPwd.equals("")) {
-            if (!getMD5(oldPwd).equals(originPwd))
-                errMsg.append("原密碼錯誤\n");
-            else {
-                if (newPwd.length() < 6 || newPwd.length() > 15)
-                    errMsg.append("新密碼長度錯誤\n");
-                else if (!newPwd.equals(newPwd2))
-                    errMsg.append("確認密碼錯誤\n");
-            }
+        if (!member.getPwd().equals("")) {
+            if (!getMD5(member.getPwd()).equals(originPwd))
+                errMsg.append(getString(R.string.chkPasswordWrong));
+            else
+                errMsg.append(v.chkPassword(newPwd, newPwd2));
         }
 
-        if (errMsg.length() == 0) {
+        if (errMsg.length() != 0) {
+            v.getDialog("編輯個人檔案", errMsg.substring(0, errMsg.length() - 1)).show();
+            return false;
+        }else {
             if (!newPwd.equals(""))
                 member.setPwd(newPwd);
             return true;
-        }else {
-            AlertDialog.Builder msgbox = new AlertDialog.Builder(context);
-            msgbox.setTitle("編輯個人檔案")
-                    .setPositiveButton("確定", null)
-                    .setMessage(errMsg.substring(0, errMsg.length() - 1))
-                    .show();
-            return false;
         }
     }
 

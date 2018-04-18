@@ -50,33 +50,47 @@
     <string name="sp_isAutoLogin">isAutoLogin</string>
     <string name="sp_myPassword">myPassword</string>
 
-    <string name="link_avatar">http://111.250.19.212/avatars/</string>
-    <string name="link_image">http://111.250.19.212/images/</string>
-    <string name="link_upload_image">http://111.250.19.212/upload_images</string>
-    <string name="link_upload_avatar">http://111.250.19.212/upload_avatar</string>
+    <string name="link_avatar">http://111.250.19.189/avatars/</string>
+    <string name="link_image">http://111.250.19.189/images/</string>
+    <string name="link_upload_image">http://111.250.19.189/upload_images</string>
+    <string name="link_upload_avatar">http://111.250.19.189/upload_avatar</string>
 
-    <string name="link_login">http://111.250.19.212:8080/ShareMe/api/login</string>
-    <string name="link_register">http://111.250.19.212:8080/ShareMe/api/register</string>
-    <string name="link_list_product">http://111.250.19.212:8080/ShareMe/api/list_products</string>
-    <string name="link_post_product">http://111.250.19.212:8080/ShareMe/api/post_product</string>
-    <string name="link_product_detail">http://111.250.19.212:8080/ShareMe/api/product_detail</string>
-    <string name="link_add_favorite">http://111.250.19.212:8080/ShareMe/api/add_favorite</string>
-    <string name="link_show_profile">http://111.250.19.212:8080/ShareMe/api/show_profile</string>
-    <string name="link_evaluate">http://111.250.19.212:8080/ShareMe/api/evaluate</string>
-    <string name="link_list_favorite">http://111.250.19.212:8080/ShareMe/api/list_favorite</string>
-    <string name="link_list_mails">http://111.250.19.212:8080/ShareMe/api/list_mails</string>
-    <string name="link_show_chatroom">http://111.250.19.212:8080/ShareMe/api/show_chatroom</string>
-    <string name="link_list_message">http://111.250.19.212:8080/ShareMe/api/list_message</string>
-    <string name="link_send_message">http://111.250.19.212:8080/ShareMe/api/send_message</string>
-    <string name="link_show_stock">http://111.250.19.212:8080/ShareMe/api/show_stock</string>
-    <string name="link_drop_product">http://111.250.19.212:8080/ShareMe/api/drop_product</string>
-    <string name="link_edit_product">http://111.250.19.212:8080/ShareMe/api/edit_product</string>
-    <string name="link_edit_profile">http://111.250.19.212:8080/ShareMe/api/edit_profile</string>
+    <string name="link_login">http://111.250.19.189:8080/ShareMe/api/login</string>
+    <string name="link_register">http://111.250.19.189:8080/ShareMe/api/register</string>
+    <string name="link_list_product">http://111.250.19.189:8080/ShareMe/api/list_products</string>
+    <string name="link_post_product">http://111.250.19.189:8080/ShareMe/api/post_product</string>
+    <string name="link_product_detail">http://111.250.19.189:8080/ShareMe/api/product_detail</string>
+    <string name="link_add_favorite">http://111.250.19.189:8080/ShareMe/api/add_favorite</string>
+    <string name="link_show_profile">http://111.250.19.189:8080/ShareMe/api/show_profile</string>
+    <string name="link_evaluate">http://111.250.19.189:8080/ShareMe/api/evaluate</string>
+    <string name="link_list_favorite">http://111.250.19.189:8080/ShareMe/api/list_favorite</string>
+    <string name="link_list_mails">http://111.250.19.189:8080/ShareMe/api/list_mails</string>
+    <string name="link_show_chatroom">http://111.250.19.189:8080/ShareMe/api/show_chatroom</string>
+    <string name="link_list_message">http://111.250.19.189:8080/ShareMe/api/list_message</string>
+    <string name="link_send_message">http://111.250.19.189:8080/ShareMe/api/send_message</string>
+    <string name="link_show_stock">http://111.250.19.189:8080/ShareMe/api/show_stock</string>
+    <string name="link_drop_product">http://111.250.19.189:8080/ShareMe/api/drop_product</string>
+    <string name="link_edit_product">http://111.250.19.189:8080/ShareMe/api/edit_product</string>
+    <string name="link_edit_profile">http://111.250.19.189:8080/ShareMe/api/edit_profile</string>
 
     <string name="hint_search_product">搜尋%1s商品</string>
     <string name="hint_search_result">%1s的搜尋結果</string>
     <string name="hint_edit_product_photo">可選五張圖，第一張將做為預覽，長按可調整順序</string>
     <string name="hint_upload_photo" formatted="false">上傳中，長按取消… (%1s/%2s)</string>
     <string name="hint_drop_product">確定要下架「%1s」嗎？</string>
+
+    <string name="chkAccount">帳號格式錯誤\n</string>
+    <string name="chkPassword">密碼格式錯誤\n</string>
+    <string name="chkPasswordMismatch">確認密碼錯誤\n</string>
+    <string name="chkPasswordWrong">原密碼錯誤\n</string>
+    <string name="chkName">姓名格式錯誤\n</string>
+    <string name="chkEmail">信箱格式錯誤\n</string>
+    <string name="chkGender">性別未選擇\n</string>
+    <string name="chkTitle">標題長度為1~50字\n</string>
+    <string name="chkPrice">價格格式錯誤\n</string>
+    <string name="chkDep">分類未勾選\n</string>
+    <string name="chkCondition">書況長度為1~50字\n</string>
+    <string name="chkNote">筆記提供方式未選擇\n</string>
+    <string name="chkPs">備註長度最多50字\n</string>
 
 </resources>

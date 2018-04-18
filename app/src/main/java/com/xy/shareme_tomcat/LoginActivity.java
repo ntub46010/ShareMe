@@ -1,7 +1,6 @@
 package com.xy.shareme_tomcat;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -25,12 +24,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.xy.shareme_tomcat.broadcast_helper.managers.RequestManager;
 import com.xy.shareme_tomcat.data.Member;
+import com.xy.shareme_tomcat.data.Verifier;
 import com.xy.shareme_tomcat.network_helper.MyOkHttp;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import static com.xy.shareme_tomcat.data.DataHelper.KEY_AVATAR;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_DEPARTMENT;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_EMAIL;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_GENDER;
@@ -214,32 +213,19 @@ public class LoginActivity extends Activity {
     }
 
     private boolean isRegisterInfoValid(Member member) {
-        //還不能阻擋在帳密輸入中文
-        String errMsg = "";
-        if (member.getAcc().length() < 8 || member.getAcc().length() > 10)
-            errMsg += "帳號長度錯誤\n";
+        Verifier v = new Verifier(context);
+        StringBuffer errMsg = new StringBuffer();
 
-        if (member.getPwd().length() < 6 || member.getPwd().length() > 15)
-            errMsg += "密碼長度錯誤\n";
-        else if (!member.getPwd().equals(member.getPwd2()))
-            errMsg += "確認密碼錯誤\n";
-
-        if (member.getName().length() < 1)
-            errMsg += "姓名未輸入\n";
-
-        if (!member.getEmail().contains("@") || member.getEmail().indexOf("@") == 0 || member.getEmail().indexOf("@") == member.getEmail().length() - 1)
-            errMsg += "信箱格式錯誤\n";
+        errMsg.append(v.chkAccount(member.getAcc()));
+        errMsg.append(v.chkPassword(member.getPwd(), member.getPwd2()));
+        errMsg.append(v.chkName(member.getName()));
+        errMsg.append(v.chkEmail(member.getEmail()));
 
         if (member.getGender().equals(""))
-            errMsg += "性別未選擇\n";
+            errMsg.append(getString(R.string.chkGender));
 
-        if (!errMsg.equals("")){
-            errMsg = "註冊資料不正確：\n" + errMsg.substring(0, errMsg.length() - 1);
-            AlertDialog.Builder msgbox = new AlertDialog.Builder(this);
-            msgbox.setTitle("註冊帳號")
-                    .setMessage(errMsg)
-                    .setPositiveButton("確定", null)
-                    .show();
+        if (errMsg.length() != 0) {
+            v.getDialog("註冊帳號", errMsg.substring(0, errMsg.length() - 1)).show();
             return false;
         }else
             return true;

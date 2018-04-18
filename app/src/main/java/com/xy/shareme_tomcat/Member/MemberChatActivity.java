@@ -363,7 +363,7 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
         isChatShown = true;
     }
 
-    private void sendMessage(String msg) {
+    private void sendMessage(final String msg) {
         conn = new MyOkHttp(MemberChatActivity.this, new MyOkHttp.TaskListener() {
             @Override
             public void onFinished(final String result) {
@@ -373,6 +373,8 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
                         try {
                             JSONObject resObj = new JSONObject(result);
                             if (resObj.getBoolean(KEY_STATUS)) {
+                                //發送推播
+                                RequestManager.getInstance().prepareNotification(memberId, myName, msg, getString(R.string.link_avatar) + avatar1);
                                 edtMsg.setText("");
                                 loadChat();
                             }else {
@@ -429,9 +431,6 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
                 if (!msg.equals("")) {
                     btnSubmit.setEnabled(false);
                     sendMessage(msg);
-
-                    //發送推播
-                    RequestManager.getInstance().prepareNotification(memberId, myName, msg, getString(R.string.link_avatar) + avatar1);
                 }
                 break;
         }
