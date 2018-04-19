@@ -153,11 +153,6 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
         sbErrMsg.append(v.chkTitle(book.getTitle()));
         sbErrMsg.append(v.chkPrice(book.getPrice()));
 
-        //書況、備註、筆記
-        sbErrMsg.append(v.chkCondition(book.getStatus()));
-        sbErrMsg.append(v.chkPs(book.getPs()));
-        if (note.equals("0")) sbErrMsg.append(getString(R.string.chkNote));
-
         //科系
         if (chkGN.isChecked()) sbDep.append("00#");
         if (chkAI.isChecked()) sbDep.append("01#");
@@ -172,6 +167,11 @@ public class ProductPostActivity extends AppCompatActivity implements View.OnCli
         if (chkDM.isChecked()) sbDep.append("C#");
         if (sbDep.length() == 0)
             sbErrMsg.append(getString(R.string.chkDep));
+
+        //書況、筆記、備註
+        sbErrMsg.append(v.chkCondition(book.getStatus()));
+        if (note.equals("0")) sbErrMsg.append(getString(R.string.chkNote));
+        sbErrMsg.append(v.chkPs(book.getPs()));
 
         if (sbErrMsg.length() != 0) {
             v.getDialog("刊登商品", sbErrMsg.substring(0, sbErrMsg.length() - 1)).show();

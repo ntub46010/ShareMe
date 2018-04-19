@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">ShareMe 2.0</string>
     <string name="action_settings">Settings</string>
-    <string name="key_firebase_server" translatable="false">key=AAAAQBhiCzM:APA91bEm5qaY2ouoxD6ARI9iUpCDmRqCrGReFs-Mvy5u3sQd0XXvdxXdKeSfdWWfEB5a__DF3F8e5ae67TINdeYQkSmpTQ24H8bVMBY8N5-_ferzG_7EbwPsppqec6RAcvQS9HtOEYu6</string>
+    <string name="key_firebase_server" translatable="false">key=AAAASpBNM3Y:APA91bFryyy_Vj-qSJEfL3moSShZMF3Bk9i1KxsdVHuTBaqRtN9HVRPTejUB7lZWiHHgC1yX3D9PBgW22mSzmK-IBPJKjeyaQzVn1tyzZ6s6cd5n8bbiAtv-c91glDsnmeYpGzcY1rFy</string>
 
     <string-array name="department">
         <item>五專會計統計科</item><!--0-->
@@ -50,28 +50,28 @@
     <string name="sp_isAutoLogin">isAutoLogin</string>
     <string name="sp_myPassword">myPassword</string>
 
-    <string name="link_avatar">http://111.250.19.189/avatars/</string>
-    <string name="link_image">http://111.250.19.189/images/</string>
-    <string name="link_upload_image">http://111.250.19.189/upload_images</string>
-    <string name="link_upload_avatar">http://111.250.19.189/upload_avatar</string>
+    <string name="link_avatar">http://111.250.20.151/avatars/</string>
+    <string name="link_image">http://111.250.20.151/images/</string>
+    <string name="link_upload_image">http://111.250.20.151/upload_images</string>
+    <string name="link_upload_avatar">http://111.250.20.151/upload_avatar</string>
 
-    <string name="link_login">http://111.250.19.189:8080/ShareMe/api/login</string>
-    <string name="link_register">http://111.250.19.189:8080/ShareMe/api/register</string>
-    <string name="link_list_product">http://111.250.19.189:8080/ShareMe/api/list_products</string>
-    <string name="link_post_product">http://111.250.19.189:8080/ShareMe/api/post_product</string>
-    <string name="link_product_detail">http://111.250.19.189:8080/ShareMe/api/product_detail</string>
-    <string name="link_add_favorite">http://111.250.19.189:8080/ShareMe/api/add_favorite</string>
-    <string name="link_show_profile">http://111.250.19.189:8080/ShareMe/api/show_profile</string>
-    <string name="link_evaluate">http://111.250.19.189:8080/ShareMe/api/evaluate</string>
-    <string name="link_list_favorite">http://111.250.19.189:8080/ShareMe/api/list_favorite</string>
-    <string name="link_list_mails">http://111.250.19.189:8080/ShareMe/api/list_mails</string>
-    <string name="link_show_chatroom">http://111.250.19.189:8080/ShareMe/api/show_chatroom</string>
-    <string name="link_list_message">http://111.250.19.189:8080/ShareMe/api/list_message</string>
-    <string name="link_send_message">http://111.250.19.189:8080/ShareMe/api/send_message</string>
-    <string name="link_show_stock">http://111.250.19.189:8080/ShareMe/api/show_stock</string>
-    <string name="link_drop_product">http://111.250.19.189:8080/ShareMe/api/drop_product</string>
-    <string name="link_edit_product">http://111.250.19.189:8080/ShareMe/api/edit_product</string>
-    <string name="link_edit_profile">http://111.250.19.189:8080/ShareMe/api/edit_profile</string>
+    <string name="link_login">http://111.250.20.151:8080/ShareMe/api/login</string>
+    <string name="link_register">http://111.250.20.151:8080/ShareMe/api/register</string>
+    <string name="link_list_product">http://111.250.20.151:8080/ShareMe/api/list_products</string>
+    <string name="link_post_product">http://111.250.20.151:8080/ShareMe/api/post_product</string>
+    <string name="link_product_detail">http://111.250.20.151:8080/ShareMe/api/product_detail</string>
+    <string name="link_add_favorite">http://111.250.20.151:8080/ShareMe/api/add_favorite</string>
+    <string name="link_show_profile">http://111.250.20.151:8080/ShareMe/api/show_profile</string>
+    <string name="link_evaluate">http://111.250.20.151:8080/ShareMe/api/evaluate</string>
+    <string name="link_list_favorite">http://111.250.20.151:8080/ShareMe/api/list_favorite</string>
+    <string name="link_list_mails">http://111.250.20.151:8080/ShareMe/api/list_mails</string>
+    <string name="link_show_chatroom">http://111.250.20.151:8080/ShareMe/api/show_chatroom</string>
+    <string name="link_list_message">http://111.250.20.151:8080/ShareMe/api/list_message</string>
+    <string name="link_send_message">http://111.250.20.151:8080/ShareMe/api/send_message</string>
+    <string name="link_show_stock">http://111.250.20.151:8080/ShareMe/api/show_stock</string>
+    <string name="link_drop_product">http://111.250.20.151:8080/ShareMe/api/drop_product</string>
+    <string name="link_edit_product">http://111.250.20.151:8080/ShareMe/api/edit_product</string>
+    <string name="link_edit_profile">http://111.250.20.151:8080/ShareMe/api/edit_profile</string>
 
     <string name="hint_search_product">搜尋%1s商品</string>
     <string name="hint_search_result">%1s的搜尋結果</string>

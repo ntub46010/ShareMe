@@ -1,6 +1,5 @@
 package com.xy.shareme_tomcat.broadcast_helper.managers;
 
-import android.app.Activity;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -13,10 +12,11 @@ import android.support.v4.app.NotificationCompat;
 import com.xy.shareme_tomcat.Member.MemberMailboxActivity;
 import com.xy.shareme_tomcat.R;
 
+import static android.content.Context.MODE_PRIVATE;
 import static com.xy.shareme_tomcat.data.DataHelper.canShowChatroom;
 import static com.xy.shareme_tomcat.data.DataHelper.canShowMailbox;
 
-public class NotificationManager extends Activity {
+public class NotificationManager {
     public static final int NOTIFICATION_ID = -Integer.MAX_VALUE;
 
     private static NotificationManager INSTANCE = null;
@@ -94,8 +94,9 @@ public class NotificationManager extends Activity {
             android.app.NotificationManager notificationManager = (android.app.NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.notify(NOTIFICATION_ID, notification);
 
-            SharedPreferences sp = getSharedPreferences(getString(R.string.sp_fileName), MODE_PRIVATE);
-            sp.edit().putBoolean(getString(R.string.sp_isFromNotification), true).apply();
+            SharedPreferences sp = context.getSharedPreferences(context.getString(R.string.sp_fileName), MODE_PRIVATE);
+            sp.edit().putBoolean(context.getString(R.string.sp_isFromNotification), true).apply();
+
         }
     }
 }

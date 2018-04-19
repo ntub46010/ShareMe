@@ -30,13 +30,6 @@ public class PSNMessagingService extends FirebaseMessagingService {
             final String title = map.get(KeyData.TITLE);
             final String message = map.get(KeyData.MESSAGE);
 
-            /*
-            if (isMailboxExist || isChatroomExist) {
-                Toast.makeText(context, shareme + "傳送了訊息", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            */
-
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(new Runnable() {
                 @Override
