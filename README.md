@@ -73,12 +73,11 @@
 <img src="https://github.com/ntub46010/Photos/blob/master/BookStore%E6%93%8D%E4%BD%9C%E7%95%AB%E9%9D%A2/%E6%88%91%E7%9A%84%E6%9C%80%E6%84%9B(%E6%9C%AA%E6%89%BE%E5%88%B0).png" height="24%" width="24%" />
 </td></tr></table>
 
-## 交談室(開發中)
+## 交談室
 主程式：<a href="https://github.com/ntub46010/ShareMe_Tomcat/blob/Tomcat/app/src/main/java/com/xy/shareme_tomcat/Member/MemberChatActivity.java">MemberChatActivity</a><br>
-說明：買賣雙方對話的地方，在此洽談交易事宜。點擊右上方手提袋圖案將出現半透明背景的商品詳情。點擊人形圖案開啟對方個人檔案。點擊中上方選單則可切換到其他談過的商品。
+說明：買賣雙方對話的地方，在此洽談交易事宜。點擊右上方手提袋圖案將顯示商品詳情畫面。點擊人形圖案開啟對方個人檔案。點擊中上方選單則可切換到其他談過的商品。
 <table><tr><td>
 <img src="https://github.com/ntub46010/Photos/blob/master/BookStore%E6%93%8D%E4%BD%9C%E7%95%AB%E9%9D%A2/%E4%BA%A4%E8%AB%87%E5%AE%A41.png" height="24%" width="24%" />
-<img src="https://github.com/ntub46010/Photos/blob/master/BookStore%E6%93%8D%E4%BD%9C%E7%95%AB%E9%9D%A2/%E4%BA%A4%E8%AB%87%E5%AE%A4(%E7%9C%8B%E5%95%86%E5%93%81).png" height="24%" width="24%" />
 <img src="https://github.com/ntub46010/Photos/blob/master/BookStore%E6%93%8D%E4%BD%9C%E7%95%AB%E9%9D%A2/%E4%BA%A4%E8%AB%87%E5%AE%A42.png" height="24%" width="24%" />
 </td></tr></table>
 
@@ -117,11 +116,11 @@
 <table>
 <tr><td>
 <img src="https://github.com/ntub46010/Photos/blob/master/BookStore%E6%93%8D%E4%BD%9C%E7%95%AB%E9%9D%A2/%E5%95%86%E5%93%81%E7%AE%A1%E7%90%86(%E4%B8%8B%E6%9E%B6).png" height="24%" width="24%" />
-<img src="https://github.com/ntub46010/Photos/blob/master/BookStore%E6%93%8D%E4%BD%9C%E7%95%AB%E9%9D%A2/%E4%BA%A4%E8%AB%87%E5%AE%A4(%E5%B7%B2%E4%B8%8B%E6%9E%B6).png" height="24%" width="24%" />
+<img src="https://github.com/ntub46010/Photos/blob/master/ShareMe%E6%93%8D%E4%BD%9C%E7%95%AB%E9%9D%A2/%E5%95%86%E5%93%81%E8%A9%B3%E6%83%85(%E5%B7%B2%E4%B8%8B%E6%9E%B6).png" height="24%" width="24%" />
 </td></tr>
 </table>
 
-## 帳號設定(開發中)
+## 帳號設定
 主程式：<a href="https://github.com/ntub46010/ShareMe_Tomcat/blob/Tomcat/app/src/main/java/com/xy/shareme_tomcat/Settings/SettingProfileActivity.java">SettingProfileActivity</a><br>
 說明：編輯個人基本資料，包含姓名、科系、Email、大頭照與登入密碼。
 
