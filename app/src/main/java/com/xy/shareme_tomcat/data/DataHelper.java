@@ -31,6 +31,7 @@ public class DataHelper {
     public static boolean isChatroomExist = false;
     public static boolean canShowMailbox = true;
     public static boolean canShowChatroom = true;
+    public static boolean haveNewMsg = false;
 
     public static final String KEY_STATUS = "Status";
     public static final String KEY_USER_ID = "UserId";

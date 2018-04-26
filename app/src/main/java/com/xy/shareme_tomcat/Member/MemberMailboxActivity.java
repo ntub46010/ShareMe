@@ -3,6 +3,8 @@ package com.xy.shareme_tomcat.Member;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -29,6 +31,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 
+import static android.content.Context.MODE_PRIVATE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_AVATAR;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_DATE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_HAVE_TALKED;
@@ -44,6 +47,7 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_TIME;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_USER_ID;
 import static com.xy.shareme_tomcat.data.DataHelper.canShowMailbox;
+import static com.xy.shareme_tomcat.data.DataHelper.haveNewMsg;
 import static com.xy.shareme_tomcat.data.DataHelper.isMailboxExist;
 import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
 import static com.xy.shareme_tomcat.data.DataHelper.myGender;
@@ -84,7 +88,7 @@ public class MemberMailboxActivity extends AppCompatActivity {
             @Override
             public void onRefresh() {
                 adapter.destroy(false);
-                loadData();
+                loadData(false);
             }
         });
 
@@ -105,13 +109,14 @@ public class MemberMailboxActivity extends AppCompatActivity {
         isMailboxExist = true;
         canShowMailbox = false;
         if (!isShown)
-            loadData();
+            loadData(true);
     }
 
-    private void loadData() {
+    private void loadData(boolean showPrgBar) {
         isShown = false;
-        prgBar.setVisibility(View.VISIBLE);
         swipeRefreshLayout.setEnabled(false);
+        if (showPrgBar)
+            prgBar.setVisibility(View.VISIBLE);
 
         chats = new ArrayList<>();
         conn = new MyOkHttp(MemberMailboxActivity.this, new MyOkHttp.TaskListener() {
@@ -192,7 +197,33 @@ public class MemberMailboxActivity extends AppCompatActivity {
         prgBar.setVisibility(View.GONE);
         chats = null;
         isShown = true;
+        initTrdWaitMsg();
     }
+
+    private void initTrdWaitMsg() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(10000);
+                }catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                hdrWaitMsg.sendMessage(hdrWaitMsg.obtainMessage());
+            }
+        }).start();
+    }
+
+    private Handler hdrWaitMsg = new Handler() {
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            if (haveNewMsg) {
+                haveNewMsg = false;
+                loadData(false);
+            }else
+                initTrdWaitMsg();
+        }
+    };
 
     @Override
     public void onPause() {

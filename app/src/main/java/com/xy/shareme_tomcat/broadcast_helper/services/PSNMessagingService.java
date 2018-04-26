@@ -12,11 +12,14 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.xy.shareme_tomcat.R;
+import static com.xy.shareme_tomcat.data.DataHelper.haveNewMsg;
 import com.xy.shareme_tomcat.broadcast_helper.PSNApplication;
 import com.xy.shareme_tomcat.broadcast_helper.constants.KeyData;
 import com.xy.shareme_tomcat.broadcast_helper.managers.NotificationManager;
 
 import java.util.Map;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class PSNMessagingService extends FirebaseMessagingService {
 
@@ -41,8 +44,10 @@ public class PSNMessagingService extends FirebaseMessagingService {
                                 @Override
                                 public void onResourceReady(Bitmap bitmap, GlideAnimation<? super Bitmap> glideAnimation) {
                                     SharedPreferences sp = getSharedPreferences(getString(R.string.sp_fileName), MODE_PRIVATE);
-                                    if (sp.getBoolean(getString(R.string.sp_showNotification), true))
+                                    if (sp.getBoolean(getString(R.string.sp_showNotification), true)) {
                                         NotificationManager.getInstance().generateNotification(PSNApplication.getAPPLICATION(), bitmap, title, message);
+                                        haveNewMsg = true;
+                                    }
                                 }
 
                                 @Override

@@ -61,6 +61,7 @@ import static com.xy.shareme_tomcat.data.DataHelper.KEY_TITLE;
 import static com.xy.shareme_tomcat.data.DataHelper.KEY_USER_ID;
 import static com.xy.shareme_tomcat.data.DataHelper.canShowChatroom;
 import static com.xy.shareme_tomcat.data.DataHelper.canShowProfile;
+import static com.xy.shareme_tomcat.data.DataHelper.haveNewMsg;
 import static com.xy.shareme_tomcat.data.DataHelper.isChatroomExist;
 import static com.xy.shareme_tomcat.data.DataHelper.loginUserId;
 import static com.xy.shareme_tomcat.data.DataHelper.myName;
@@ -127,7 +128,7 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
                 if (isSpinnerInitialed) {
                     if (isChatShown) {
                         productId = ((Book) books.get(i)).getId();
-                        loadChat();
+                        loadChat(true);
                     }
                 }else
                     isSpinnerInitialed = true;
@@ -263,13 +264,14 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
-    private void loadChat() {
+    private void loadChat(boolean showPrgBar) {
         isChatShown = false;
         btnProfile.setVisibility(View.INVISIBLE);
         btnProduct.setVisibility(View.INVISIBLE);
         btnSubmit.setEnabled(false);
-        recyChats.setVisibility(View.INVISIBLE);
-        prgChat.setVisibility(View.VISIBLE);
+
+        if (showPrgBar)
+            prgChat.setVisibility(View.VISIBLE);
 
         chats = new ArrayList<>();
         conn = new MyOkHttp(MemberChatActivity.this, new MyOkHttp.TaskListener() {
@@ -361,6 +363,7 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
         recyChats.setVisibility(View.VISIBLE);
         btnSubmit.setEnabled(true);
         isChatShown = true;
+        initTrdWaitMsg();
     }
 
     private void sendMessage(final String msg) {
@@ -376,7 +379,7 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
                                 //發送推播
                                 RequestManager.getInstance().prepareNotification(memberId, myName, msg, getString(R.string.link_avatar) + avatar1);
                                 edtMsg.setText("");
-                                loadChat();
+                                loadChat(false);
                             }else {
                                 Toast.makeText(context, "傳送失敗", Toast.LENGTH_SHORT).show();
                             }
@@ -496,6 +499,31 @@ public class MemberChatActivity extends AppCompatActivity implements View.OnClic
                     Toast.makeText(context, "無法取得對方Token，請再試一次", Toast.LENGTH_SHORT).show();
                 }
             }
+        }
+    };
+
+    private void initTrdWaitMsg() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(10000);
+                }catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                hdrWaitMsg.sendMessage(hdrWaitMsg.obtainMessage());
+            }
+        }).start();
+    }
+
+    private Handler hdrWaitMsg = new Handler() {
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            if (haveNewMsg) {
+                haveNewMsg = false;
+                loadChat(false); //但若是別的商品的訊息，也會重整
+            }else
+                initTrdWaitMsg();
         }
     };
 

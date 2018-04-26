@@ -40,23 +40,28 @@
             </intent-filter>
         </service>
 
-        <activity
-            android:name=".Product.ProductPostActivity"
+        <activity android:name=".Product.ProductPostActivity"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".Product.ProductDetailActivity"
+        <activity android:name=".Product.ProductDetailActivity"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".ImageActivity"
+        <activity android:name=".ImageActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".Product.ProductSearchActivity" />
-        <activity android:name=".Member.MemberFavoriteActivity" />
-        <activity android:name=".Member.MemberStockActivity" />
-        <activity android:name=".Member.ProductEditActivity" />
-        <activity android:name=".Member.MemberMailboxActivity" />
-        <activity android:name=".Member.MemberChatActivity" />
-        <activity android:name=".Member.MemberProfileActivity" />
-        <activity android:name=".Settings.SettingProfileActivity"></activity>
+        <activity android:name=".Product.ProductSearchActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".Member.MemberFavoriteActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".Member.MemberStockActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".Member.ProductEditActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".Member.MemberMailboxActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".Member.MemberChatActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".Member.MemberProfileActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".Settings.SettingProfileActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>
