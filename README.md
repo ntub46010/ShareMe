@@ -6,9 +6,9 @@
 主程式：<a href="https://github.com/ntub46010/ShareMe_Tomcat/blob/Tomcat/app/src/main/java/com/xy/shareme_tomcat/LoginActivity.java">LoginActivity</a><br>
 說明：輸入帳密才可登入，或者前往註冊帳號。
 <table><tr><td>
-<img src="https://github.com/ntub46010/Photos/blob/master/BookStore%E6%93%8D%E4%BD%9C%E7%95%AB%E9%9D%A2/%E7%99%BB%E5%85%A5%E7%95%AB%E9%9D%A2.png" height="24%" width="24%" />
+<img src="https://github.com/ntub46010/Photos/blob/master/ShareMe%E6%93%8D%E4%BD%9C%E7%95%AB%E9%9D%A2/%E7%99%BB%E5%85%A5%E7%95%AB%E9%9D%A2.png" height="24%" width="24%" />
 <img src="https://github.com/ntub46010/Photos/blob/master/BookStore%E6%93%8D%E4%BD%9C%E7%95%AB%E9%9D%A2/%E8%A8%BB%E5%86%8A(%E7%A9%BA%E7%99%BD).png" height="24%" width="24%" />
-<img src="https://github.com/ntub46010/Photos/blob/master/BookStore%E6%93%8D%E4%BD%9C%E7%95%AB%E9%9D%A2/%E8%A8%BB%E5%86%8A(%E6%9C%89%E8%B3%87%E6%96%99).png" height="24%" width="24%" />
+<img src="https://github.com/ntub46010/Photos/blob/master/ShareMe%E6%93%8D%E4%BD%9C%E7%95%AB%E9%9D%A2/%E8%A8%BB%E5%86%8A(%E6%9C%89%E8%B3%87%E6%96%99).png" height="24%" width="24%" />
 </td></tr></table>
 
 ## 首頁
@@ -73,17 +73,17 @@
 <img src="https://github.com/ntub46010/Photos/blob/master/BookStore%E6%93%8D%E4%BD%9C%E7%95%AB%E9%9D%A2/%E6%88%91%E7%9A%84%E6%9C%80%E6%84%9B(%E6%9C%AA%E6%89%BE%E5%88%B0).png" height="24%" width="24%" />
 </td></tr></table>
 
-## 交談室(開發中)
+## 交談室
 主程式：<a href="https://github.com/ntub46010/ShareMe_Tomcat/blob/Tomcat/app/src/main/java/com/xy/shareme_tomcat/Member/MemberChatActivity.java">MemberChatActivity</a><br>
-說明：買賣雙方對話的地方，在此洽談交易事宜。點擊右上方手提袋圖案將出現半透明背景的商品詳情。點擊人形圖案開啟對方個人檔案。點擊中上方選單則可切換到其他談過的商品。
+說明：買賣雙方對話的地方，在此洽談交易事宜。點擊右上方手提袋圖案將開啟商品詳情頁面。點擊人形圖案開啟對方個人檔案。點擊中上方選單則可切換到其他談過的商品。
 <table><tr><td>
 <img src="https://github.com/ntub46010/Photos/blob/master/BookStore%E6%93%8D%E4%BD%9C%E7%95%AB%E9%9D%A2/%E4%BA%A4%E8%AB%87%E5%AE%A41.png" height="24%" width="24%" />
-<img src="https://github.com/ntub46010/Photos/blob/master/BookStore%E6%93%8D%E4%BD%9C%E7%95%AB%E9%9D%A2/%E4%BA%A4%E8%AB%87%E5%AE%A4(%E7%9C%8B%E5%95%86%E5%93%81).png" height="24%" width="24%" />
 <img src="https://github.com/ntub46010/Photos/blob/master/BookStore%E6%93%8D%E4%BD%9C%E7%95%AB%E9%9D%A2/%E4%BA%A4%E8%AB%87%E5%AE%A42.png" height="24%" width="24%" />
 </td></tr></table>
 
 ## 信箱
-主程式：<a href="https://github.com/ntub46010/ShareMe_Tomcat/blob/Tomcat/app/src/main/java/com/xy/shareme_tomcat/Member/MemberMailboxActivity.java">MemberMailboxActivity</a><br>
+主程式：
+<a href="https://github.com/ntub46010/ShareMe_Tomcat/blob/Tomcat/app/src/main/java/com/xy/shareme_tomcat/Member/MemberMailboxActivity.java">MemberMailboxActivity</a><br>
 說明：顯示與各個會員的對話紀錄，點擊可開啟交談室。另外接收到他人訊息時會收到推播通知，在交談室以外的地方，包含關閉本App後都可收到推播。
 <table><tr><td>
 <img src="https://github.com/ntub46010/Photos/blob/master/BookStore%E6%93%8D%E4%BD%9C%E7%95%AB%E9%9D%A2/%E4%BF%A1%E7%AE%B1.png" height="24%" width="24%" />
@@ -121,7 +121,7 @@
 </td></tr>
 </table>
 
-## 帳號設定(開發中)
+## 帳號設定
 主程式：<a href="https://github.com/ntub46010/ShareMe_Tomcat/blob/Tomcat/app/src/main/java/com/xy/shareme_tomcat/Settings/SettingProfileActivity.java">SettingProfileActivity</a><br>
 說明：編輯個人基本資料，包含姓名、科系、Email、大頭照與登入密碼。
 
